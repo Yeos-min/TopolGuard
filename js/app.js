@@ -87,9 +87,158 @@ function countUpTo(el, targetVal, duration, suffix) {
 document.addEventListener('DOMContentLoaded', applyAnimToggleUI);
 
 // ════════════════════════════════════════════════════════
+// HISTORY SYSTEM (메모리 방식 — localStorage 미사용)
+// ════════════════════════════════════════════════════════
+var historyEntries = [];
+var MAX_HISTORY = 5;
+var currentLoadedFile = null;
+var _pendingLoad = null; // 로드 중인 파일 정보 임시 저장
+
+function addToHistory(info, analysisData) {
+  // 같은 파일명 중복 방지: 기존 항목 제거 후 맨 위에 재추가
+  historyEntries = historyEntries.filter(function(e) { return e.name !== info.name; });
+
+  historyEntries.unshift({
+    name: info.name,
+    verts: analysisData.verts,
+    health: analysisData.health,
+    loadedAt: Date.now(),
+    isSample: info.isSample,
+    samplePath: info.samplePath || null,
+    objText: info.isSample ? null : info.objText
+  });
+
+  // 최대 5개
+  if (historyEntries.length > MAX_HISTORY) {
+    historyEntries.pop();
+  }
+
+  currentLoadedFile = info.name;
+  renderHistory();
+  renderSampleButtons();
+}
+
+function renderHistory() {
+  var container = document.getElementById('history-list');
+  var emptyEl = document.getElementById('history-empty');
+
+  if (historyEntries.length === 0) {
+    if (emptyEl) emptyEl.style.display = '';
+    // 기존 엔트리 제거
+    var entries = container.querySelectorAll('.history-entry');
+    entries.forEach(function(e) { e.remove(); });
+    return;
+  }
+
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // 기존 엔트리 제거 후 재렌더
+  var oldEntries = container.querySelectorAll('.history-entry');
+  oldEntries.forEach(function(e) { e.remove(); });
+
+  historyEntries.forEach(function(entry, idx) {
+    var el = document.createElement('div');
+    el.className = 'history-entry';
+    el.onclick = function() { reloadFromHistory(idx); };
+
+    var isCurrent = (entry.name === currentLoadedFile);
+    var dotClass = isCurrent ? 'history-dot current' : 'history-dot past';
+    var dotChar = isCurrent ? '●' : '○';
+
+    el.innerHTML =
+      '<div class="history-name"><span class="' + dotClass + '">' + dotChar + '</span>' + escapeHtml(entry.name) + '</div>' +
+      '<div class="history-meta">' + formatVerts(entry.verts) + ' verts · Health ' + entry.health + ' · <span class="history-time" data-time="' + entry.loadedAt + '">' + relativeTime(entry.loadedAt) + '</span></div>';
+
+    container.appendChild(el);
+  });
+}
+
+function reloadFromHistory(idx) {
+  var entry = historyEntries[idx];
+  if (!entry) return;
+
+  if (entry.isSample && entry.samplePath) {
+    loadSample(entry.samplePath, entry.name, entry.name.indexOf('Good') >= 0 ? '✓' : '⚠');
+  } else if (entry.objText) {
+    _pendingLoad = { isSample: false, name: entry.name, objText: entry.objText };
+    var blob = new Blob([entry.objText], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    loadModel(url, entry.objText);
+  }
+}
+
+function formatVerts(v) {
+  var n = parseInt(String(v).replace(/,/g, ''), 10);
+  if (isNaN(n)) return v;
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return String(n);
+}
+
+function relativeTime(ts) {
+  var diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+  return Math.floor(diff / 3600) + ' hr ago';
+}
+
+function escapeHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// 30초마다 상대 시간 갱신
+setInterval(function() {
+  var spans = document.querySelectorAll('.history-time');
+  spans.forEach(function(span) {
+    var ts = parseInt(span.dataset.time, 10);
+    if (ts) span.textContent = relativeTime(ts);
+  });
+}, 30000);
+
+// ════════════════════════════════════════════════════════
+// SIDEBAR SAMPLE BUTTONS
+// ════════════════════════════════════════════════════════
+var SAMPLE_PATHS = {
+  good: 'samples/Good_Low_Poly_Male_body_AI.obj',
+  bad:  'samples/Bad_Low_Poly_Male_body_AI.obj'
+};
+
+function loadSampleFromSidebar(which) {
+  var path = SAMPLE_PATHS[which];
+  var name = path.split('/').pop();
+  var icon = which === 'good' ? '✓' : '⚠';
+  loadSample(path, name, icon);
+}
+
+function renderSampleButtons() {
+  var goodBtn = document.getElementById('sample-good-btn');
+  var badBtn  = document.getElementById('sample-bad-btn');
+  if (!goodBtn || !badBtn) return;
+
+  var goodName = SAMPLE_PATHS.good.split('/').pop();
+  var badName  = SAMPLE_PATHS.bad.split('/').pop();
+
+  goodBtn.classList.toggle('active', currentLoadedFile === goodName);
+  badBtn.classList.toggle('active', currentLoadedFile === badName);
+}
+
+// 키보드 단축키: G(Good), B(Bad)
+document.addEventListener('keydown', function(e) {
+  // 입력 필드에 포커스 있으면 무시
+  var tag = document.activeElement && document.activeElement.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (document.activeElement && document.activeElement.isContentEditable) return;
+
+  if (e.key === 'g' || e.key === 'G') { loadSampleFromSidebar('good'); }
+  if (e.key === 'b' || e.key === 'B') { loadSampleFromSidebar('bad'); }
+});
+
+// ════════════════════════════════════════════════════════
 // QUICK START SAMPLE LOADER
 // ════════════════════════════════════════════════════════
 function loadSample(path, name, icon) {
+  _pendingLoad = { isSample: true, samplePath: path, name: name || path.split('/').pop() };
   showToast('info', icon + ' ' + name + ' 로드 중', '샘플 파일을 불러옵니다...', 3000);
   fetch(path)
     .then(function(res) {
@@ -103,6 +252,7 @@ function loadSample(path, name, icon) {
     })
     .catch(function(err) {
       console.error(err);
+      _pendingLoad = null;
       showToast('error', '샘플 로드 실패',
         '"' + path + '" 파일을 찾을 수 없습니다.<br>깃헙 저장소의 samples/ 폴더에 파일이 있는지 확인하세요.', 6000);
     });
@@ -175,6 +325,7 @@ function validateAndLoad(file) {
       showToast('warn', '대용량 모델 감지',
         '버텍스 약 ' + vertCount.toLocaleString() + '개 — 분석에 시간이 걸릴 수 있습니다.', 7000);
     }
+    _pendingLoad = { isSample: false, name: file.name, objText: text };
     const url = URL.createObjectURL(file);
     loadModel(url, text);
   };
@@ -496,7 +647,9 @@ function computeHealthScore(faceCount, stats) {
   return { score, grade, desc, color };
 }
 
+var _lastHealthScore = null;
 function updateHealthUI(result) {
+  _lastHealthScore = result.score;
   const val   = document.getElementById('health-score-val');
   const grade = document.getElementById('health-grade');
   const desc  = document.getElementById('health-desc');
@@ -1458,6 +1611,14 @@ function loadModel(url, rawText) {
       }
       setProgress(100, '완료');
       document.getElementById('upload-btn').style.pointerEvents = '';
+
+      // 히스토리에 추가
+      if (_pendingLoad) {
+        var vText = document.getElementById('v-count').textContent.replace(/\s*\(.*\)/, '');
+        var healthNum = (_lastHealthScore !== null) ? _lastHealthScore : '—';
+        addToHistory(_pendingLoad, { verts: vText, health: healthNum });
+        _pendingLoad = null;
+      }
 
       // 스캔라인 종료 + Skip 버튼 숨기기
       animDelay(function() {

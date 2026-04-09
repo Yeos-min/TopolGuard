@@ -253,3 +253,23 @@ body, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
 /* Bad: 경고 악센트 */
 .qs-btn.qs-bad .qs-btn-icon { color: var(--warn); }
 .qs-btn.qs-bad:hover { border-color: var(--warn); }
+
+/* ── SIDEBAR SAMPLES BUTTONS ── */
+.sample-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 4px; }
+.sample-btn { display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: var(--panel2); border: 1px solid var(--border); border-radius: 2px; color: var(--dim); font-family: var(--mono); font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: all 0.15s; }
+.sample-btn:hover { border-color: var(--border2); color: var(--text); }
+.sample-icon { font-size: 12px; flex-shrink: 0; }
+.sample-btn.good .sample-icon { color: var(--ok); }
+.sample-btn.bad .sample-icon { color: var(--warn); }
+.sample-btn.good.active { border-color: var(--ok); background: rgba(98,163,83,0.08); color: var(--text); }
+.sample-btn.bad.active { border-color: var(--warn); background: rgba(217,163,54,0.08); color: var(--text); }
+
+/* ── SIDEBAR HISTORY ── */
+#history-list { margin-bottom: 4px; }
+.history-entry { display: flex; flex-direction: column; gap: 1px; padding: 6px 9px; background: var(--panel2); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 2px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.history-entry:hover { border-color: var(--border2); background: var(--header); }
+.history-name { font-family: var(--mono); font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
+.history-dot { font-size: 8px; flex-shrink: 0; }
+.history-dot.current { color: var(--accent); }
+.history-dot.past { color: var(--faint); }
+.history-meta { font-family: var(--mono); font-size: 9px; color: var(--faint); padding-left: 13px; letter-spacing: 0.3px; }

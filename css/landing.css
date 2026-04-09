@@ -299,120 +299,50 @@
 
 
 /* ──────────────────────────────────────────────────────
-   [01] WHY TOPOLOGY MATTERS
+   [01] [02] 통합 카드 시스템 — 숫자 넘버링
    ────────────────────────────────────────────────────── */
 
-.why-grid {
+.num-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 20px;
 }
+.num-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.num-grid-4 { grid-template-columns: repeat(4, 1fr); }
 
-.why-card {
-  padding: 32px 28px;
+.num-card {
+  padding: 24px 28px;
   border: 1px solid var(--border2);
   border-radius: 4px;
   background: rgba(255,255,255,0.01);
   transition: border-color 0.3s var(--ease);
 }
-.why-card:hover {
+.num-card:hover {
   border-color: var(--dim);
 }
 
-.why-icon {
+.num-label {
   display: block;
-  font-size: 22px;
+  font-family: var(--mono);
+  font-size: 36px;
+  font-weight: 700;
   color: var(--accent);
-  margin-bottom: 20px;
   line-height: 1;
+  margin-bottom: 16px;
 }
 
-.why-card h3 {
+.num-card h3 {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  color: var(--text);
-  margin: 0 0 12px;
-  font-weight: 600;
-}
-
-.why-card p {
-  font-family: var(--sans);
-  font-size: 13px;
-  line-height: 1.65;
-  color: var(--dim);
-  margin: 0;
-}
-
-
-/* ──────────────────────────────────────────────────────
-   [02] WHAT WE CHECK
-   ────────────────────────────────────────────────────── */
-
-.check-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.check-card {
-  padding: 32px 24px;
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  background: var(--bg);
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
-}
-
-/* Colored top accent line */
-.check-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  opacity: 0;
-  transition: opacity 0.3s var(--ease);
-}
-.check-card:hover { transform: translateY(-4px); }
-.check-card:hover::before { opacity: 1; }
-
-.check-card[data-color="error"]::before { background: var(--error); }
-.check-card[data-color="warn"]::before  { background: var(--warn); }
-.check-card[data-color="blue"]::before  { background: var(--blue); }
-.check-card[data-color="accent"]::before { background: var(--accent); }
-
-.check-card[data-color="error"]:hover { border-color: var(--error); }
-.check-card[data-color="warn"]:hover  { border-color: var(--warn); }
-.check-card[data-color="blue"]:hover  { border-color: var(--blue); }
-.check-card[data-color="accent"]:hover { border-color: var(--accent); }
-
-.check-icon {
-  width: 44px;
-  height: 44px;
-  margin-bottom: 20px;
-}
-.check-icon svg { width: 100%; height: 100%; }
-
-.check-card[data-color="error"] .check-icon { color: var(--error); }
-.check-card[data-color="warn"]  .check-icon { color: var(--warn); }
-.check-card[data-color="blue"]  .check-icon { color: var(--blue); }
-.check-card[data-color="accent"] .check-icon { color: var(--accent); }
-
-.check-card h3 {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   color: var(--text);
-  margin: 0 0 12px;
-  line-height: 1.6;
+  margin: 0 0 8px;
   font-weight: 600;
 }
 
-.check-card p {
+.num-card p {
   font-family: var(--sans);
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--dim);
   margin: 0;
 }
@@ -504,6 +434,40 @@
   color: var(--text);
   font-weight: 600;
   letter-spacing: 0.1em;
+}
+
+/* ── Image placeholder ── */
+.compare-img-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.1),
+    0 12px 40px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.placeholder-icon {
+  font-size: 28px;
+  color: var(--faint);
+  opacity: 0.4;
+}
+.placeholder-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--faint);
+}
+.placeholder-desc {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--faint);
+  opacity: 0.6;
 }
 
 .sample-note {
@@ -647,8 +611,7 @@
 
 .sect-head,
 .sect-desc,
-.why-card,
-.check-card,
+.num-card,
 .terminal-card,
 .cta-headline,
 .cta-desc,
@@ -675,16 +638,11 @@
   transform: translateY(0);
 }
 
-/* Stagger: WHY cards */
-.in-view .why-card:nth-child(1) { transition-delay: 0.05s; }
-.in-view .why-card:nth-child(2) { transition-delay: 0.15s; }
-.in-view .why-card:nth-child(3) { transition-delay: 0.25s; }
-
-/* Stagger: CHECK cards */
-.in-view .check-card:nth-child(1) { transition-delay: 0.05s; }
-.in-view .check-card:nth-child(2) { transition-delay: 0.15s; }
-.in-view .check-card:nth-child(3) { transition-delay: 0.25s; }
-.in-view .check-card:nth-child(4) { transition-delay: 0.35s; }
+/* Stagger: num-cards */
+.in-view .num-card:nth-child(1) { transition-delay: 0.05s; }
+.in-view .num-card:nth-child(2) { transition-delay: 0.15s; }
+.in-view .num-card:nth-child(3) { transition-delay: 0.25s; }
+.in-view .num-card:nth-child(4) { transition-delay: 0.35s; }
 
 /* Stagger: terminal cards */
 .in-view .terminal-card:nth-child(1) { transition-delay: 0.05s; }
@@ -703,7 +661,7 @@
    ────────────────────────────────────────────────────── */
 
 @media (max-width: 1100px) {
-  .check-grid {
+  .num-grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -717,8 +675,8 @@
   .sect { padding: 80px 28px; }
   .sect-cta { padding: 100px 28px; }
 
-  .why-grid { grid-template-columns: 1fr; }
-  .check-grid { grid-template-columns: 1fr; }
+  .num-grid-3 { grid-template-columns: 1fr; }
+  .num-grid-4 { grid-template-columns: 1fr; }
   .compare-row { grid-template-columns: 1fr; }
 
   .cta-features {

@@ -25,6 +25,23 @@
   </div>
   <div id="sidebar-body">
 
+    <!-- SAMPLES -->
+    <div class="section-title">SAMPLES</div>
+    <div class="sample-btns">
+      <button class="sample-btn good" id="sample-good-btn" onclick="loadSampleFromSidebar('good')">
+        <span class="sample-icon">✓</span> GOOD
+      </button>
+      <button class="sample-btn bad" id="sample-bad-btn" onclick="loadSampleFromSidebar('bad')">
+        <span class="sample-icon">⚠</span> BAD
+      </button>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="section-title">HISTORY</div>
+    <div id="history-list">
+      <div id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px; font-family:var(--mono);">아직 로드된 파일이 없습니다</div>
+    </div>
+
     <!-- HEALTH SCORE -->
     <div class="section-title">HEALTH SCORE</div>
     <div id="health-card">
