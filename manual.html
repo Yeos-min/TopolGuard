@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual — TopolGuard</title>
+  <meta name="description" content="TopolGuard manual: what we check, how the Health Score works, and how to read the Inspector.">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/manual.css">
+</head>
+<body data-page="manual">
+
+  <div class="manual">
+
+    <!-- ─── 좌측 사이드바 트리 ─── -->
+    <aside class="manual-side">
+      <div class="tree-title">Documentation</div>
+
+      <div class="tree-group">
+        <span class="label">Getting Started</span>
+        <ul>
+          <li><a href="#what">What is TopolGuard?</a></li>
+          <li><a href="#quickstart">Quick Start</a></li>
+          <li><a href="#formats">Supported Formats</a></li>
+        </ul>
+      </div>
+
+      <div class="tree-group">
+        <span class="label">Topology Checks</span>
+        <ul>
+          <li><a href="#non-manifold">Non-Manifold Edges</a></li>
+          <li><a href="#boundary">Boundary Edges</a></li>
+          <li><a href="#skinny">Skinny Triangles</a></li>
+          <li><a href="#ngon">N-Gons</a></li>
+          <li><a href="#degenerate">Degenerate Faces</a></li>
+          <li><a href="#flipped">Flipped Normals</a></li>
+          <li><a href="#isolated">Isolated Vertices</a></li>
+        </ul>
+      </div>
+
+      <div class="tree-group">
+        <span class="label">Inspector</span>
+        <ul>
+          <li><a href="#health">Health Score</a></li>
+          <li><a href="#views">View Modes</a></li>
+          <li><a href="#density">Density Heatmap</a></li>
+        </ul>
+      </div>
+
+      <div class="tree-group">
+        <span class="label">Reference</span>
+        <ul>
+          <li><a href="#euler">Euler Characteristic</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- ─── 중앙 본문 ─── -->
+    <main class="manual-main">
+
+      <div class="manual-breadcrumb">
+        <span>DOCS</span><span class="sep">/</span><span>MANUAL</span>
+      </div>
+
+      <h1>TopolGuard Manual</h1>
+      <p class="lead">
+        TopolGuard는 Wavefront <code>.obj</code> 메시의 토폴로지 품질을 브라우저 안에서 감사합니다.
+        이 문서는 각 검사 항목이 어떤 문제를 잡아내는지, 그리고 Inspector의 지표를 어떻게 읽어야 하는지를 설명합니다.
+      </p>
+
+      <h2 id="what">무엇을 검사하나요?</h2>
+      <p>
+        TopolGuard는 3D 메시의 <b>기하학적 품질</b>이 아니라 <b>토폴로지 품질</b>에 집중합니다.
+        즉, 모양이 예쁜지는 보지 않고, 메시가 DCC 툴(Blender, Maya, ZBrush)과 게임 엔진,
+        3D 프린터, 시뮬레이터에서 <b>문제 없이 다뤄질 수 있는지</b>를 봅니다.
+      </p>
+      <p>
+        폴리곤 수, 면의 형태, 에지 연결, 법선 방향 — 이런 것들이 깨지면 리깅·UV 언랩·불리언·
+        물리 시뮬·슬라이싱 같은 뒤 공정이 조용히 실패하거나 이상한 결과를 냅니다. TopolGuard는
+        그런 <i>조용한 지뢰</i>를 미리 드러내는 도구입니다.
+      </p>
+
+      <h2 id="quickstart">Quick Start</h2>
+      <ol>
+        <li><a href="app.html">Inspector 페이지</a>를 엽니다.</li>
+        <li>좌하단 <code>▲ UPLOAD .OBJ</code>를 누르거나 뷰포트에 파일을 드래그합니다.</li>
+        <li>우측 사이드바에서 <b>Health Score</b>와 <b>Topology Issues</b>를 확인합니다.</li>
+        <li><b>ERROR LAYERS</b> 토글로 특정 오류만 하이라이트해서 볼 수 있습니다.</li>
+      </ol>
+      <div class="callout">
+        <b>NOTE —</b> 업로드된 파일은 <b>브라우저 밖으로 나가지 않습니다.</b>
+        모든 파싱과 분석이 클라이언트에서 실행됩니다.
+      </div>
+
+      <h2 id="formats">Supported Formats</h2>
+      <p>
+        현재는 <code>.obj</code> (Wavefront) 포맷만 지원합니다. 향후 <code>.stl</code>,
+        <code>.ply</code>, <code>.gltf</code>를 추가할 예정입니다.
+      </p>
+
+      <h2 id="non-manifold">Non-Manifold Edges</h2>
+      <div class="metric-card error">
+        <div class="glyph">✕</div>
+        <div class="body">
+          <h4>Non-Manifold Edge</h4>
+          <p class="why">하나의 에지를 <b>3개 이상의 면</b>이 공유하는 상태. 매니폴드 가정을 깨뜨립니다.</p>
+        </div>
+      </div>
+      <p>
+        정상적인 surface 메시에서 하나의 에지는 정확히 2개의 면에 속해야 합니다 (또는 경계에서 1개).
+        세 면 이상이 한 에지를 공유하면 그 지점은 <b>두께 없는 평면의 교차</b>가 되고, 법선·UV·스무딩·
+        불리언 연산이 모두 모호해집니다.
+      </p>
+      <p>흔한 원인: 내부 면이 남아있는 부울 결과물, 중복 면, 두께 0의 얇은 쉘 등.</p>
+
+      <h2 id="boundary">Boundary Edges</h2>
+      <div class="metric-card warn">
+        <div class="glyph">◠</div>
+        <div class="body">
+          <h4>Boundary Edge</h4>
+          <p class="why">하나의 면만 공유하는 에지. 메시가 "뚫려 있다"는 뜻입니다.</p>
+        </div>
+      </div>
+      <p>
+        닫힌 볼륨이 되어야 할 메시(예: 3D 프린팅, 물리 시뮬)에서는 경계 에지가 0이어야 합니다.
+        평면/옷감/지형처럼 <b>의도적으로 열린</b> 메시에서는 자연스러운 상태이므로 경고 수준으로만 표시합니다.
+      </p>
+
+      <h2 id="skinny">Skinny Triangles</h2>
+      <div class="metric-card warn">
+        <div class="glyph">△</div>
+        <div class="body">
+          <h4>Skinny Triangle</h4>
+          <p class="why">한 각이 극단적으로 좁은 삼각형. 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
+        </div>
+      </div>
+      <p>
+        최소 내각이 <code>~5°</code> 이하인 삼각형을 스키니로 분류합니다. 렌더링에서는
+        보간 오차로 그림자/노멀이 튀고, 시뮬레이션에서는 솔버가 발산합니다.
+        서브디비전이나 리토폴로지로 해결하는 것이 일반적입니다.
+      </p>
+
+      <h2 id="ngon">N-Gons</h2>
+      <div class="metric-card warn">
+        <div class="glyph">⬡</div>
+        <div class="body">
+          <h4>N-Gon (5+ sides)</h4>
+          <p class="why">5변 이상의 면. DCC에서는 허용되지만 엔진에선 자동 삼각화되며, 결과가 예측 불가입니다.</p>
+        </div>
+      </div>
+      <p>
+        모델링 단계에서는 n-gon이 편리하지만 게임 엔진과 대부분의 실시간 렌더러는 삼각형만 다룹니다.
+        n-gon은 엔진 내부에서 임의의 방식으로 삼각화되며, 이 과정에서 생기는 삼각형이 <b>스키니</b>이거나
+        <b>변형 애니메이션에서 찌그러질</b> 수 있습니다.
+      </p>
+
+      <h2 id="degenerate">Degenerate Faces</h2>
+      <div class="metric-card error">
+        <div class="glyph">○</div>
+        <div class="body">
+          <h4>Degenerate Face</h4>
+          <p class="why">면적이 0에 수렴하는 면. 세 정점이 한 점 또는 한 직선에 있는 경우.</p>
+        </div>
+      </div>
+      <p>
+        법선이 정의되지 않아 렌더러가 검은 픽셀이나 NaN을 만듭니다. 대개 export 버그나 모델링 실수의
+        흔적으로, 발견 즉시 제거하는 것이 안전합니다.
+      </p>
+
+      <h2 id="flipped">Flipped Normals</h2>
+      <div class="metric-card error">
+        <div class="glyph">⇄</div>
+        <div class="body">
+          <h4>Flipped Normal</h4>
+          <p class="why">면의 법선이 이웃과 반대 방향을 가리키는 상태.</p>
+        </div>
+      </div>
+      <p>
+        뒷면 컬링이 켜진 상태에서 해당 면이 사라지거나 어둡게 보입니다. TopolGuard는 이웃 면과의
+        법선 일관성을 기준으로 outlier를 찾아냅니다.
+      </p>
+
+      <h2 id="isolated">Isolated Vertices</h2>
+      <div class="metric-card">
+        <div class="glyph">·</div>
+        <div class="body">
+          <h4>Isolated Vertex</h4>
+          <p class="why">어떤 면에도 속하지 않는 떠다니는 정점.</p>
+        </div>
+      </div>
+      <p>
+        파일 용량만 차지하고 엔진에서는 무시되지만, 일부 DCC 툴은 경고를 띄웁니다.
+        정리(clean up) 단계에서 제거해야 할 항목입니다.
+      </p>
+
+      <h2 id="health">Health Score</h2>
+      <p>
+        상단의 <b>MESH QUALITY INDEX</b>는 0 ~ 100점의 단일 수치로, 발견된 이슈의 <b>가중 페널티</b>를
+        100에서 차감해 계산합니다. 가중치는 다음 원칙을 따릅니다:
+      </p>
+      <ul>
+        <li><b>Error</b>(non-manifold, degenerate, flipped) — 페널티 큼. 고치지 않으면 파이프라인이 깨짐.</li>
+        <li><b>Warning</b>(skinny, n-gon, boundary) — 페널티 중간. 상황에 따라 허용 가능.</li>
+        <li><b>Info</b>(isolated) — 페널티 작음. 정리 대상.</li>
+      </ul>
+      <p>점수는 등급으로도 표시됩니다: <code>A+</code> · <code>A</code> · <code>B</code> · <code>C</code> · <code>D</code> · <code>F</code>.</p>
+
+      <h2 id="views">View Modes</h2>
+      <h3>WIRE</h3>
+      <p>와이어프레임만 표시. 토폴로지 흐름(엣지 루프)을 가장 잘 볼 수 있는 모드입니다.</p>
+      <h3>SOLID</h3>
+      <p>기본 쉐이딩. 모델의 실루엣과 전체적인 형태 확인용.</p>
+      <h3>BOTH</h3>
+      <p>솔리드 위에 와이어프레임 오버레이. 실전 리뷰에 가장 많이 쓰는 모드입니다.</p>
+      <h3>DENSITY</h3>
+      <p>정점 밀도 히트맵. 빨강일수록 정점이 몰려 있고, 파랑일수록 듬성듬성합니다. 리토폴로지 계획에 유용.</p>
+
+      <h2 id="density">Density Heatmap</h2>
+      <p>
+        각 정점의 <b>근방 반경</b> 안에 몇 개의 이웃 정점이 있는지를 세어 정규화한 값입니다.
+        국소적으로 정점이 몰린 구간은 렌더링 비용이 높고, 변형 애니메이션에서 울컥거릴 가능성이 큽니다.
+        Density가 균일할수록 "잘 리토폴로지된" 메시입니다.
+      </p>
+
+      <h2 id="euler">Euler Characteristic (χ)</h2>
+      <p>
+        <code>χ = V − E + F</code> — 폐곡면의 위상 불변량입니다. 닫힌 구 형태의 메시는 χ = 2,
+        도넛(토러스)은 χ = 0입니다. χ가 예상 값과 다르면 구멍(손잡이)이 있거나, 메시가 닫혀 있지
+        않거나, non-manifold 요소가 있다는 신호입니다.
+      </p>
+      <div class="callout">
+        <b>TIP —</b> TopolGuard는 에지 수를 <i>정확히</i> 세지 않고
+        <code>F × 3 / 2</code>로 추정합니다. 경계가 있거나 n-gon이 섞이면 χ 값이 약간 어긋날 수 있습니다.
+      </div>
+
+      <h2 id="faq">FAQ</h2>
+      <h3>샘플 파일은 어디서 구하나요?</h3>
+      <p>
+        Inspector 페이지의 <b>Quick Start</b> 오버레이에서 <b>Good</b>과 <b>Bad</b> 두 가지
+        비교 샘플을 바로 불러올 수 있습니다. 본인의 <code>.obj</code> 파일도 업로드나
+        드래그로 검사할 수 있습니다.
+      </p>
+
+      <h3>왜 Tripo AI 샘플 두 개뿐인가요?</h3>
+      <p>
+        TopolGuard는 AI 생성 3D 모델의 품질이 생성 설정과 후처리에 따라 크게 달라진다는 점을
+        보여주기 위해 같은 도구(Tripo AI)로 만든 두 가지 결과물을 나란히 제공합니다.
+        사람이 만든 저작물의 재배포 문제를 피하기 위해 의도적으로 AI 생성물만 포함했습니다.
+      </p>
+
+      <h3>Bad 샘플은 왜 데시메이트(decimate)되어 있나요?</h3>
+      <p>
+        원본 Tripo AI 출력은 약 <b>44만 면(29MB)</b>이어서 웹 전송에 부적합했습니다.
+        블렌더의 Decimate 모디파이어로 페이스 수만 줄였을 뿐, 토폴로지 문제를 의도적으로
+        추가하거나 제거하지 않았습니다. 데시메이트 과정에서 일부 원본 오류는 자연스럽게
+        청소되었지만, non-manifold 에지·skinny 삼각형·degenerate 면·비정상 Euler
+        χ 등 주요 문제는 여전히 남아 있어 데모 용도로 충분합니다.
+      </p>
+
+      <h3>엄청 큰 파일도 되나요?</h3>
+      <p>
+        현재는 <b>~500k 페이스</b>까지 원활히 돌아갑니다. 그 이상은 분석 단계에서 체감 지연이 생깁니다.
+      </p>
+
+      <h3>분석 결과를 저장할 수 있나요?</h3>
+      <p>현재는 세션 한정입니다. JSON 리포트 내보내기는 로드맵에 있습니다.</p>
+
+    </main>
+
+    <!-- ─── 우측 on-this-page ─── -->
+    <aside class="manual-toc">
+      <div class="label">On This Page</div>
+      <ul>
+        <li><a href="#what">What is TopolGuard?</a></li>
+        <li><a href="#quickstart">Quick Start</a></li>
+        <li><a href="#formats">Formats</a></li>
+        <li><a href="#non-manifold">Non-Manifold</a></li>
+        <li><a href="#boundary">Boundary</a></li>
+        <li><a href="#skinny">Skinny Tri</a></li>
+        <li><a href="#ngon">N-Gons</a></li>
+        <li><a href="#degenerate">Degenerate</a></li>
+        <li><a href="#flipped">Flipped</a></li>
+        <li><a href="#isolated">Isolated Verts</a></li>
+        <li><a href="#health">Health Score</a></li>
+        <li><a href="#views">View Modes</a></li>
+        <li><a href="#density">Density</a></li>
+        <li><a href="#euler">Euler χ</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </aside>
+
+  </div>
+
+  <script src="js/theme.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/manual.js"></script>
+</body>
+</html>

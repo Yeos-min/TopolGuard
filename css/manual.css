@@ -1,0 +1,246 @@
+/* ════════════════════════════════════════════════════════
+   Manual Page — Unreal 독스 스타일 3컬럼
+   ════════════════════════════════════════════════════════ */
+
+.manual {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 220px;
+  gap: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 36px);
+}
+
+/* ── 좌측 사이드바 트리 ── */
+.manual-side {
+  border-right: 1px solid var(--border2);
+  padding: 32px 20px 60px 24px;
+  position: sticky;
+  top: 36px;
+  align-self: start;
+  height: calc(100vh - 36px);
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.manual-side::-webkit-scrollbar { width: 6px; }
+.manual-side::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.manual-side .tree-title {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--faint);
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border2);
+}
+.manual-side .tree-group { margin-bottom: 22px; }
+.manual-side .tree-group > .label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.manual-side .tree-group ul {
+  list-style: none;
+  padding: 0; margin: 0;
+  border-left: 1px solid var(--border2);
+}
+.manual-side .tree-group li a {
+  display: block;
+  padding: 5px 0 5px 14px;
+  color: var(--dim);
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+  transition: all 0.15s var(--ease);
+  font-size: 12px;
+}
+.manual-side .tree-group li a:hover { color: var(--text); }
+.manual-side .tree-group li a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: rgba(232, 125, 62, 0.04);
+}
+
+/* ── 중앙 본문 ── */
+.manual-main {
+  padding: 48px 56px 120px;
+  min-width: 0;
+}
+.manual-breadcrumb {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.manual-breadcrumb span { color: var(--dim); }
+.manual-breadcrumb .sep { margin: 0 8px; color: var(--faint); }
+
+.manual-main h1 {
+  font-family: var(--sans);
+  font-size: 42px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.manual-main .lead {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--dim);
+  margin: 0 0 48px;
+  max-width: 640px;
+}
+.manual-main h2 {
+  font-family: var(--sans);
+  font-size: 26px;
+  font-weight: 600;
+  margin: 56px 0 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border2);
+  scroll-margin-top: 60px;
+  color: var(--text);
+}
+.manual-main h2:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+.manual-main h3 {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 32px 0 10px;
+  scroll-margin-top: 60px;
+  color: var(--text);
+}
+.manual-main p {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--text);
+  margin: 0 0 16px;
+  max-width: 680px;
+}
+.manual-main p b, .manual-main strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+.manual-main code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  padding: 1px 6px;
+  border-radius: 2px;
+  color: var(--accent2);
+}
+.manual-main ul, .manual-main ol {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--text);
+  max-width: 680px;
+  padding-left: 20px;
+  margin: 0 0 20px;
+}
+.manual-main li { margin-bottom: 6px; }
+.manual-main li::marker { color: var(--accent); }
+
+/* 검사 항목 카드 */
+.metric-card {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 2px;
+  max-width: 680px;
+}
+.metric-card .glyph {
+  font-family: var(--display);
+  font-size: 40px;
+  color: var(--accent);
+  line-height: 1;
+  text-align: center;
+}
+.metric-card .body h4 {
+  margin: 0 0 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.metric-card .body .why {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.6;
+  margin: 0;
+}
+.metric-card.error { border-left-color: var(--error); }
+.metric-card.error .glyph { color: var(--error); }
+.metric-card.warn  { border-left-color: var(--warn); }
+.metric-card.warn  .glyph { color: var(--warn); }
+.metric-card.ok    { border-left-color: var(--ok); }
+.metric-card.ok    .glyph { color: var(--ok); }
+
+/* 콜아웃 */
+.callout {
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--blue);
+  background: var(--panel2);
+  padding: 14px 18px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--dim);
+  margin: 20px 0;
+  max-width: 680px;
+  border-radius: 2px;
+}
+.callout b { color: var(--blue); }
+
+/* ── 우측 on-this-page ── */
+.manual-toc {
+  padding: 48px 24px 60px 20px;
+  position: sticky;
+  top: 36px;
+  align-self: start;
+  height: calc(100vh - 36px);
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  border-left: 1px solid var(--border2);
+}
+.manual-toc .label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--faint);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.manual-toc ul { list-style: none; padding: 0; margin: 0; }
+.manual-toc li a {
+  display: block;
+  padding: 4px 0 4px 10px;
+  color: var(--dim);
+  border-left: 1px solid var(--border2);
+  transition: all 0.15s var(--ease);
+}
+.manual-toc li a:hover { color: var(--text); }
+.manual-toc li a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+@media (max-width: 1100px) {
+  .manual { grid-template-columns: 220px 1fr; }
+  .manual-toc { display: none; }
+}
+@media (max-width: 760px) {
+  .manual { grid-template-columns: 1fr; }
+  .manual-side { display: none; }
+  .manual-main { padding: 32px 20px 80px; }
+}

@@ -1,0 +1,60 @@
+/* ════════════════════════════════════════════════════════
+   TopolGuard — DESIGN TOKENS
+   3페이지(Landing / Manual / App) 전체 공통 변수
+   ════════════════════════════════════════════════════════ */
+
+:root {
+  /* Dark mode (default) */
+  --bg:      #0d0d11;
+  --bg-app:  #1a1a1f;
+  --panel:   #22222a;
+  --panel2:  #171720;
+  --header:  #2a2a35;
+  --border:  #141418;
+  --border2: #32323f;
+
+  --text:    #e0e0ec;
+  --dim:     #7a7a90;
+  --faint:   #4a4a5c;
+
+  --accent:  #e87d3e;
+  --accent2: #f5a572;
+  --error:   #cf4b4b;
+  --warn:    #d9a336;
+  --ok:      #62a353;
+  --blue:    #4a9fd4;
+
+  /* 랜딩 와이어프레임 톤 */
+  --wire:    #e8c4a8;
+  --wire-dim:#3a2a20;
+
+  /* Typography */
+  --mono: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+  --sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --display: 'VT323', 'JetBrains Mono', monospace;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.light {
+  --bg:      #f0f0f4;
+  --bg-app:  #f0f0f4;
+  --panel:   #ffffff;
+  --panel2:  #f5f5fa;
+  --header:  #e8e8f0;
+  --border:  #d0d0dd;
+  --border2: #b8b8cc;
+  --text:    #1a1a2e;
+  --dim:     #606080;
+  --faint:   #9090a8;
+  --accent:  #d4621e;
+  --accent2: #b8501a;
+  --error:   #c03030;
+  --warn:    #b07000;
+  --ok:      #3a7a30;
+  --blue:    #2a7ab0;
+  --wire:    #8a5030;
+  --wire-dim:#d0c0b0;
+}

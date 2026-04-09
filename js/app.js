@@ -1,0 +1,1559 @@
+// ════════════════════════════════════════════════════════
+// TopolGuard — INSPECTOR APP
+// 이 파일은 원본 단일 HTML의 <script> 블록을 그대로 이관한 것입니다.
+// Three.js / OBJLoader / OrbitControls / BufferGeometryUtils 는
+// app.html 에서 CDN <script> 로 먼저 로드되어 전역 THREE 에 있어야 합니다.
+// ════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════
+// ANIMATION SYSTEM
+// ════════════════════════════════════════════════════════
+
+// localStorage에서 설정 복원 (기본값: ON)
+let animEnabled = localStorage.getItem('tg_anim') !== 'false';
+let animRunning = false;
+let animSkipped = false;
+let animTimeouts = [];  // 취소 가능하도록 timeout ID 수집
+
+function applyAnimToggleUI() {
+  const wrap  = document.getElementById('anim-toggle-wrap');
+  const label = document.getElementById('anim-toggle-label');
+  if (!wrap) return;
+  wrap.classList.toggle('on', animEnabled);
+  label.textContent = animEnabled ? 'ANIM' : 'ANIM';
+}
+
+function toggleAnimSetting() {
+  animEnabled = !animEnabled;
+  localStorage.setItem('tg_anim', animEnabled);
+  applyAnimToggleUI();
+  showToast('info',
+    animEnabled ? '애니메이션 ON' : '애니메이션 OFF',
+    animEnabled ? '다음 분석부터 연출이 재생됩니다.' : '결과가 즉시 표시됩니다.',
+    2000);
+}
+
+function skipAnimation() {
+  animSkipped = true;
+  // 대기 중인 setTimeout 전부 취소
+  animTimeouts.forEach(id => clearTimeout(id));
+  animTimeouts = [];
+  // 스킵 버튼 숨기기
+  document.getElementById('skip-btn').classList.remove('visible');
+  document.getElementById('scan-line').classList.remove('active');
+  animRunning = false;
+  // 즉시 완전 표시 상태로
+  finalizeAnimation();
+}
+
+// 애니메이션이 끝났거나 스킵됐을 때 호출 — 숨겨진 요소 전부 표시
+let _pendingFinalizeCallback = null;
+function finalizeAnimation() {
+  if (_pendingFinalizeCallback) {
+    _pendingFinalizeCallback();
+    _pendingFinalizeCallback = null;
+  }
+}
+
+// 딜레이 래퍼: animSkipped 상태면 즉시 실행, 아니면 setTimeout
+function animDelay(fn, ms) {
+  if (!animEnabled || animSkipped) { fn(); return; }
+  const id = setTimeout(fn, ms);
+  animTimeouts.push(id);
+  return id;
+}
+
+// 숫자 카운트업 애니메이션
+function countUpTo(el, targetVal, duration, suffix) {
+  if (!animEnabled || animSkipped) {
+    el.textContent = targetVal + (suffix || '');
+    return;
+  }
+  suffix = suffix || '';
+  const start = performance.now();
+  const startVal = 0;
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    const cur = Math.round(startVal + (targetVal - startVal) * ease);
+    el.textContent = cur + suffix;
+    if (t < 1 && !animSkipped) requestAnimationFrame(tick);
+    else el.textContent = targetVal + suffix;
+  }
+  requestAnimationFrame(tick);
+}
+
+// 초기 UI 반영
+document.addEventListener('DOMContentLoaded', applyAnimToggleUI);
+
+// ════════════════════════════════════════════════════════
+// QUICK START SAMPLE LOADER
+// ════════════════════════════════════════════════════════
+function loadSample(path, name, icon) {
+  showToast('info', icon + ' ' + name + ' 로드 중', '샘플 파일을 불러옵니다...', 3000);
+  fetch(path)
+    .then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.text();
+    })
+    .then(function(text) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url  = URL.createObjectURL(blob);
+      loadModel(url, text);
+    })
+    .catch(function(err) {
+      console.error(err);
+      showToast('error', '샘플 로드 실패',
+        '"' + path + '" 파일을 찾을 수 없습니다.<br>깃헙 저장소의 samples/ 폴더에 파일이 있는지 확인하세요.', 6000);
+    });
+}
+
+// ════════════════════════════════════════════════════════
+// TOAST SYSTEM
+// ════════════════════════════════════════════════════════
+const TOAST_ICONS = { error: '✕', warn: '⚠', info: 'ℹ', success: '✓' };
+function showToast(type, title, msg, duration) {
+  duration = duration || 5000;
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML =
+    '<span class="toast-icon">' + TOAST_ICONS[type] + '</span>' +
+    '<div class="toast-body"><div class="toast-title">' + title + '</div>' +
+    (msg ? '<div class="toast-msg">' + msg + '</div>' : '') + '</div>' +
+    '<button class="toast-close" onclick="this.parentElement.remove()">×</button>';
+  container.appendChild(el);
+  if (duration > 0) {
+    setTimeout(function() {
+      el.style.animation = 'toast-out 0.3s ease-in forwards';
+      setTimeout(function() { el.remove(); }, 300);
+    }, duration);
+  }
+  return el;
+}
+
+// ════════════════════════════════════════════════════════
+// FILE VALIDATION
+// ════════════════════════════════════════════════════════
+const MAX_FILE_SIZE_MB    = 500;
+const MAX_VERTEX_COUNT    = 3000000;
+const WARN_VERTEX_COUNT   = 1000000;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+function quickCountVertices(text) {
+  let count = 0, idx = 0;
+  while (idx < text.length) {
+    const nl = text.indexOf('\n', idx);
+    const lineEnd = nl === -1 ? text.length : nl;
+    if (text[idx] === 'v' && text[idx+1] === ' ') count++;
+    idx = lineEnd + 1;
+  }
+  return count;
+}
+
+function validateAndLoad(file) {
+  if (!file.name.toLowerCase().endsWith('.obj')) {
+    showToast('error', '지원하지 않는 파일 형식', '.obj 파일만 업로드 가능합니다. 현재 파일: ' + file.name);
+    return;
+  }
+  const sizeMB = (file.size / (1024*1024)).toFixed(1);
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    showToast('error', '파일이 너무 큽니다', '최대 ' + MAX_FILE_SIZE_MB + 'MB까지 지원됩니다. 현재: ' + sizeMB + 'MB');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onerror = function() { showToast('error', '파일 읽기 실패', '파일이 손상되었을 수 있습니다.'); };
+  reader.onload = function(ev) {
+    const text = ev.target.result;
+    const vertCount = quickCountVertices(text);
+    if (vertCount > MAX_VERTEX_COUNT) {
+      showToast('error', '버텍스 수 초과 — 로드 불가',
+        '이 파일의 버텍스: 약 ' + vertCount.toLocaleString() + '개 (최대 ' + MAX_VERTEX_COUNT.toLocaleString() + '개)', 10000);
+      return;
+    }
+    if (vertCount > WARN_VERTEX_COUNT) {
+      showToast('warn', '대용량 모델 감지',
+        '버텍스 약 ' + vertCount.toLocaleString() + '개 — 분석에 시간이 걸릴 수 있습니다.', 7000);
+    }
+    const url = URL.createObjectURL(file);
+    loadModel(url, text);
+  };
+  reader.readAsText(file);
+}
+
+// ════════════════════════════════════════════════════════
+// SCENE SETUP
+// ════════════════════════════════════════════════════════
+const viewport = document.getElementById('viewport');
+const W = () => viewport.clientWidth;
+const H = () => viewport.clientHeight;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1f);
+
+const camera = new THREE.PerspectiveCamera(55, W() / H(), 0.001, 100000);
+camera.position.set(0, 0, 5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(W(), H());
+viewport.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(5, 8, 5);
+scene.add(dirLight);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.15);
+fillLight.position.set(-5, -3, -5);
+scene.add(fillLight);
+
+const grid = new THREE.GridHelper(20, 40, 0x2e2e3a, 0x252530);
+scene.add(grid);
+
+// ════════════════════════════════════════════════════════
+// VIEW MODE (including HEATMAP)
+// ════════════════════════════════════════════════════════
+let currentMode = 'wireframe';
+let currentMeshes = [];
+let heatmapMeshes = []; // stores heatmap THREE.Mesh objects
+
+function setViewMode(mode, btn) {
+  currentMode = mode;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  applyViewMode();
+  const heatBar = document.getElementById('heatmap-bar');
+  heatBar.classList.toggle('visible', mode === 'heatmap');
+}
+
+function applyViewMode() {
+  currentMeshes.forEach(({ solid, wire }) => {
+    if (currentMode === 'heatmap') {
+      solid.visible = false;
+      wire.visible  = false;
+    } else {
+      solid.visible = currentMode === 'solid' || currentMode === 'both';
+      wire.visible  = currentMode === 'wireframe' || currentMode === 'both';
+    }
+  });
+  heatmapMeshes.forEach(m => { m.visible = currentMode === 'heatmap'; });
+}
+
+// ════════════════════════════════════════════════════════
+// BOUNDING BOX HELPER
+// ════════════════════════════════════════════════════════
+let bboxHelper = null;
+let bboxVisible = true;
+
+function toggleBBoxHelper() {
+  bboxVisible = !bboxVisible;
+  const btn = document.getElementById('bbox-toggle');
+  const lbl = document.getElementById('bbox-toggle-label');
+  if (bboxHelper) bboxHelper.visible = bboxVisible;
+  btn.classList.toggle('active', bboxVisible);
+  lbl.textContent = bboxVisible ? 'ON' : 'OFF';
+}
+
+function updateBBoxHelper(object, allVertsBox) {
+  if (bboxHelper) {
+    if (bboxHelper.geometry) bboxHelper.geometry.dispose();
+    if (bboxHelper.material) bboxHelper.material.dispose();
+    scene.remove(bboxHelper);
+    bboxHelper = null;
+  }
+  const box = allVertsBox || new THREE.Box3().setFromObject(object);
+  bboxHelper = new THREE.Box3Helper(box, 0xe87d3e);
+  bboxHelper.visible = bboxVisible;
+  scene.add(bboxHelper);
+}
+
+// ════════════════════════════════════════════════════════
+// OVERLAY GROUPS
+// ════════════════════════════════════════════════════════
+const overlayGroup = new THREE.Group();
+scene.add(overlayGroup);
+
+const overlays = {
+  degen:       { group: new THREE.Group(), color: '#ff2222', label: 'Degenerate face',    count: 0 },
+  ngon:        { group: new THREE.Group(), color: '#ff00ff', label: 'N-gon (5각형+)',     count: 0 },
+  dupvert:     { group: new THREE.Group(), color: '#ffdd00', label: '위치 중복 정점',     count: 0 },
+  flipped:     { group: new THREE.Group(), color: '#ff6ec7', label: '뒤집힌 면 (법선)',  count: 0 },
+  nonmanifold: { group: new THREE.Group(), color: '#ff2222', label: '비매니폴드 엣지',    count: 0 },
+  boundary:    { group: new THREE.Group(), color: '#ff8c00', label: '열린 경계 엣지',     count: 0 },
+  isolated:    { group: new THREE.Group(), color: '#ff3366', label: '고립 정점',           count: 0 },
+  skinny:      { group: new THREE.Group(), color: '#ffd700', label: 'Skinny Triangle',    count: 0 },
+};
+Object.values(overlays).forEach(o => { o.group.visible = true; overlayGroup.add(o.group); });
+
+// ════════════════════════════════════════════════════════
+// COLOR THEME
+// ════════════════════════════════════════════════════════
+const DEFAULT_COLORS = {};
+Object.entries(overlays).forEach(([k,o]) => { DEFAULT_COLORS[k] = o.color; });
+
+function hexToInt(hex) { return parseInt(hex.replace('#',''), 16); }
+
+function applyOverlayColor(key, hex) {
+  overlays[key].color = hex;
+  overlays[key].group.traverse(function(obj) {
+    if (obj.material) {
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      mats.forEach(m => { if (m.color) m.color.set(hex); });
+    }
+  });
+  // sync swatch in toggle UI
+  const dot = document.querySelector('#overlay-toggles [data-key="'+key+'"] .etr-dot');
+  if (dot) dot.style.background = hex;
+}
+
+function buildColorThemeUI() {
+  const wrap = document.getElementById('color-entries');
+  wrap.innerHTML = '';
+  Object.entries(overlays).forEach(function([key, o]) {
+    const entry = document.createElement('div');
+    entry.className = 'color-entry';
+    entry.innerHTML =
+      '<span class="color-entry-label">' + o.label + '</span>' +
+      '<div class="color-swatch-wrap">' +
+        '<div class="color-swatch" id="swatch-'+key+'" style="background:'+o.color+'"></div>' +
+        '<input type="color" class="color-input-hidden" id="colorpick-'+key+'" value="'+o.color+'">' +
+      '</div>';
+    wrap.appendChild(entry);
+    const input  = entry.querySelector('input[type=color]');
+    const swatch = entry.querySelector('.color-swatch');
+    input.addEventListener('input', function() {
+      swatch.style.background = input.value;
+      applyOverlayColor(key, input.value);
+    });
+  });
+}
+function resetColors() {
+  Object.entries(DEFAULT_COLORS).forEach(function([key, hex]) {
+    applyOverlayColor(key, hex);
+    const input  = document.getElementById('colorpick-'+key);
+    const swatch = document.getElementById('swatch-'+key);
+    if (input)  input.value = hex;
+    if (swatch) swatch.style.background = hex;
+  });
+  showToast('info', '색상 초기화', '기본 색상으로 되돌렸습니다.', 2000);
+}
+function randomizeColors() {
+  const palette = ['#ff2d55','#ff9f0a','#ffd60a','#30d158','#64d2ff','#0a84ff','#bf5af2','#ff6b6b','#4ecdc4','#a8e6cf','#ff8b94'];
+  const shuffled = palette.sort(() => Math.random() - 0.5);
+  let idx = 0;
+  Object.keys(overlays).forEach(function(key) {
+    const hex = shuffled[idx % shuffled.length]; idx++;
+    applyOverlayColor(key, hex);
+    const input  = document.getElementById('colorpick-'+key);
+    const swatch = document.getElementById('swatch-'+key);
+    if (input)  input.value = hex;
+    if (swatch) swatch.style.background = hex;
+  });
+  showToast('info', '랜덤 색상 적용', '새로운 색상 조합으로 변경했습니다.', 2000);
+}
+buildColorThemeUI();
+
+// ════════════════════════════════════════════════════════
+// CLEAR OVERLAYS
+// ════════════════════════════════════════════════════════
+function clearOverlays() {
+  Object.values(overlays).forEach(o => {
+    while (o.group.children.length) {
+      const c = o.group.children[0];
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) { const ms = Array.isArray(c.material) ? c.material : [c.material]; ms.forEach(m => m.dispose()); }
+      o.group.remove(c);
+    }
+    o.count = 0;
+  });
+  // clear heatmap meshes from scene
+  heatmapMeshes.forEach(m => {
+    if (m.geometry) m.geometry.dispose();
+    if (m.material) m.material.dispose();
+    scene.remove(m);
+  });
+  heatmapMeshes = [];
+}
+
+// ════════════════════════════════════════════════════════
+// ERROR LAYER TOGGLE UI (new checkbox-style)
+// ════════════════════════════════════════════════════════
+function buildToggleUI() {
+  const wrap  = document.getElementById('overlay-toggles');
+  const empty = document.getElementById('legend-empty');
+  wrap.innerHTML = '';
+  const hasAny = Object.values(overlays).some(o => o.count > 0);
+  if (!hasAny) {
+    empty.textContent = '문제 있는 요소가 없습니다 ✓';
+    empty.style.display = 'block';
+    wrap.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  wrap.style.display = 'block';
+
+  Object.entries(overlays).forEach(function([key, o]) {
+    if (o.count === 0) return;
+    const row = document.createElement('div');
+    row.className = 'error-toggle-row';
+    row.setAttribute('data-key', key);
+    const isRound = (key === 'isolated');
+    row.innerHTML =
+      '<div class="etr-dot' + (isRound?' round':'') + '" style="background:' + o.color + '"></div>' +
+      '<span class="etr-name">' + o.label + '</span>' +
+      '<span class="etr-count">' + o.count.toLocaleString() + '</span>' +
+      '<div class="etr-switch"></div>';
+    row.addEventListener('click', function() {
+      o.group.visible = !o.group.visible;
+      row.classList.toggle('layer-off', !o.group.visible);
+    });
+    wrap.appendChild(row);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// STATISTICS INSPECTOR PANEL
+// ════════════════════════════════════════════════════════
+function buildInspectorUI(stats) {
+  const grid  = document.getElementById('inspector-grid');
+  const empty = document.getElementById('inspector-empty');
+  grid.innerHTML = '';
+  grid.style.display = 'flex';
+  empty.style.display = 'none';
+
+  const rows = [
+    { label: 'Degenerate',    val: stats.degenCount,       color: '--error' },
+    { label: 'N-gon',         val: stats.ngonCount,        color: '--error' },
+    { label: 'Dup. Vertices', val: stats.dupVertCount,     color: '--ok'    },
+    { label: 'Flipped Faces', val: stats.flippedCount,     color: '--warn'  },
+    { label: 'Non-Manifold',  val: stats.nonManifoldCount, color: '--error' },
+    { label: 'Open Boundary', val: stats.boundaryCount,    color: '--warn'  },
+    { label: 'Isolated Verts',val: stats.isolatedCount,    color: '--warn'  },
+    { label: 'Skinny Tris',   val: stats.skinnyCount,      color: '--warn', badge: 'NEW' },
+  ];
+
+  rows.forEach(function(r) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 8px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;font-size:10px;';
+    const isOk = r.val === 0;
+    row.innerHTML =
+      '<span style="color:' + (isOk?'var(--ok)':'var('+r.color+')') + ';font-family:var(--mono);font-size:10px;">' + (isOk?'✓':'●') + '</span>' +
+      '<span style="flex:1;color:var(--dim);">' + r.label + (r.badge?'  <span class="badge new">'+r.badge+'</span>':'') + '</span>' +
+      '<span style="font-family:var(--mono);font-weight:700;color:' + (isOk?'var(--ok)':'var('+r.color+')') + ';">' + r.val.toLocaleString() + '</span>';
+    grid.appendChild(row);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// HEALTH SCORE
+// ════════════════════════════════════════════════════════
+function computeHealthScore(faceCount, stats) {
+  if (faceCount === 0) return { score: 0, grade: 'N/A', desc: '면이 없음', color: '#888' };
+  let score = 100;
+  const fc = Math.max(faceCount, 1);
+
+  // Deductions per error type (weighted by severity and ratio)
+  const rules = [
+    { count: stats.degenCount,       weight: 30, label: 'Degenerate' },
+    { count: stats.ngonCount,        weight: 15, label: 'N-gon' },
+    // dupVertCount는 UV/Normal 분리 정점 포함으로 오탐 가능 → Health Score 제외
+    { count: stats.flippedCount,     weight: 20, label: 'Flipped' },
+    { count: stats.nonManifoldCount, weight: 25, label: 'NonManifold' },
+    { count: stats.boundaryCount,    weight: 5,  label: 'Boundary' },
+    { count: stats.isolatedCount,    weight: 5,  label: 'Isolated' },
+    { count: stats.skinnyCount,      weight: 8,  label: 'Skinny' },
+  ];
+  rules.forEach(function(r) {
+    if (r.count > 0) {
+      const ratio = Math.min(r.count / fc, 1);
+      // sigmoid-style: even 1 error causes -5, scales to full weight at 100%
+      const penalty = r.weight * (0.05 + 0.95 * Math.pow(ratio, 0.3));
+      score -= penalty;
+    }
+  });
+
+  // Density uniformity bonus/penalty: if heatmap data available
+  if (stats.densityCV != null) {
+    // CV (coefficient of variation): 0 = perfectly uniform
+    const cvPenalty = Math.min(stats.densityCV * 10, 10);
+    score -= cvPenalty;
+  }
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  let grade, desc, color;
+  if (score >= 95) { grade = 'S';  desc = '완벽한 토폴로지';       color = '#30d158'; }
+  else if (score >= 85) { grade = 'A'; desc = '우수한 메시 품질';   color = '#62a353'; }
+  else if (score >= 70) { grade = 'B'; desc = '양호 — 소수 문제';   color = '#d9a336'; }
+  else if (score >= 50) { grade = 'C'; desc = '주의 — 오류 수정 권장'; color = '#e87d3e'; }
+  else if (score >= 30) { grade = 'D'; desc = '불량 — 다수 오류 존재'; color = '#cf4b4b'; }
+  else                  { grade = 'F'; desc = '심각한 토폴로지 문제';   color = '#ff2222'; }
+
+  return { score, grade, desc, color };
+}
+
+function updateHealthUI(result) {
+  const val   = document.getElementById('health-score-val');
+  const grade = document.getElementById('health-grade');
+  const desc  = document.getElementById('health-desc');
+  const fill  = document.getElementById('health-bar-fill');
+
+  // 색상/등급/설명은 즉시
+  val.style.color   = result.color;
+  grade.textContent = result.grade;
+  grade.style.color = result.color;
+  desc.textContent  = result.desc;
+
+  if (animEnabled && !animSkipped) {
+    // Health Score: 0 → target 카운트업
+    countUpTo(val, result.score, 900);
+    // 바: 0 → target 넓이
+    fill.style.transition = 'width 0.9s cubic-bezier(0.16,1,0.3,1), background 0.4s';
+    fill.style.background = result.color;
+    requestAnimationFrame(function() {
+      fill.style.width = '0%';
+      requestAnimationFrame(function() {
+        fill.style.width = result.score + '%';
+      });
+    });
+  } else {
+    val.textContent   = result.score;
+    fill.style.transition = 'none';
+    fill.style.width      = result.score + '%';
+    fill.style.background = result.color;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// OBJ TEXT PARSER (optimized with chunked approach)
+// ════════════════════════════════════════════════════════
+let rawObjText = '';
+let hasUvInObj  = false;
+
+function parseObjText(text) {
+  rawObjText = text;
+  const verts = [];
+  const ngonFaces = [];
+  let ngonCount = 0, quadCount = 0, triCount = 0;
+  hasUvInObj = false;
+
+  const dupVertIndices = new Set();
+  const coordToFirstIdx = new Map();
+  const referencedVerts = new Set();
+
+  // Fast line iteration (avoid split('\n') for large files)
+  let i = 0;
+  const len = text.length;
+  while (i < len) {
+    let lineEnd = text.indexOf('\n', i);
+    if (lineEnd === -1) lineEnd = len;
+
+    const c0 = text[i], c1 = text[i+1];
+
+    if (c0 === 'v' && c1 === ' ') {
+      // parse vertex coords
+      const sub = text.slice(i+2, lineEnd).trim();
+      const parts = sub.split(/\s+/);
+      const x = parseFloat(parts[0]), y = parseFloat(parts[1]), z = parseFloat(parts[2]);
+      verts.push([x, y, z]);
+      const idx = verts.length - 1;
+      const key = x.toFixed(6) + ',' + y.toFixed(6) + ',' + z.toFixed(6);
+      if (coordToFirstIdx.has(key)) {
+        dupVertIndices.add(idx);
+        dupVertIndices.add(coordToFirstIdx.get(key));
+      } else {
+        coordToFirstIdx.set(key, idx);
+      }
+    } else if (c0 === 'v' && c1 === 't') {
+      hasUvInObj = true;
+    } else if (c0 === 'f' && c1 === ' ') {
+      const sub = text.slice(i+2, lineEnd).trim();
+      const tokens = sub.split(/\s+/).filter(Boolean);
+      const vi = tokens.map(tk => {
+        const idx = parseInt(tk.split('/')[0]);
+        return idx > 0 ? idx - 1 : verts.length + idx;
+      });
+      if      (vi.length === 3) triCount++;
+      else if (vi.length === 4) quadCount++;
+      else if (vi.length >= 5) { ngonCount++; ngonFaces.push(vi.map(ii => verts[ii] || [0,0,0])); }
+      vi.forEach(ii => referencedVerts.add(ii));
+    }
+
+    i = lineEnd + 1;
+  }
+
+  // Isolated vertices
+  const trueIsolatedPoints = [];
+  for (let j = 0; j < verts.length; j++) {
+    if (!referencedVerts.has(j)) trueIsolatedPoints.push(...verts[j]);
+  }
+
+  // Dup vert points
+  const dupVertPoints = [];
+  dupVertIndices.forEach(j => { if (verts[j]) dupVertPoints.push(...verts[j]); });
+
+  return {
+    ngonCount, quadCount, triCount, ngonFaces, verts,
+    dupVertPoints, dupVertCount: dupVertIndices.size,
+    trueIsolatedPoints, trueIsolatedCount: trueIsolatedPoints.length / 3
+  };
+}
+
+// ════════════════════════════════════════════════════════
+// N-GON OVERLAY
+// ════════════════════════════════════════════════════════
+function buildNgonOverlay(ngonFaces) {
+  const posArr = [];
+  for (const face of ngonFaces) {
+    const v0 = face[0];
+    for (let i = 1; i < face.length - 1; i++) {
+      posArr.push(...v0, ...face[i], ...face[i+1]);
+    }
+  }
+  if (posArr.length === 0) return;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(posArr, 3));
+  overlays.ngon.group.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({
+    color: hexToInt(overlays.ngon.color), side: THREE.DoubleSide,
+    transparent: true, opacity: 0.55, depthTest: false
+  })));
+  const linePos = [];
+  for (const face of ngonFaces) {
+    for (let i = 0; i < face.length; i++) {
+      linePos.push(...face[i], ...face[(i+1) % face.length]);
+    }
+  }
+  const lg = new THREE.BufferGeometry();
+  lg.setAttribute('position', new THREE.Float32BufferAttribute(linePos, 3));
+  overlays.ngon.group.add(new THREE.LineSegments(lg,
+    new THREE.LineBasicMaterial({ color: hexToInt(overlays.ngon.color), depthTest: false })));
+}
+
+// ════════════════════════════════════════════════════════
+// VERTEX DENSITY HEATMAP
+// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// VERTEX DENSITY MAP
+// 각 정점의 로컬 밀도를 "평균 엣지 길이"로 추정합니다.
+// 짧은 평균 엣지 → 고밀도(빨강), 긴 평균 엣지 → 저밀도(파랑)
+// 그라디언트: 파랑(저) → 초록(중) → 빨강(고)
+// ════════════════════════════════════════════════════════
+function buildVertexDensityMap(geometries, modelGroupRef) {
+  // geometries: 배열로 받아 전체 오브젝트를 커버
+  if (!Array.isArray(geometries)) geometries = [geometries];
+  geometries = geometries.filter(g => g && g.attributes && g.attributes.position);
+  if (geometries.length === 0) return { densityCV: null };
+
+  // ── 1. 각 geometry별로 정점 밀도 계산 후 개별 mesh 생성 ──
+  // 전체를 하나로 합치면 43MB+ 배열이 생기므로
+  // geometry당 개별 처리 → 메모리 피크를 분산
+
+  const colLo  = new THREE.Color(0xef4444); // red   = high density (짧은 엣지)
+  const colMid = new THREE.Color(0x22c55e); // green = medium
+  const colHi  = new THREE.Color(0x3b82f6); // blue  = low density (긴 엣지)
+  const tmp    = new THREE.Color();
+
+  // 전역 p5/p95 계산을 위해 먼저 전체 spacing 샘플링 (메모리 절약: 최대 50K 샘플)
+  const SAMPLE_MAX = 50000;
+  const spacingSample = [];
+
+  for (const geo of geometries) {
+    const pos      = geo.attributes.position;
+    const vtxCount = pos.count;
+    const faceCount = vtxCount / 3;
+    if (faceCount < 1) continue;
+
+    const step = Math.max(1, Math.floor(faceCount / (SAMPLE_MAX / geometries.length)));
+    for (let f = 0; f < faceCount; f += step) {
+      const i0=f*3, i1=f*3+1, i2=f*3+2;
+      const ax=pos.getX(i0),ay=pos.getY(i0),az=pos.getZ(i0);
+      const bx=pos.getX(i1),by=pos.getY(i1),bz=pos.getZ(i1);
+      const cx=pos.getX(i2),cy=pos.getY(i2),cz=pos.getZ(i2);
+      const dab=Math.sqrt((bx-ax)**2+(by-ay)**2+(bz-az)**2);
+      const dbc=Math.sqrt((cx-bx)**2+(cy-by)**2+(cz-bz)**2);
+      const dca=Math.sqrt((ax-cx)**2+(ay-cy)**2+(az-cz)**2);
+      const avg=(dab+dbc+dca)/3;
+      if (avg > 0) spacingSample.push(avg);
+    }
+  }
+
+  // TypedArray sort — JS Array.sort보다 훨씬 빠름
+  const sampleF32 = new Float32Array(spacingSample);
+  sampleF32.sort(); // TypedArray.sort: 네이티브 정렬, 블로킹 최소화
+  const p5  = sampleF32[Math.floor(sampleF32.length * 0.05)] || 0;
+  const p95 = sampleF32[Math.floor(sampleF32.length * 0.95)] || 1;
+  const range = (p95 - p5) || 1;
+
+  // densityCV 추정 (샘플 기반)
+  let sumS=0, cntS=sampleF32.length;
+  for (let i=0; i<cntS; i++) sumS += sampleF32[i];
+  const meanS = cntS>0 ? sumS/cntS : 1;
+  let varS=0;
+  for (let i=0; i<cntS; i++) { const d=sampleF32[i]-meanS; varS+=d*d; }
+  const densityCV = meanS>0 ? Math.sqrt(varS/cntS)/meanS : null;
+
+  const copyTransform = function(dst) {
+    if (modelGroupRef) {
+      dst.position.copy(modelGroupRef.position);
+      dst.rotation.copy(modelGroupRef.rotation);
+      dst.scale.copy(modelGroupRef.scale);
+    }
+    dst.visible = currentMode === 'heatmap';
+  };
+
+  // ── 2. 각 geometry에 density color 적용 → 개별 Mesh 생성 ──
+  for (const geo of geometries) {
+    const pos      = geo.attributes.position;
+    const vtxCount = pos.count;
+    const faceCount = vtxCount / 3;
+    if (faceCount < 1) continue;
+
+    // 정점별 평균 엣지 길이 계산 (Float32Array로 GC 압박 최소화)
+    const edgeLenSum   = new Float32Array(vtxCount);
+    const edgeLenCount = new Uint8Array(vtxCount); // max 255 faces per vertex
+
+    for (let f=0; f<faceCount; f++) {
+      const i0=f*3, i1=f*3+1, i2=f*3+2;
+      const ax=pos.getX(i0),ay=pos.getY(i0),az=pos.getZ(i0);
+      const bx=pos.getX(i1),by=pos.getY(i1),bz=pos.getZ(i1);
+      const cx=pos.getX(i2),cy=pos.getY(i2),cz=pos.getZ(i2);
+      const dab=Math.sqrt((bx-ax)**2+(by-ay)**2+(bz-az)**2);
+      const dbc=Math.sqrt((cx-bx)**2+(cy-by)**2+(cz-bz)**2);
+      const dca=Math.sqrt((ax-cx)**2+(ay-cy)**2+(az-cz)**2);
+      edgeLenSum[i0]+=dab+dca; edgeLenCount[i0]+=2;
+      edgeLenSum[i1]+=dab+dbc; edgeLenCount[i1]+=2;
+      edgeLenSum[i2]+=dbc+dca; edgeLenCount[i2]+=2;
+    }
+
+    // vertex color 버퍼 (기존 position 재사용 → 복사 없음)
+    const vColors = new Float32Array(vtxCount * 3);
+    for (let i=0; i<vtxCount; i++) {
+      const spacing = edgeLenCount[i]>0 ? edgeLenSum[i]/edgeLenCount[i] : p5;
+      const t = Math.max(0, Math.min(1, (spacing - p5) / range));
+      if (t < 0.5) tmp.lerpColors(colLo, colMid, t*2);
+      else         tmp.lerpColors(colMid, colHi, (t-0.5)*2);
+      vColors[i*3]=tmp.r; vColors[i*3+1]=tmp.g; vColors[i*3+2]=tmp.b;
+    }
+
+    // ── Density solid mesh ──
+    // position을 새로 복사하지 않고 기존 geo의 attribute를 공유
+    const dg = new THREE.BufferGeometry();
+    dg.setAttribute('position', geo.attributes.position);  // 공유 (복사 안 함)
+    dg.setAttribute('color', new THREE.Float32BufferAttribute(vColors, 3));
+
+    const dm = new THREE.Mesh(dg, new THREE.MeshBasicMaterial({
+      vertexColors: true,
+      side: THREE.DoubleSide,
+      depthTest: true,
+      depthWrite: true,
+      transparent: false,
+    }));
+    copyTransform(dm);
+    scene.add(dm);
+    heatmapMeshes.push(dm);
+
+    // ── Wireframe overlay ──
+    // wireframe:true 옵션 사용 → 별도 43MB wirePos 배열 불필요
+    const wg = new THREE.BufferGeometry();
+    wg.setAttribute('position', geo.attributes.position);  // 공유
+    const wm = new THREE.Mesh(wg, new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.18,
+      depthTest: true,
+    }));
+    copyTransform(wm);
+    scene.add(wm);
+    heatmapMeshes.push(wm);
+  }
+
+  return { densityCV };
+}
+
+// ════════════════════════════════════════════════════════
+// SKINNY TRIANGLE DETECTION — OBJ 원문 직접 파싱 방식
+//
+// Three.js OBJLoader가 정점을 재인덱싱하면서 좌표 기반 엣지
+// 매칭이 부동소수점 오차로 실패하는 문제를 근본적으로 해결합니다.
+//
+// 해법: geometry.position 배열(OBJLoader 결과)을 사용하지 않고,
+// OBJ 원문의 f 라인에서 직접 삼각형(토큰 3개)만 읽어 검사합니다.
+// 쿼드(토큰 4개), N-gon(5개+)은 완전히 건너뜁니다.
+// ════════════════════════════════════════════════════════
+function detectSkinnyTriangles(rawObjText, objVerts) {
+  const skinnyFaces = []; // [[x,y,z], [x,y,z], [x,y,z]] 트리플
+  const THRESHOLD = 10;   // longest_edge / altitude ≥ 10 → skinny
+
+  if (!rawObjText || objVerts.length === 0) {
+    overlays.skinny.count = 0;
+    return;
+  }
+
+  let i = 0;
+  const len = rawObjText.length;
+  const V   = objVerts; // [[x,y,z], ...]
+
+  while (i < len) {
+    let lineEnd = rawObjText.indexOf('\n', i);
+    if (lineEnd === -1) lineEnd = len;
+
+    if (rawObjText[i] === 'f' && rawObjText[i+1] === ' ') {
+      const sub    = rawObjText.slice(i+2, lineEnd).trim();
+      const tokens = sub.split(/\s+/).filter(Boolean);
+
+      // 삼각형만 검사 — 쿼드/N-gon은 완전히 스킵
+      if (tokens.length === 3) {
+        const vi = tokens.map(tk => {
+          const idx = parseInt(tk.split('/')[0]);
+          return idx > 0 ? idx - 1 : V.length + idx;
+        });
+
+        const va = V[vi[0]], vb = V[vi[1]], vc = V[vi[2]];
+        if (!va || !vb || !vc) { i = lineEnd + 1; continue; }
+
+        const [ax, ay, az] = va;
+        const [bx, by, bz] = vb;
+        const [cx, cy, cz] = vc;
+
+        // 세 변의 길이
+        const lab = Math.sqrt((bx-ax)**2 + (by-ay)**2 + (bz-az)**2);
+        const lbc = Math.sqrt((cx-bx)**2 + (cy-by)**2 + (cz-bz)**2);
+        const lca = Math.sqrt((ax-cx)**2 + (ay-cy)**2 + (az-cz)**2);
+        const longest = Math.max(lab, lbc, lca);
+        if (longest < 1e-12) { i = lineEnd + 1; continue; }
+
+        // 넓이 = |AB × AC| / 2, 최단 높이 = 2*area / longest
+        const abx=bx-ax, aby=by-ay, abz=bz-az;
+        const acx=cx-ax, acy=cy-ay, acz=cz-az;
+        const crossLen = Math.sqrt(
+          (aby*acz - abz*acy)**2 +
+          (abz*acx - abx*acz)**2 +
+          (abx*acy - aby*acx)**2
+        );
+        const height = crossLen / longest; // = 2*area / longest
+        if (height < 1e-12) { i = lineEnd + 1; continue; } // degenerate
+
+        const aspectRatio = longest / height;
+        if (aspectRatio >= THRESHOLD) {
+          skinnyFaces.push([ax,ay,az, bx,by,bz, cx,cy,cz]);
+        }
+      }
+    }
+
+    i = lineEnd + 1;
+  }
+
+  overlays.skinny.count = skinnyFaces.length;
+  if (skinnyFaces.length > 0) {
+    const posArr = new Float32Array(skinnyFaces.length * 9);
+    for (let j = 0; j < skinnyFaces.length; j++) {
+      posArr.set(skinnyFaces[j], j * 9);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(posArr, 3));
+    overlays.skinny.group.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({
+      color: hexToInt(overlays.skinny.color), side: THREE.DoubleSide,
+      transparent: true, opacity: 0.70, depthTest: false
+    })));
+  }
+}
+
+
+// ════════════════════════════════════════════════════════
+// MAIN ANALYSIS
+// ════════════════════════════════════════════════════════
+function runAnalysis(originalGeometry, allGeometries) {
+  allGeometries = allGeometries || [originalGeometry];
+  // clearOverlays()는 loadModel에서 모델 해제 직후 호출됨 (잔상 버그 방지)
+
+  // Bounding box
+  originalGeometry.computeBoundingBox();
+  const meshBB = originalGeometry.boundingBox;
+  const meshBBSize = new THREE.Vector3();
+  meshBB.getSize(meshBBSize);
+
+  let trueBB = null;
+  if (rawObjText) {
+    const allVerts = [];
+    let idx = 0, len = rawObjText.length;
+    while (idx < len) {
+      let lineEnd = rawObjText.indexOf('\n', idx);
+      if (lineEnd === -1) lineEnd = len;
+      if (rawObjText[idx] === 'v' && rawObjText[idx+1] === ' ') {
+        const sub = rawObjText.slice(idx+2, lineEnd).trim().split(/\s+/);
+        const x = parseFloat(sub[0]), y = parseFloat(sub[1]), z = parseFloat(sub[2]);
+        if (!isNaN(x) && !isNaN(y) && !isNaN(z)) allVerts.push(x, y, z);
+      }
+      idx = lineEnd + 1;
+    }
+    if (allVerts.length > 0) {
+      trueBB = new THREE.Box3();
+      for (let i = 0; i < allVerts.length; i += 3) {
+        trueBB.expandByPoint(new THREE.Vector3(allVerts[i], allVerts[i+1], allVerts[i+2]));
+      }
+    }
+  }
+
+  const bb = trueBB || meshBB;
+  const bbSize = new THREE.Vector3();
+  bb.getSize(bbSize);
+
+  document.getElementById('bbox').textContent =
+    bbSize.x.toFixed(3) + ' / ' + bbSize.y.toFixed(3) + ' / ' + bbSize.z.toFixed(3);
+
+  if (trueBB) updateBBoxHelper(null, trueBB);
+
+  // ── Dynamic marker scale based on bounding box ──
+  const bbDiag = bbSize.length();
+  const ptSize = Math.max(bbDiag * 0.008, 0.002); // tighter scale to avoid overlap
+
+  let strayDataWarning = false;
+  if (trueBB && meshBBSize.length() > 0) {
+    if (bbSize.length() / meshBBSize.length() > 1.5) strayDataWarning = true;
+  }
+
+  const rawArr   = originalGeometry.attributes.position.array;
+  const rawVerts = originalGeometry.attributes.position.count;
+  const faceCount = rawVerts / 3;
+
+  // Merge for topology analysis
+  const posOnlyGeo = new THREE.BufferGeometry();
+  posOnlyGeo.setAttribute('position', originalGeometry.attributes.position.clone());
+  let indexedGeo;
+  try { indexedGeo = THREE.BufferGeometryUtils.mergeVertices(posOnlyGeo, 1e-4); }
+  catch(e) { indexedGeo = posOnlyGeo; }
+
+  const mergedVerts = indexedGeo.attributes.position.count;
+  const mpos = indexedGeo.attributes.position.array;
+  const indices = indexedGeo.index ? indexedGeo.index.array : null;
+
+  document.getElementById('v-count').textContent = mergedVerts.toLocaleString() +
+    (rawVerts !== mergedVerts ? ' (' + rawVerts.toLocaleString() + ')' : '');
+  document.getElementById('f-count').textContent = Math.round(faceCount).toLocaleString();
+
+  // Edge map
+  let edgeSt = null;
+  const edgeMap = new Map();
+  if (indices) {
+    const ekey = (a,b) => a<b ? a+'_'+b : b+'_'+a;
+    for (let i = 0; i < indices.length; i += 3) {
+      const pairs = [[indices[i],indices[i+1]],[indices[i+1],indices[i+2]],[indices[i+2],indices[i]]];
+      for (const [a,b] of pairs) { const k=ekey(a,b); edgeMap.set(k,{cnt:(edgeMap.get(k)||{cnt:0}).cnt+1,a,b}); }
+    }
+    let nonManifold=0, boundary=0;
+    edgeMap.forEach(e => { if(e.cnt>2) nonManifold++; else if(e.cnt===1) boundary++; });
+    edgeSt = { nonManifold, boundary, totalEdges: edgeMap.size };
+  }
+  document.getElementById('e-count').textContent = edgeSt ? edgeSt.totalEdges.toLocaleString() : '—';
+  if (edgeSt) {
+    const chi = mergedVerts - edgeSt.totalEdges + Math.round(faceCount);
+    document.getElementById('euler').textContent = (chi>=0?'+':'') + chi;
+  }
+
+  // ── Degenerate faces ──
+  const degenVerts = [];
+  for (let f = 0; f < faceCount; f++) {
+    const b=f*9;
+    const ax=rawArr[b],ay=rawArr[b+1],az=rawArr[b+2];
+    const bx=rawArr[b+3],by=rawArr[b+4],bz=rawArr[b+5];
+    const cx=rawArr[b+6],cy=rawArr[b+7],cz=rawArr[b+8];
+    const abx=bx-ax,aby=by-ay,abz=bz-az;
+    const acx=cx-ax,acy=cy-ay,acz=cz-az;
+    const cl=Math.sqrt(Math.pow(aby*acz-abz*acy,2)+Math.pow(abz*acx-abx*acz,2)+Math.pow(abx*acy-aby*acx,2));
+    if (cl < 1e-10) degenVerts.push(ax,ay,az,bx,by,bz,cx,cy,cz);
+  }
+  overlays.degen.count = degenVerts.length / 9;
+  if (degenVerts.length > 0) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(degenVerts, 3));
+    overlays.degen.group.add(new THREE.Points(g,
+      new THREE.PointsMaterial({ color: hexToInt(overlays.degen.color), size: ptSize, sizeAttenuation: true, depthTest: false })));
+  }
+
+  // ── Skinny triangles: OBJ 원문 직접 파싱 (쿼드/N-gon 완전 제외) ──
+  // _parsed는 아래 OBJ text analysis에서 선언됩니다
+  // 여기서는 rawObjText와 verts를 사용하므로, OBJ parsing을 먼저 수행
+  const _parsed = parseObjText(rawObjText);
+  detectSkinnyTriangles(rawObjText, _parsed.verts);
+
+  // ── Non-manifold & boundary edges ──
+  if (indices) {
+    const nmVerts=[], bdVerts=[];
+    edgeMap.forEach(function(e) {
+      const ax=mpos[e.a*3],ay=mpos[e.a*3+1],az=mpos[e.a*3+2];
+      const bx=mpos[e.b*3],by=mpos[e.b*3+1],bz=mpos[e.b*3+2];
+      if (e.cnt > 2)      nmVerts.push(ax,ay,az,bx,by,bz);
+      else if (e.cnt===1) bdVerts.push(ax,ay,az,bx,by,bz);
+    });
+    overlays.nonmanifold.count = nmVerts.length / 6;
+    if (nmVerts.length > 0) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(nmVerts, 3));
+      overlays.nonmanifold.group.add(new THREE.LineSegments(g,
+        new THREE.LineBasicMaterial({ color: hexToInt(overlays.nonmanifold.color), linewidth: 2, depthTest: false })));
+    }
+    overlays.boundary.count = bdVerts.length / 6;
+    if (bdVerts.length > 0) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(bdVerts, 3));
+      overlays.boundary.group.add(new THREE.LineSegments(g,
+        new THREE.LineBasicMaterial({ color: hexToInt(overlays.boundary.color), linewidth: 2, depthTest: false })));
+    }
+
+    // ── Isolated verts (Three.js level) ──
+    const used = new Uint8Array(mergedVerts);
+    for (let i = 0; i < indices.length; i++) used[indices[i]] = 1;
+    const isoVerts = [];
+    for (let i = 0; i < mergedVerts; i++) {
+      if (!used[i]) isoVerts.push(mpos[i*3], mpos[i*3+1], mpos[i*3+2]);
+    }
+    overlays.isolated.count = isoVerts.length / 3;
+    if (isoVerts.length > 0) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(isoVerts, 3));
+      overlays.isolated.group.add(new THREE.Points(g,
+        new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: ptSize*1.4, sizeAttenuation: true, depthTest: false })));
+    }
+  }
+
+  // ── Flipped normals ──
+  // 알고리즘: vn(버텍스 노말) 기반 우선 사용
+  //   → vn 있음: 기하 법선 vs 평균 vn 내적이 음수면 뒤집힌 면
+  //   → vn 없음: 인접 face 법선 다수결 비교 (기존 방식, 오목 메시 오탐 가능)
+  // vn 기반이 훨씬 정확 — 오목(concave) 메시에서의 오탐 제거
+  (function detectFlipped() {
+    const flippedVerts = [];
+
+    // OBJ 원문에서 vn 파싱
+    const objVNormals = [];  // [[x,y,z], ...]
+    // face별 vn 인덱스 (삼각화 후) 수집
+    const faceVN = [];       // [[vna,vnb,vnc], ...]
+    let hasVN = false;
+
+    if (rawObjText) {
+      let li = 0, ll = rawObjText.length;
+      while (li < ll) {
+        let lineEnd = rawObjText.indexOf('\n', li);
+        if (lineEnd === -1) lineEnd = ll;
+        const c0 = rawObjText[li], c1 = rawObjText[li+1], c2 = rawObjText[li+2];
+
+        if (c0==='v' && c1==='n' && c2===' ') {
+          const sub = rawObjText.slice(li+3, lineEnd).trim().split(/\s+/);
+          objVNormals.push([parseFloat(sub[0]), parseFloat(sub[1]), parseFloat(sub[2])]);
+          hasVN = true;
+        } else if (c0==='f' && c1===' ') {
+          const tokens = rawObjText.slice(li+2, lineEnd).trim().split(/\s+/).filter(Boolean);
+          const vis=[], vns=[];
+          for (const tk of tokens) {
+            const parts = tk.split('/');
+            vis.push(parseInt(parts[0])-1);
+            vns.push(parts.length>2 && parts[2] ? parseInt(parts[2])-1 : null);
+          }
+          // fan 삼각화
+          for (let i=1; i<vis.length-1; i++) {
+            faceVN.push([vns[0], vns[i], vns[i+1]]);
+          }
+        }
+        li = lineEnd + 1;
+      }
+    }
+
+    if (hasVN && faceVN.length > 0 && indices) {
+      // ── vn 기반 탐지 ──
+      const pos = originalGeometry.attributes.position;
+      const faceCount2 = Math.min(indices.length/3, faceVN.length);
+
+      const AB = new THREE.Vector3(), AC = new THREE.Vector3();
+      const pA = new THREE.Vector3(), pB = new THREE.Vector3(), pC = new THREE.Vector3();
+      const geomN = new THREE.Vector3();
+
+      // faceVN은 OBJ fan 순서 — indices는 Three.js 머지 후 순서
+      // rawArr(non-indexed) 기준으로 직접 계산
+      const rawFaceCount = rawArr.length / 9;
+
+      for (let f=0; f<rawFaceCount; f++) {
+        if (f >= faceVN.length) break;
+        const b = f*9;
+        pA.set(rawArr[b],  rawArr[b+1],rawArr[b+2]);
+        pB.set(rawArr[b+3],rawArr[b+4],rawArr[b+5]);
+        pC.set(rawArr[b+6],rawArr[b+7],rawArr[b+8]);
+        AB.subVectors(pB,pA); AC.subVectors(pC,pA);
+        geomN.crossVectors(AB,AC).normalize();
+
+        const [na,nb,nc] = faceVN[f];
+        if (na===null||nb===null||nc===null) continue;
+        if (na>=objVNormals.length||nb>=objVNormals.length||nc>=objVNormals.length) continue;
+
+        const vnA=objVNormals[na], vnB=objVNormals[nb], vnC=objVNormals[nc];
+        const avgX=(vnA[0]+vnB[0]+vnC[0])/3;
+        const avgY=(vnA[1]+vnB[1]+vnC[1])/3;
+        const avgZ=(vnA[2]+vnB[2]+vnC[2])/3;
+        const d = geomN.x*avgX + geomN.y*avgY + geomN.z*avgZ;
+
+        if (d < -0.5) {
+          flippedVerts.push(
+            rawArr[b],  rawArr[b+1],rawArr[b+2],
+            rawArr[b+3],rawArr[b+4],rawArr[b+5],
+            rawArr[b+6],rawArr[b+7],rawArr[b+8]
+          );
+        }
+      }
+    } else if (indices) {
+      // ── vn 없음: 기존 인접 face 다수결 방식 (폴백) ──
+      const faceCount2 = indices.length / 3;
+      const faceNormals = [];
+      const n=new THREE.Vector3(), ab2=new THREE.Vector3(), ac2=new THREE.Vector3();
+      const pA=new THREE.Vector3(), pB=new THREE.Vector3(), pC=new THREE.Vector3();
+      for (let f=0;f<faceCount2;f++) {
+        const ia=indices[f*3],ib=indices[f*3+1],ic=indices[f*3+2];
+        pA.set(mpos[ia*3],mpos[ia*3+1],mpos[ia*3+2]);
+        pB.set(mpos[ib*3],mpos[ib*3+1],mpos[ib*3+2]);
+        pC.set(mpos[ic*3],mpos[ic*3+1],mpos[ic*3+2]);
+        ab2.subVectors(pB,pA); ac2.subVectors(pC,pA);
+        n.crossVectors(ab2,ac2).normalize();
+        faceNormals.push(n.x,n.y,n.z);
+      }
+      const ekey2=(a,b)=>a<b?a+'_'+b:b+'_'+a;
+      const edgeToFaces2=new Map();
+      for (let f=0;f<faceCount2;f++) {
+        const pairs=[[indices[f*3],indices[f*3+1]],[indices[f*3+1],indices[f*3+2]],[indices[f*3+2],indices[f*3]]];
+        for (const [a,b] of pairs) {
+          const k=ekey2(a,b);
+          if(!edgeToFaces2.has(k)) edgeToFaces2.set(k,[]);
+          edgeToFaces2.get(k).push(f);
+        }
+      }
+      const faceAdj=Array.from({length:faceCount2},()=>new Set());
+      edgeToFaces2.forEach(function(faces){
+        if(faces.length===2){faceAdj[faces[0]].add(faces[1]);faceAdj[faces[1]].add(faces[0]);}
+      });
+      for (let f=0;f<faceCount2;f++) {
+        const nx=faceNormals[f*3],ny=faceNormals[f*3+1],nz=faceNormals[f*3+2];
+        const adj=faceAdj[f]; if(adj.size===0) continue;
+        let flippedCount=0;
+        adj.forEach(function(af){
+          const d=nx*faceNormals[af*3]+ny*faceNormals[af*3+1]+nz*faceNormals[af*3+2];
+          if(d<-0.5) flippedCount++;
+        });
+        if(flippedCount>adj.size*0.5){
+          const ia=indices[f*3],ib=indices[f*3+1],ic=indices[f*3+2];
+          flippedVerts.push(
+            mpos[ia*3],mpos[ia*3+1],mpos[ia*3+2],
+            mpos[ib*3],mpos[ib*3+1],mpos[ib*3+2],
+            mpos[ic*3],mpos[ic*3+1],mpos[ic*3+2]
+          );
+        }
+      }
+    }
+
+    overlays.flipped.count = flippedVerts.length / 9;
+    if (flippedVerts.length > 0) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(flippedVerts, 3));
+      overlays.flipped.group.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({
+        color: hexToInt(overlays.flipped.color), side: THREE.DoubleSide,
+        transparent: true, opacity: 0.6, depthTest: false
+      })));
+    }
+  })();
+
+  // ── OBJ text based analysis (_parsed는 위 skinny 단계에서 이미 파싱됨) ──
+  const { ngonCount, quadCount, ngonFaces, dupVertPoints, dupVertCount, trueIsolatedPoints, trueIsolatedCount } = _parsed;
+  overlays.ngon.count = ngonCount;
+  if (ngonCount > 0) buildNgonOverlay(ngonFaces);
+
+  overlays.dupvert.count = dupVertCount;
+  if (dupVertPoints.length > 0) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(dupVertPoints, 3));
+    overlays.dupvert.group.add(new THREE.Points(g,
+      new THREE.PointsMaterial({ color: hexToInt(overlays.dupvert.color), size: ptSize, sizeAttenuation: true, depthTest: false })));
+  }
+
+  overlays.isolated.count = trueIsolatedCount;
+  if (trueIsolatedPoints.length > 0) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(trueIsolatedPoints, 3));
+    overlays.isolated.group.add(new THREE.Points(g,
+      new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: ptSize*1.5, sizeAttenuation: true, depthTest: false })));
+  }
+
+  // ── Build heatmap ──
+  const { densityCV } = buildVertexDensityMap(allGeometries, modelGroup);
+
+  // ── Collect stats for health score & inspector ──
+  const stats = {
+    degenCount:       overlays.degen.count,
+    ngonCount:        overlays.ngon.count,
+    dupVertCount:     overlays.dupvert.count,
+    flippedCount:     overlays.flipped.count,
+    nonManifoldCount: overlays.nonmanifold.count,
+    boundaryCount:    overlays.boundary.count,
+    isolatedCount:    trueIsolatedCount,
+    skinnyCount:      overlays.skinny.count,
+    densityCV,
+  };
+
+  // ── Inspector UI ──
+  buildInspectorUI(stats);
+
+  // ── Health Score ──
+  const healthResult = computeHealthScore(faceCount, stats);
+  updateHealthUI(healthResult);
+
+  // ── Issue List ──
+  const realDups = rawVerts - mergedVerts;
+  const issues = [];
+  if (strayDataWarning) issues.push({type:'warn', icon:'⚠', text:'Stray Data 감지됨', sub:'바운딩 박스가 메시보다 현저히 큽니다.'});
+  if (hasUvInObj)       issues.push({type:'ok',   icon:'ℹ', text:'UV 데이터 포함', sub:'UV 언렙 모델 — 정점 분리는 정상 처리됩니다.'});
+
+  // realDups = rawVerts - mergedVerts
+  // UV/Normal 있으면 분리 정점이 당연히 많음 → 정상, 표시 생략
+  // UV/Normal 없으면 진짜 중복 가능성 → 경고
+  if (realDups <= 0 || hasUvInObj) {
+    // UV 있을 땐 이 항목 자체를 표시 안 함 (dupVert 항목에서 통합 안내)
+  } else {
+    issues.push({type:'warn', icon:'⚠', text:'렌더러 분리 정점', count: realDups.toLocaleString()+'개',
+      sub:'UV 데이터 없이 정점이 분리됨 — 확인 권장'});
+  }
+
+  // 중복 정점 판정:
+  // UV/Normal이 있는 파일 → 분리 정점은 렌더러 필수 처리 → 정상(ok)
+  // UV/Normal이 없는 파일 → 위치까지 같으면 진짜 중복 → 경고(warn)
+  if (dupVertCount <= 0) {
+    issues.push({type:'ok', icon:'✓', text:'중복 정점 없음'});
+  } else if (hasUvInObj) {
+    issues.push({type:'ok', icon:'✓',
+      text:'UV/Normal 분리 정점 — 정상',
+      sub: dupVertCount.toLocaleString() + '개 (UV 언렙 처리로 인한 정상 분리, 오류 아님)'});
+  } else {
+    issues.push({type:'warn', icon:'⚠',
+      text:'동일 위치 중복 정점',
+      count: dupVertCount.toLocaleString() + '개',
+      sub: 'UV 데이터 없이 위치까지 겹침 — Merge 권장'});
+  }
+
+  if (ngonCount === 0 && rawObjText === '') {
+    issues.push({type:'warn', icon:'ℹ', text:'N-gon 검사 불가'});
+  } else if (ngonCount === 0) {
+    issues.push({type:'ok', icon:'✓', text:'N-gon 없음', sub: quadCount > 0 ? '쿼드 '+quadCount+'개 포함 (정상)' : '전부 삼각형'});
+  } else {
+    issues.push({type:'error', icon:'✕', text:'N-gon (5각형 이상)', count: ngonCount.toLocaleString()+'개'});
+  }
+
+  if (overlays.degen.count===0)        issues.push({type:'ok',    icon:'✓', text:'Degenerate face 없음'});
+  else                                  issues.push({type:'error', icon:'✕', text:'Degenerate face (넓이 ≈ 0)', count: overlays.degen.count+'개'});
+
+  if (overlays.skinny.count===0)       issues.push({type:'ok',    icon:'✓', text:'Skinny Triangle 없음 (종횡비<10:1)'});
+  else                                  issues.push({type:'warn',  icon:'⚠', text:'Skinny Triangle (종횡비 ≥10:1)', count: overlays.skinny.count+'개', sub:'렌더링 아티팩트 발생 원인'});
+
+  if (overlays.flipped.count===0)      issues.push({type:'ok',    icon:'✓', text:'뒤집힌 면 없음'});
+  else                                  issues.push({type:'error', icon:'✕', text:'뒤집힌 면 (법선 반전)', count: overlays.flipped.count+'개'});
+
+  if (edgeSt) {
+    if (overlays.nonmanifold.count===0) issues.push({type:'ok',    icon:'✓', text:'비매니폴드 엣지 없음'});
+    else                                 issues.push({type:'error', icon:'✕', text:'비매니폴드 엣지', count: overlays.nonmanifold.count+'개'});
+    if (overlays.boundary.count===0)    issues.push({type:'ok',    icon:'✓', text:'닫힌 메쉬 (열린 경계 없음)'});
+    else                                 issues.push({type:'warn',  icon:'⚠', text:'열린 경계 엣지', count: overlays.boundary.count+'개'});
+  } else {
+    issues.push({type:'warn', icon:'⚠', text:'엣지 분석 불가 (머지 실패)'});
+  }
+
+  if (trueIsolatedCount === 0) issues.push({type:'ok',   icon:'✓', text:'고립 정점 없음'});
+  else                          issues.push({type:'warn', icon:'⚠', text:'고립 정점 (면에 연결 안 된 정점)', count: trueIsolatedCount+'개'});
+
+  const issueList = document.getElementById('issue-list');
+
+  if (!animEnabled || animSkipped) {
+    // 즉시 표시
+    issueList.innerHTML = issues.map(function(it) {
+      return '<div class="issue-item '+it.type+'">' +
+        '<span class="issue-icon">'+it.icon+'</span>' +
+        '<span>'+it.text+
+          (it.count ? '<br><span class="issue-count">'+it.count+'</span>' : '')+
+          (it.sub   ? '<br><span class="issue-count">'+it.sub+'</span>'   : '')+
+        '</span></div>';
+    }).join('');
+  } else {
+    // 순차 페이드인: 아이템 하나씩 등장
+    issueList.innerHTML = '';
+    issues.forEach(function(it, idx) {
+      animDelay(function() {
+        const el = document.createElement('div');
+        el.className = 'issue-item ' + it.type + ' anim-in';
+        el.style.animationDelay = '0ms'; // 이미 딜레이 걸림
+        el.innerHTML =
+          '<span class="issue-icon">'+it.icon+'</span>' +
+          '<span>'+it.text+
+            (it.count ? '<br><span class="issue-count">'+it.count+'</span>' : '')+
+            (it.sub   ? '<br><span class="issue-count">'+it.sub+'</span>'   : '')+
+          '</span>';
+        issueList.appendChild(el);
+      }, 300 + idx * 80);
+    });
+  }
+
+  buildToggleUI();
+
+  // ── 연산용 임시 Geometry 해제 (JS 힙 부하 방지) ──
+  // VRAM에는 안 올라가지만 dispose() 안 하면 GC가 치울 때까지 메모리 점유
+  posOnlyGeo.dispose();
+  if (indexedGeo !== posOnlyGeo) indexedGeo.dispose();
+}
+
+// ════════════════════════════════════════════════════════
+// LOAD MODEL
+// ════════════════════════════════════════════════════════
+let modelGroup = null;
+
+function setProgress(pct, label) {
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+  if (pct >= 100) setTimeout(() => { document.getElementById('progress-wrap').style.display = 'none'; }, 800);
+}
+
+function loadModel(url, rawText) {
+  rawObjText = rawText || '';
+  document.getElementById('upload-btn').style.pointerEvents = 'none';
+  setProgress(10, '파일 로드 중...');
+
+  // ── 이전 모델 완전 해제 (GPU 메모리 누수 방지) ──
+  // scene.remove()만으로는 WebGL VRAM이 해제되지 않음
+  // geometry.dispose() + material.dispose()를 명시적으로 순회 호출
+  if (modelGroup) {
+    modelGroup.traverse(function(obj) {
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        mats.forEach(m => m.dispose());
+      }
+    });
+    scene.remove(modelGroup);
+    modelGroup = null;
+  }
+  // heatmap meshes도 동일하게 해제 (clearOverlays보다 먼저 실행될 수 있으므로 방어적으로)
+  heatmapMeshes.forEach(function(m) {
+    if (m.geometry) m.geometry.dispose();
+    if (m.material) {
+      const mats = Array.isArray(m.material) ? m.material : [m.material];
+      mats.forEach(mat => mat.dispose());
+    }
+    scene.remove(m);
+  });
+  heatmapMeshes = [];
+  currentMeshes = [];
+  clearOverlays();  // 이전 에러 마커 즉시 제거 — 새 모델 로딩 중 잔상 방지
+  // Quick Start 오버레이 숨기기
+  const qs = document.getElementById('quick-start');
+  if (qs) { qs.classList.remove('visible'); qs.classList.add('hidden'); }
+
+  // 스캔라인 시작
+  animSkipped = false;
+  animTimeouts = [];
+  if (animEnabled) {
+    const scanLine = document.getElementById('scan-line');
+    scanLine.classList.add('active');
+    scanLine.style.top = '0%';
+    // 스캔라인 내려가는 애니메이션
+    let scanStart = performance.now();
+    function moveScan(now) {
+      const t = Math.min((now - scanStart) / 1500, 1);
+      scanLine.style.top = (t * 100) + '%';
+      if (t < 1 && !animSkipped) requestAnimationFrame(moveScan);
+    }
+    requestAnimationFrame(moveScan);
+    // Skip 버튼 표시
+    document.getElementById('skip-btn').classList.add('visible');
+  }
+
+  // Reset health display
+  document.getElementById('health-score-val').textContent = '—';
+  document.getElementById('health-grade').textContent = 'N/A';
+  document.getElementById('health-desc').textContent = '분석 중...';
+  document.getElementById('health-bar-fill').style.width = '0%';
+
+  const hasLineElements = /^l\s/m.test(rawObjText);
+  const cleanedObjText = hasLineElements
+    ? rawObjText.split('\n').filter(line => !line.trim().startsWith('l ')).join('\n')
+    : rawObjText;
+
+  const cleanedBlob = new Blob([cleanedObjText], { type: 'text/plain' });
+  const cleanedUrl  = URL.createObjectURL(cleanedBlob);
+  const loader = new THREE.OBJLoader();
+
+  loader.load(cleanedUrl, function(obj) {
+    setProgress(50, '분석 중...');
+    modelGroup = new THREE.Group();
+    let firstGeometry = null;
+    const allGeometries = [];  // density map용 전체 geometry 수집
+
+    if (hasLineElements) {
+      document.getElementById('issue-list').innerHTML =
+        '<div class="issue-item warn"><span class="issue-icon">ℹ</span><span>Line element(l) 감지됨 — 분석에서 제외됩니다.</span></div>';
+    }
+
+    obj.traverse(function(child) {
+      if (child.isLine && !child.isMesh) {
+        child.material = new THREE.LineBasicMaterial({ color: 0x888888, opacity: 0.5, transparent: true });
+        modelGroup.add(child.clone());
+        return;
+      }
+      if (!child.isMesh) return;
+      child.geometry.computeVertexNormals();
+      if (!firstGeometry) firstGeometry = child.geometry;
+      allGeometries.push(child.geometry);  // 전체 수집
+
+      // OBJLoader가 내부적으로 생성한 기본 머티리얼 즉시 해제
+      // (씬에 추가되지 않으므로 dispose하지 않으면 JS 힙에 방치됨)
+      if (child.material) {
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(m => m.dispose());
+      }
+
+      const solidMesh = new THREE.Mesh(child.geometry, new THREE.MeshStandardMaterial({
+        color: 0x4a4a55, roughness: 0.7, metalness: 0.0, side: THREE.DoubleSide
+      }));
+      const wireMesh = new THREE.Mesh(child.geometry, new THREE.MeshBasicMaterial({
+        color: 0xaaaacc, wireframe: true, opacity: 0.45, transparent: true
+      }));
+      currentMeshes.push({ solid: solidMesh, wire: wireMesh });
+      modelGroup.add(solidMesh);
+      modelGroup.add(wireMesh);
+    });
+
+    if (!firstGeometry) {
+      document.getElementById('issue-list').innerHTML =
+        '<div class="issue-item warn"><span class="issue-icon">⚠</span><span>면(face)이 없는 파일입니다</span></div>';
+    }
+
+    scene.add(modelGroup);
+    applyViewMode();
+
+    const box = new THREE.Box3().setFromObject(modelGroup);
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.copy(center).add(new THREE.Vector3(0, maxDim*0.5, maxDim*2.5));
+    controls.target.copy(center);
+    controls.update();
+    grid.position.y = box.min.y;
+    overlayGroup.position.copy(modelGroup.position);
+    overlayGroup.rotation.copy(modelGroup.rotation);
+    overlayGroup.scale.copy(modelGroup.scale);
+
+    setProgress(80, '위상 분석 중...');
+    setTimeout(function() {
+      try {
+        if (firstGeometry) runAnalysis(firstGeometry, allGeometries);
+      } catch(e) {
+        console.error('분석 오류:', e);
+        document.getElementById('issue-list').innerHTML =
+          '<div class="issue-item error"><span class="issue-icon">✕</span><span>분석 중 오류가 발생했습니다</span></div>';
+      }
+      setProgress(100, '완료');
+      document.getElementById('upload-btn').style.pointerEvents = '';
+
+      // 스캔라인 종료 + Skip 버튼 숨기기
+      animDelay(function() {
+        document.getElementById('scan-line').classList.remove('active');
+        document.getElementById('skip-btn').classList.remove('visible');
+        animRunning = false;
+      }, animEnabled && !animSkipped ? 1200 : 0);
+      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(cleanedUrl);
+    }, 50);
+
+  }, function(xhr) {
+    if (xhr.total) setProgress(10 + (xhr.loaded/xhr.total)*40, '로드 중...');
+  }, function(err) {
+    console.error(err);
+    document.getElementById('issue-list').innerHTML =
+      '<div class="issue-item error"><span class="issue-icon">✕</span><span>파일 로드 실패</span></div>';
+    document.getElementById('upload-btn').style.pointerEvents = '';
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// FILE INPUT / DRAG & DROP
+// ════════════════════════════════════════════════════════
+document.getElementById('file-upload').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  validateAndLoad(file);
+  e.target.value = '';
+});
+viewport.addEventListener('dragover',  function(e) {
+  e.preventDefault();
+  viewport.classList.add('drag-hover');
+  document.getElementById('drop-overlay').style.display = 'flex';
+});
+viewport.addEventListener('dragleave', function() {
+  viewport.classList.remove('drag-hover');
+  document.getElementById('drop-overlay').style.display = 'none';
+});
+viewport.addEventListener('drop', function(e) {
+  e.preventDefault();
+  viewport.classList.remove('drag-hover');
+  document.getElementById('drop-overlay').style.display = 'none';
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.name.toLowerCase().endsWith('.obj')) return;
+  validateAndLoad(file);
+});
+
+// ════════════════════════════════════════════════════════
+// THEME (LIGHT / DARK)
+// ════════════════════════════════════════════════════════
+let isLight = localStorage.getItem('tg_theme') === 'light';
+
+function applyTheme() {
+  document.body.classList.toggle('light', isLight);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+
+  // Three.js 씬 배경색도 동기화
+  if (scene) {
+    scene.background = new THREE.Color(isLight ? 0xf0f0f4 : 0x1a1a1f);
+  }
+  // 그리드 색상도 모드에 맞게
+  if (grid) {
+    grid.material.color.set(isLight ? 0xc0c0cc : 0x2e2e3a);
+    // GridHelper는 material이 배열 [center, grid]
+    if (Array.isArray(grid.material)) {
+      grid.material[0].color.set(isLight ? 0xa0a0b0 : 0x2e2e3a);
+      grid.material[1].color.set(isLight ? 0xc8c8d8 : 0x252530);
+    }
+  }
+}
+
+function toggleTheme() {
+  isLight = !isLight;
+  localStorage.setItem('tg_theme', isLight ? 'light' : 'dark');
+  applyTheme();
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+applyAnimToggleUI();
+applyTheme();
+
+// ════════════════════════════════════════════════════════
+// RENDER LOOP
+// ════════════════════════════════════════════════════════
+(function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+})();
+
+window.addEventListener('resize', function() {
+  camera.aspect = W() / H();
+  camera.updateProjectionMatrix();
+  renderer.setSize(W(), H());
+});
