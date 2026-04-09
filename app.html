@@ -14,6 +14,86 @@
 
 <div id="toast-container"></div>
 
+<!-- LEFT SIDEBAR — SAMPLES + HISTORY -->
+<div id="left-sidebar">
+  <div class="section-title">SAMPLES</div>
+  <div class="sample-btns">
+    <button class="sample-btn" id="sample-good-btn" onclick="loadSampleFromSidebar('good')">
+      <span class="sample-icon">✓</span> GOOD
+    </button>
+    <button class="sample-btn" id="sample-bad-btn" onclick="loadSampleFromSidebar('bad')">
+      <span class="sample-icon">⚠</span> BAD
+    </button>
+  </div>
+
+  <div class="section-title">HISTORY</div>
+  <div id="history-list">
+    <div id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px; font-family:var(--mono);">아직 로드된 파일이 없습니다</div>
+  </div>
+</div>
+
+<div id="viewport">
+  <!-- SCAN LINE (분석 중 연출) -->
+  <div class="scan-line" id="scan-line"></div>
+
+  <!-- SKIP ANIMATION 버튼 -->
+  <button id="skip-btn" onclick="skipAnimation()">⏭ SKIP</button>
+
+  <!-- QUICK START 오버레이 (파일 없을 때) -->
+  <div id="quick-start" class="visible">
+    <div class="qs-title">Quick Start — AI 생성 메시 비교</div>
+    <div class="qs-grid qs-grid-2">
+      <button class="qs-btn qs-good" onclick="loadSample('samples/Good_Low_Poly_Male_body_AI.obj','Good Sample','✓')">
+        <span class="qs-btn-icon">✓</span>
+        <span class="qs-btn-name">GOOD</span>
+        <span class="qs-btn-desc">
+          Tripo AI 생성 · 정돈된 저폴리<br>
+          <span class="qs-btn-meta">2.5k verts · 350KB</span>
+        </span>
+      </button>
+      <button class="qs-btn qs-bad" onclick="loadSample('samples/Bad_Low_Poly_Male_body_AI.obj','Bad Sample','⚠')">
+        <span class="qs-btn-icon">⚠</span>
+        <span class="qs-btn-name">BAD</span>
+        <span class="qs-btn-desc">
+          Tripo AI 생성 · 덴스/비정상 위상<br>
+          <span class="qs-btn-meta">11k verts · 1.2MB · decimated</span>
+        </span>
+      </button>
+    </div>
+    <div class="qs-or">— OR —</div>
+    <div class="qs-upload-hint">
+      <label for="file-upload"><span>파일 직접 업로드</span></label>
+      &nbsp;하거나 여기에 드래그하세요
+    </div>
+  </div>
+
+  <!-- DROP HOVER 오버레이 -->
+  <div id="drop-overlay" style="display:none;">
+    <div class="drop-icon">⬡</div>
+    <div class="drop-text">DROP .OBJ HERE</div>
+    <div class="drop-sub">WAVEFRONT OBJ FORMAT</div>
+  </div>
+  <div id="hud">
+    <div>SCROLL — ZOOM</div><div>DRAG — ROTATE</div><div>RIGHT DRAG — PAN</div>
+  </div>
+  <div id="bottom-bar">
+    <div id="view-modes">
+      <button class="view-btn active" id="btn-wire"  onclick="setViewMode('wireframe',this)">WIRE</button>
+      <button class="view-btn"        id="btn-solid" onclick="setViewMode('solid',this)">SOLID</button>
+      <button class="view-btn"        id="btn-both"  onclick="setViewMode('both',this)">BOTH</button>
+      <button class="view-btn"        id="btn-heat"  onclick="setViewMode('heatmap',this)">DENSITY</button>
+    </div>
+    <div id="heatmap-bar">
+      <span style="color:#3b82f6;">●</span><span>LOW</span><div class="hm-grad"></div><span>HIGH</span><span style="color:#ef4444;">●</span>
+      <span style="margin-left:4px; color:var(--text);">VERTEX DENSITY</span>
+    </div>
+    <div id="anim-toggle-wrap" class="on" onclick="toggleAnimSetting()" title="분석 결과 애니메이션 연출 켜기/끄기">
+      <div id="anim-switch"></div>
+      <span id="anim-toggle-label">ANIM</span>
+    </div>
+  </div>
+</div>
+
 <div id="sidebar">
   <div id="sidebar-header">
     <div>
@@ -24,23 +104,6 @@
     <button id="theme-toggle" onclick="toggleTheme()" title="라이트/다크 모드 전환">🌙</button>
   </div>
   <div id="sidebar-body">
-
-    <!-- SAMPLES -->
-    <div class="section-title">SAMPLES</div>
-    <div class="sample-btns">
-      <button class="sample-btn good" id="sample-good-btn" onclick="loadSampleFromSidebar('good')">
-        <span class="sample-icon">✓</span> GOOD
-      </button>
-      <button class="sample-btn bad" id="sample-bad-btn" onclick="loadSampleFromSidebar('bad')">
-        <span class="sample-icon">⚠</span> BAD
-      </button>
-    </div>
-
-    <!-- HISTORY -->
-    <div class="section-title">HISTORY</div>
-    <div id="history-list">
-      <div id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px; font-family:var(--mono);">아직 로드된 파일이 없습니다</div>
-    </div>
 
     <!-- HEALTH SCORE -->
     <div class="section-title">HEALTH SCORE</div>
@@ -113,68 +176,6 @@
     </div>
     <label id="upload-btn" for="file-upload">▲ UPLOAD .OBJ</label>
     <input type="file" id="file-upload" accept=".obj" style="display:none;">
-  </div>
-</div>
-
-<div id="viewport">
-  <!-- SCAN LINE (분석 중 연출) -->
-  <div class="scan-line" id="scan-line"></div>
-
-  <!-- SKIP ANIMATION 버튼 -->
-  <button id="skip-btn" onclick="skipAnimation()">⏭ SKIP</button>
-
-  <!-- QUICK START 오버레이 (파일 없을 때) -->
-  <div id="quick-start" class="visible">
-    <div class="qs-title">Quick Start — AI 생성 메시 비교</div>
-    <div class="qs-grid qs-grid-2">
-      <button class="qs-btn qs-good" onclick="loadSample('samples/Good_Low_Poly_Male_body_AI.obj','Good Sample','✓')">
-        <span class="qs-btn-icon">✓</span>
-        <span class="qs-btn-name">GOOD</span>
-        <span class="qs-btn-desc">
-          Tripo AI 생성 · 정돈된 저폴리<br>
-          <span class="qs-btn-meta">2.5k verts · 350KB</span>
-        </span>
-      </button>
-      <button class="qs-btn qs-bad" onclick="loadSample('samples/Bad_Low_Poly_Male_body_AI.obj','Bad Sample','⚠')">
-        <span class="qs-btn-icon">⚠</span>
-        <span class="qs-btn-name">BAD</span>
-        <span class="qs-btn-desc">
-          Tripo AI 생성 · 덴스/비정상 위상<br>
-          <span class="qs-btn-meta">11k verts · 1.2MB · decimated</span>
-        </span>
-      </button>
-    </div>
-    <div class="qs-or">— OR —</div>
-    <div class="qs-upload-hint">
-      <label for="file-upload"><span>파일 직접 업로드</span></label>
-      &nbsp;하거나 여기에 드래그하세요
-    </div>
-  </div>
-
-  <!-- DROP HOVER 오버레이 -->
-  <div id="drop-overlay" style="display:none;">
-    <div class="drop-icon">⬡</div>
-    <div class="drop-text">DROP .OBJ HERE</div>
-    <div class="drop-sub">WAVEFRONT OBJ FORMAT</div>
-  </div>
-  <div id="hud">
-    <div>SCROLL — ZOOM</div><div>DRAG — ROTATE</div><div>RIGHT DRAG — PAN</div>
-  </div>
-  <div id="bottom-bar">
-    <div id="view-modes">
-      <button class="view-btn active" id="btn-wire"  onclick="setViewMode('wireframe',this)">WIRE</button>
-      <button class="view-btn"        id="btn-solid" onclick="setViewMode('solid',this)">SOLID</button>
-      <button class="view-btn"        id="btn-both"  onclick="setViewMode('both',this)">BOTH</button>
-      <button class="view-btn"        id="btn-heat"  onclick="setViewMode('heatmap',this)">DENSITY</button>
-    </div>
-    <div id="heatmap-bar">
-      <span style="color:#3b82f6;">●</span><span>LOW</span><div class="hm-grad"></div><span>HIGH</span><span style="color:#ef4444;">●</span>
-      <span style="margin-left:4px; color:var(--text);">VERTEX DENSITY</span>
-    </div>
-    <div id="anim-toggle-wrap" class="on" onclick="toggleAnimSetting()" title="분석 결과 애니메이션 연출 켜기/끄기">
-      <div id="anim-switch"></div>
-      <span id="anim-toggle-label">ANIM</span>
-    </div>
   </div>
 </div>
 
