@@ -1,12 +1,23 @@
 /* ════════════════════════════════════════════════════════
-   Landing Page — Foxtrove 스타일
+   Landing Page — Foxtrove 스타일 + Blender 방향성
+   Hero + [01] WHY + [02] WHAT WE CHECK + [03] HOW IT LOOKS + INITIATE SCAN
    ════════════════════════════════════════════════════════ */
 
 .landing {
+  background: var(--bg);
+}
+
+/* ──────────────────────────────────────────────────────
+   HERO SECTION
+   ────────────────────────────────────────────────────── */
+
+.hero {
   position: relative;
   min-height: calc(100vh - 36px);
   overflow: hidden;
-  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 #landing-canvas {
@@ -27,8 +38,10 @@
   background-size: 40px 40px;
   z-index: 0;
   pointer-events: none;
+  will-change: transform;
 }
 
+/* ── Decorative frames ── */
 .landing-frames {
   position: absolute;
   right: 40px;
@@ -40,6 +53,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  will-change: transform;
 }
 .landing-frames .frame {
   border: 1px solid var(--wire-dim);
@@ -59,15 +73,13 @@
 .landing-frames .frame.tall  { height: 140px; }
 .landing-frames .frame.stair { height: 120px; clip-path: polygon(0 40%, 30% 40%, 30% 0, 100% 0, 100% 100%, 0 100%); }
 
-.landing-hero {
+/* ── Hero content ── */
+.hero-content {
   position: relative;
   z-index: 2;
   padding: 80px 64px 100px;
   max-width: 900px;
-  min-height: calc(100vh - 36px);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  will-change: transform;
 }
 
 .landing-eyebrow {
@@ -124,6 +136,7 @@
 }
 .landing-sub b { color: var(--text); font-weight: 600; }
 
+/* ── CTA buttons ── */
 .landing-cta {
   display: flex;
   gap: 12px;
@@ -165,6 +178,7 @@
 }
 .landing-cta a:hover .arrow { transform: translateX(3px); }
 
+/* ── Status bar ── */
 .landing-status {
   position: absolute;
   left: 64px;
@@ -184,7 +198,37 @@
   margin-left: 6px;
 }
 
-.landing::after {
+/* ── Scroll hint ── */
+.scroll-hint {
+  position: absolute;
+  right: 64px;
+  bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+}
+.scroll-line {
+  display: block;
+  width: 1px;
+  height: 36px;
+  background: var(--faint);
+  animation: scroll-pulse 2.5s ease-in-out infinite;
+}
+.scroll-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  color: var(--faint);
+}
+@keyframes scroll-pulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.7); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+/* ── Scan-line overlay (hero only) ── */
+.hero::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -200,8 +244,500 @@
   mix-blend-mode: overlay;
 }
 
+
+/* ──────────────────────────────────────────────────────
+   SECTIONS — shared base
+   ────────────────────────────────────────────────────── */
+
+.sect {
+  padding: 120px 64px;
+  position: relative;
+  border-top: 1px solid var(--border);
+}
+
+.sect-alt {
+  background: var(--panel2);
+}
+
+.sect-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.sect-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.sect-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+.sect-title {
+  font-family: var(--display);
+  font-size: clamp(32px, 5vw, 56px);
+  color: var(--text);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.sect-desc {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--dim);
+  max-width: 600px;
+  margin: 0 0 48px;
+}
+
+
+/* ──────────────────────────────────────────────────────
+   [01] WHY TOPOLOGY MATTERS
+   ────────────────────────────────────────────────────── */
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.why-card {
+  padding: 32px 28px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.01);
+  transition: border-color 0.3s var(--ease);
+}
+.why-card:hover {
+  border-color: var(--dim);
+}
+
+.why-icon {
+  display: block;
+  font-size: 22px;
+  color: var(--accent);
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.why-card h3 {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--text);
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.why-card p {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--dim);
+  margin: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────
+   [02] WHAT WE CHECK
+   ────────────────────────────────────────────────────── */
+
+.check-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.check-card {
+  padding: 32px 24px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+/* Colored top accent line */
+.check-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+.check-card:hover { transform: translateY(-4px); }
+.check-card:hover::before { opacity: 1; }
+
+.check-card[data-color="error"]::before { background: var(--error); }
+.check-card[data-color="warn"]::before  { background: var(--warn); }
+.check-card[data-color="blue"]::before  { background: var(--blue); }
+.check-card[data-color="accent"]::before { background: var(--accent); }
+
+.check-card[data-color="error"]:hover { border-color: var(--error); }
+.check-card[data-color="warn"]:hover  { border-color: var(--warn); }
+.check-card[data-color="blue"]:hover  { border-color: var(--blue); }
+.check-card[data-color="accent"]:hover { border-color: var(--accent); }
+
+.check-icon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 20px;
+}
+.check-icon svg { width: 100%; height: 100%; }
+
+.check-card[data-color="error"] .check-icon { color: var(--error); }
+.check-card[data-color="warn"]  .check-icon { color: var(--warn); }
+.check-card[data-color="blue"]  .check-icon { color: var(--blue); }
+.check-card[data-color="accent"] .check-icon { color: var(--accent); }
+
+.check-card h3 {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  margin: 0 0 12px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+.check-card p {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--dim);
+  margin: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────
+   [03] HOW IT LOOKS — terminal comparison cards
+   ────────────────────────────────────────────────────── */
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.terminal-card {
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 12px;
+  transition: border-color 0.3s var(--ease);
+}
+.terminal-card.clean    { border-color: rgba(98, 163, 83, 0.25); }
+.terminal-card.defective { border-color: rgba(207, 75, 75, 0.25); }
+.terminal-card.clean:hover    { border-color: rgba(98, 163, 83, 0.5); }
+.terminal-card.defective:hover { border-color: rgba(207, 75, 75, 0.5); }
+
+.terminal-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  color: var(--dim);
+  background: rgba(0,0,0,0.2);
+}
+
+.terminal-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.terminal-dot.ok    { background: var(--ok);    box-shadow: 0 0 8px var(--ok); }
+.terminal-dot.error { background: var(--error); box-shadow: 0 0 8px var(--error); }
+
+.terminal-body {
+  padding: 16px 20px;
+  background: rgba(0,0,0,0.12);
+}
+
+.t-row {
+  display: flex;
+  align-items: baseline;
+  padding: 3px 0;
+  gap: 8px;
+}
+
+.t-label {
+  color: var(--faint);
+  flex: 1;
+}
+
+.t-val {
+  color: var(--dim);
+  text-align: right;
+}
+.t-val.ok  { color: var(--ok);  font-weight: 600; }
+.t-val.err { color: var(--error); font-weight: 600; }
+
+.t-check {
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+}
+.t-check.pass { color: var(--ok); }
+.t-check.fail { color: var(--error); }
+
+.t-divider {
+  height: 1px;
+  background: var(--border2);
+  margin: 8px 0;
+}
+
+.t-score .t-label {
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.sample-note {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  text-align: center;
+  letter-spacing: 0.08em;
+  line-height: 1.9;
+  margin: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────
+   INITIATE SCAN — final CTA
+   ────────────────────────────────────────────────────── */
+
+.sect-cta {
+  text-align: center;
+  padding: 140px 64px;
+}
+
+.cta-headline {
+  font-family: var(--display);
+  font-size: clamp(48px, 8vw, 120px);
+  line-height: 0.9;
+  color: var(--text);
+  margin: 0 0 28px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+.cta-headline .dot { color: var(--accent); }
+
+.cta-desc {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--dim);
+  margin: 0 auto 40px;
+  max-width: 440px;
+}
+.cta-desc b { color: var(--text); font-weight: 600; }
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 40px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  background: var(--wire);
+  color: #1a1a1f;
+  border: 1px solid var(--wire);
+  transition: all 0.25s var(--ease);
+}
+.cta-btn:hover {
+  background: var(--accent2);
+  border-color: var(--accent2);
+  transform: translateY(-2px);
+}
+.cta-btn .arrow {
+  display: inline-block;
+  transition: transform 0.25s var(--ease);
+}
+.cta-btn:hover .arrow { transform: translateX(4px); }
+
+.cta-features {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 48px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+.cta-features span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cta-features span::before {
+  content: '·';
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1;
+}
+
+
+/* ──────────────────────────────────────────────────────
+   FOOTER
+   ────────────────────────────────────────────────────── */
+
+.landing-footer {
+  padding: 24px 64px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.footer-brand {
+  font-weight: 700;
+  color: var(--dim);
+}
+.footer-brand span { color: var(--accent); }
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+}
+.footer-links a {
+  transition: color 0.15s var(--ease);
+}
+.footer-links a:hover { color: var(--text); }
+
+.footer-copy {
+  margin-left: auto;
+}
+
+
+/* ──────────────────────────────────────────────────────
+   ENTRANCE ANIMATIONS (IntersectionObserver driven)
+   ────────────────────────────────────────────────────── */
+
+.sect-head,
+.sect-desc,
+.why-card,
+.check-card,
+.terminal-card,
+.cta-headline,
+.cta-desc,
+.cta-btn,
+.cta-features,
+.sample-note {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+
+/* Reveal when section enters viewport */
+.in-view .sect-head,
+.in-view .sect-desc,
+.in-view .why-card,
+.in-view .check-card,
+.in-view .terminal-card,
+.in-view .cta-headline,
+.in-view .cta-desc,
+.in-view .cta-btn,
+.in-view .cta-features,
+.in-view .sample-note {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger: WHY cards */
+.in-view .why-card:nth-child(1) { transition-delay: 0.05s; }
+.in-view .why-card:nth-child(2) { transition-delay: 0.15s; }
+.in-view .why-card:nth-child(3) { transition-delay: 0.25s; }
+
+/* Stagger: CHECK cards */
+.in-view .check-card:nth-child(1) { transition-delay: 0.05s; }
+.in-view .check-card:nth-child(2) { transition-delay: 0.15s; }
+.in-view .check-card:nth-child(3) { transition-delay: 0.25s; }
+.in-view .check-card:nth-child(4) { transition-delay: 0.35s; }
+
+/* Stagger: terminal cards */
+.in-view .terminal-card:nth-child(1) { transition-delay: 0.05s; }
+.in-view .terminal-card:nth-child(2) { transition-delay: 0.2s; }
+
+/* Stagger: CTA section */
+.in-view .sect-desc    { transition-delay: 0.1s; }
+.in-view .sample-note  { transition-delay: 0.3s; }
+.in-view .cta-desc     { transition-delay: 0.12s; }
+.in-view .cta-btn      { transition-delay: 0.22s; }
+.in-view .cta-features { transition-delay: 0.32s; }
+
+
+/* ──────────────────────────────────────────────────────
+   RESPONSIVE
+   ────────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .check-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .landing-frames { display: none; }
-  .landing-hero { padding: 60px 28px 80px; }
+  .hero-content { padding: 60px 28px 80px; }
   .landing-status { left: 28px; flex-wrap: wrap; gap: 16px; }
+  .scroll-hint { display: none; }
+
+  .sect { padding: 80px 28px; }
+  .sect-cta { padding: 100px 28px; }
+
+  .why-grid { grid-template-columns: 1fr; }
+  .check-grid { grid-template-columns: 1fr; }
+  .compare-row { grid-template-columns: 1fr; }
+
+  .cta-features {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .landing-footer { padding: 24px 28px; }
+  .footer-inner { flex-wrap: wrap; }
+  .footer-copy { margin-left: 0; width: 100%; margin-top: 8px; }
+}
+
+@media (max-width: 480px) {
+  .hero-content { padding: 40px 20px 60px; }
+  .landing-status { left: 20px; bottom: 20px; gap: 12px; font-size: 9px; }
+  .sect { padding: 60px 20px; }
+  .sect-cta { padding: 80px 20px; }
+  .landing-cta { flex-direction: column; }
+  .landing-cta a { justify-content: center; }
+  .landing-footer { padding: 20px; }
 }
