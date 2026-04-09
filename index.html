@@ -76,21 +76,21 @@
           from sculpting to rigging to final render.
           TopolGuard finds them before your tools do.
         </p>
-        <div class="why-grid">
-          <div class="why-card">
-            <span class="why-icon">◇</span>
+        <div class="num-grid num-grid-3">
+          <div class="num-card">
+            <span class="num-label">01</span>
             <h3>DEFORMATION</h3>
-            <p>Bad topology warps under rigging. Hidden non-manifold edges create unpredictable deformation artifacts in character animation.</p>
+            <p>Bad topology warps under rigging. Mesh defects create unpredictable deformation in animation.</p>
           </div>
-          <div class="why-card">
-            <span class="why-icon">⬡</span>
+          <div class="num-card">
+            <span class="num-label">02</span>
             <h3>PIPELINE</h3>
-            <p>Non-manifold geometry breaks boolean operations, UV unwrapping, and 3D printing slicers. One bad edge cascades through every downstream tool.</p>
+            <p>Non-manifold geometry breaks booleans, UV unwrapping, and 3D printing slicers.</p>
           </div>
-          <div class="why-card">
-            <span class="why-icon">◐</span>
+          <div class="num-card">
+            <span class="num-label">03</span>
             <h3>RENDER</h3>
-            <p>Flipped normals and degenerate faces cause shading artifacts, invisible geometry, and wasted render cycles in real-time engines.</p>
+            <p>Flipped normals and degenerate faces cause shading artifacts and invisible geometry.</p>
           </div>
         </div>
       </div>
@@ -103,53 +103,27 @@
           <span class="sect-num">[02]</span>
           <h2 class="sect-title">WHAT WE CHECK</h2>
         </div>
-        <div class="check-grid">
-
-          <div class="check-card" data-color="error">
-            <div class="check-icon">
-              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                <path d="M12 36L24 20"/>
-                <path d="M36 36L24 20"/>
-                <path d="M24 20V6"/>
-                <circle cx="24" cy="20" r="3" fill="currentColor" stroke="none"/>
-              </svg>
-            </div>
-            <h3>NON-MANIFOLD<br>EDGES</h3>
-            <p>Edges shared by 0 or 3+ faces. Break booleans, 3D print slicers, and UV unwrapping.</p>
+        <div class="num-grid num-grid-4">
+          <div class="num-card">
+            <span class="num-label">01</span>
+            <h3>NON-MANIFOLD EDGES</h3>
+            <p>Edges shared by 0 or 3+ faces. Break booleans and UV unwrapping.</p>
           </div>
-
-          <div class="check-card" data-color="warn">
-            <div class="check-icon">
-              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 44L24 4L30 44Z"/>
-              </svg>
-            </div>
-            <h3>SKINNY<br>TRIANGLES</h3>
-            <p>Near-zero area or extreme aspect ratios. Cause shading artifacts and simulation instability.</p>
+          <div class="num-card">
+            <span class="num-label">02</span>
+            <h3>SKINNY TRIANGLES</h3>
+            <p>Near-zero area or extreme aspect ratios. Cause shading artifacts.</p>
           </div>
-
-          <div class="check-card" data-color="blue">
-            <div class="check-icon">
-              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
-                <polygon points="24,4 44,18 38,40 10,40 4,18"/>
-              </svg>
-            </div>
+          <div class="num-card">
+            <span class="num-label">03</span>
             <h3>N-GONS</h3>
-            <p>Faces with 5 or more vertices. Tessellate unpredictably across renderers and game engines.</p>
+            <p>Faces with 5+ vertices. Tessellate unpredictably across engines.</p>
           </div>
-
-          <div class="check-card" data-color="accent">
-            <div class="check-icon">
-              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 40L24 8L38 40Z"/>
-                <path d="M24 20V30"/>
-                <path d="M20 26L24 30L28 26"/>
-              </svg>
-            </div>
-            <h3>FLIPPED<br>NORMALS</h3>
-            <p>Faces pointing inward instead of outward. Render invisible or inverted in real-time engines.</p>
+          <div class="num-card">
+            <span class="num-label">04</span>
+            <h3>FLIPPED NORMALS</h3>
+            <p>Faces pointing inward. Render invisible in real-time engines.</p>
           </div>
-
         </div>
       </div>
     </section>
