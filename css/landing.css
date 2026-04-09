@@ -436,6 +436,40 @@
   letter-spacing: 0.1em;
 }
 
+/* ── Image placeholder ── */
+.compare-img-placeholder {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.1),
+    0 12px 40px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.placeholder-icon {
+  font-size: 28px;
+  color: var(--faint);
+  opacity: 0.4;
+}
+.placeholder-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--faint);
+}
+.placeholder-desc {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--faint);
+  opacity: 0.6;
+}
+
 .sample-note {
   font-family: var(--mono);
   font-size: 10px;

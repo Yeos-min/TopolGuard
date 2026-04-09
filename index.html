@@ -129,6 +129,7 @@
     </section>
 
     <!-- ═══ [03] HOW IT LOOKS ═══ -->
+    <!-- TODO: 실제 Inspector 측정값으로 교체 -->
     <section class="sect" id="compare">
       <div class="sect-inner">
         <div class="sect-head">
@@ -139,6 +140,22 @@
           Below are actual scan results from two AI-generated meshes (Tripo AI).
           One is clean. The other was decimated and arrived with topology defects.
         </p>
+
+        <!-- 이미지 영역: Good (좌) / Bad (우) -->
+        <div class="compare-row">
+          <div class="compare-img-placeholder">
+            <span class="placeholder-icon">⬡</span>
+            <span class="placeholder-title">SCREENSHOT PENDING</span>
+            <span class="placeholder-desc">Inspector view will appear here</span>
+          </div>
+          <div class="compare-img-placeholder">
+            <span class="placeholder-icon">⬡</span>
+            <span class="placeholder-title">SCREENSHOT PENDING</span>
+            <span class="placeholder-desc">Inspector view will appear here</span>
+          </div>
+        </div>
+
+        <!-- 터미널 카드: Good / Bad -->
         <div class="compare-row">
 
           <!-- CLEAN -->
@@ -148,16 +165,17 @@
               SCAN RESULT — CLEAN
             </div>
             <div class="terminal-body">
+              <!-- TODO: 실제 Inspector 측정값으로 교체 -->
               <div class="t-row"><span class="t-label">Model</span><span class="t-val">Good_Low_Poly_Male_body_AI</span></div>
-              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">2,482</span></div>
-              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">4,960</span></div>
+              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Non-Manifold</span><span class="t-val">0</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Skinny Tri</span><span class="t-val">0</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">0</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Flipped Normals</span><span class="t-val">0</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Non-Manifold</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Skinny Tri</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Flipped Normals</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
-              <div class="t-row t-score"><span class="t-label">HEALTH</span><span class="t-val ok">100 / 100</span></div>
+              <div class="t-row t-score"><span class="t-label">HEALTH</span><span class="t-val">— / 100</span></div>
             </div>
           </div>
 
@@ -168,16 +186,17 @@
               SCAN RESULT — DEFECTIVE
             </div>
             <div class="terminal-body">
+              <!-- TODO: 실제 Inspector 측정값으로 교체 -->
               <div class="t-row"><span class="t-label">Model</span><span class="t-val">Bad_Low_Poly_Male_body_AI</span></div>
-              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">10,943</span></div>
-              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">21,898</span></div>
+              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
-              <div class="t-row"><span class="t-check fail">✗</span><span class="t-label">Non-Manifold</span><span class="t-val err">847</span></div>
-              <div class="t-row"><span class="t-check fail">✗</span><span class="t-label">Skinny Tri</span><span class="t-val err">3,291</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">0</span></div>
-              <div class="t-row"><span class="t-check fail">✗</span><span class="t-label">Flipped Normals</span><span class="t-val err">162</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Non-Manifold</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Skinny Tri</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Flipped Normals</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
-              <div class="t-row t-score"><span class="t-label">HEALTH</span><span class="t-val err">23 / 100</span></div>
+              <div class="t-row t-score"><span class="t-label">HEALTH</span><span class="t-val">— / 100</span></div>
             </div>
           </div>
 
