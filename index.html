@@ -76,21 +76,21 @@
           from sculpting to rigging to final render.
           TopolGuard finds them before your tools do.
         </p>
-        <div class="num-grid num-grid-3">
-          <div class="num-card">
-            <span class="num-label">01</span>
-            <h3 data-i18n="whyDeformation">DEFORMATION</h3>
-            <p data-i18n="whyDeformationDesc">Bad topology warps under rigging. Hidden non-manifold edges create unpredictable deformation artifacts in character animation.</p>
+        <div class="card-grid card-grid-3">
+          <div class="section-card">
+            <div class="card-num">01</div>
+            <h3 class="card-title" data-i18n="whyDeformation">DEFORMATION</h3>
+            <p class="card-desc" data-i18n="whyDeformationDesc">Bad topology warps under rigging. Hidden non-manifold edges create unpredictable deformation artifacts in character animation.</p>
           </div>
-          <div class="num-card">
-            <span class="num-label">02</span>
-            <h3 data-i18n="whyPipeline">PIPELINE</h3>
-            <p data-i18n="whyPipelineDesc">Non-manifold geometry breaks boolean operations, UV unwrapping, and 3D printing slicers. One bad edge cascades through every downstream tool.</p>
+          <div class="section-card">
+            <div class="card-num">02</div>
+            <h3 class="card-title" data-i18n="whyPipeline">PIPELINE</h3>
+            <p class="card-desc" data-i18n="whyPipelineDesc">Non-manifold geometry breaks boolean operations, UV unwrapping, and 3D printing slicers. One bad edge cascades through every downstream tool.</p>
           </div>
-          <div class="num-card">
-            <span class="num-label">03</span>
-            <h3 data-i18n="whyRender">RENDER</h3>
-            <p data-i18n="whyRenderDesc">Flipped normals and degenerate faces cause shading artifacts, invisible geometry, and wasted render cycles in real-time engines.</p>
+          <div class="section-card">
+            <div class="card-num">03</div>
+            <h3 class="card-title" data-i18n="whyRender">RENDER</h3>
+            <p class="card-desc" data-i18n="whyRenderDesc">Flipped normals and degenerate faces cause shading artifacts, invisible geometry, and wasted render cycles in real-time engines.</p>
           </div>
         </div>
       </div>
@@ -103,26 +103,26 @@
           <span class="sect-num">[02]</span>
           <h2 class="sect-title" data-i18n="checkSection">WHAT WE CHECK</h2>
         </div>
-        <div class="num-grid num-grid-4">
-          <div class="num-card">
-            <span class="num-label">01</span>
-            <h3 data-i18n="checkNonManifold">NON-MANIFOLD EDGES</h3>
-            <p data-i18n="checkNonManifoldDesc">Edges shared by 0 or 3+ faces. Break booleans, 3D print slicers, and UV unwrapping.</p>
+        <div class="card-grid card-grid-4">
+          <div class="section-card">
+            <div class="card-num">01</div>
+            <h3 class="card-title" data-i18n="checkNonManifold">NON-MANIFOLD EDGES</h3>
+            <p class="card-desc" data-i18n="checkNonManifoldDesc">Edges shared by 0 or 3+ faces. Break booleans, 3D print slicers, and UV unwrapping.</p>
           </div>
-          <div class="num-card">
-            <span class="num-label">02</span>
-            <h3 data-i18n="checkSkinny">SKINNY TRIANGLES</h3>
-            <p data-i18n="checkSkinnyDesc">Near-zero area or extreme aspect ratios. Cause shading artifacts and simulation instability.</p>
+          <div class="section-card">
+            <div class="card-num">02</div>
+            <h3 class="card-title" data-i18n="checkSkinny">SKINNY TRIANGLES</h3>
+            <p class="card-desc" data-i18n="checkSkinnyDesc">Near-zero area or extreme aspect ratios. Cause shading artifacts and simulation instability.</p>
           </div>
-          <div class="num-card">
-            <span class="num-label">03</span>
-            <h3 data-i18n="checkNgon">N-GONS</h3>
-            <p data-i18n="checkNgonDesc">Faces with 5 or more vertices. Tessellate unpredictably across renderers and game engines.</p>
+          <div class="section-card">
+            <div class="card-num">03</div>
+            <h3 class="card-title" data-i18n="checkNgon">N-GONS</h3>
+            <p class="card-desc" data-i18n="checkNgonDesc">Faces with 5 or more vertices. Tessellate unpredictably across renderers and game engines.</p>
           </div>
-          <div class="num-card">
-            <span class="num-label">04</span>
-            <h3 data-i18n="checkFlipped">FLIPPED NORMALS</h3>
-            <p data-i18n="checkFlippedDesc">Faces pointing inward instead of outward. Render invisible or inverted in real-time engines.</p>
+          <div class="section-card">
+            <div class="card-num">04</div>
+            <h3 class="card-title" data-i18n="checkFlipped">FLIPPED NORMALS</h3>
+            <p class="card-desc" data-i18n="checkFlippedDesc">Faces pointing inward instead of outward. Render invisible or inverted in real-time engines.</p>
           </div>
         </div>
       </div>
