@@ -147,7 +147,7 @@ function renderHistory() {
 
     el.innerHTML =
       '<div class="history-name"><span class="' + dotClass + '">' + dotChar + '</span>' + escapeHtml(entry.name) + '</div>' +
-      '<div class="history-meta">' + formatVerts(entry.verts) + ' verts · Health ' + entry.health + ' · <span class="history-time" data-time="' + entry.loadedAt + '">' + relativeTime(entry.loadedAt) + '</span></div>';
+      '<div class="history-meta">' + formatVerts(entry.verts) + ' verts · ' + (typeof LANG_STRINGS !== 'undefined' ? LANG_STRINGS[currentLang].historyScore : 'Score') + ' ' + entry.health + ' · <span class="history-time" data-time="' + entry.loadedAt + '">' + relativeTime(entry.loadedAt) + '</span></div>';
 
     container.appendChild(el);
   });
