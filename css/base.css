@@ -92,3 +92,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 body.has-topnav { padding-top: 36px; }
+
+/* Inspector 페이지 한국어 최적화 */
+body[data-page="app"] { letter-spacing: -0.01em; }
