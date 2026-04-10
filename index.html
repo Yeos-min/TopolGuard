@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +27,7 @@
       </aside>
 
       <div class="hero-content" data-parallax="0.08">
-        <div class="landing-eyebrow" data-i18n="heroEyebrow">FOR ARTISTS, NOT JUST ENGINEERS</div>
+        <div class="landing-eyebrow">FOR ARTISTS, NOT JUST ENGINEERS</div>
 
         <h1 class="landing-headline">
           <span class="line">KNOW</span>
@@ -35,17 +35,17 @@
           <span class="line">MESH<span class="dot">.</span></span>
         </h1>
 
-        <p class="landing-sub" data-i18n="heroSub">
+        <p class="landing-sub">
           We audit your .obj topology — non-manifold edges, skinny triangles,
           n-gons, flipped normals — and show you exactly where they hide.
           Runs entirely in your browser. Nothing leaves your machine.
         </p>
 
         <div class="landing-cta">
-          <a href="app.html" class="primary" data-i18n="launchBtn">
+          <a href="app.html" class="primary">
             Launch Inspector <span class="arrow">→</span>
           </a>
-          <a href="manual.html" class="ghost" data-i18n="manualBtn">
+          <a href="manual.html" class="ghost">
             Read the Manual <span class="arrow">→</span>
           </a>
         </div>
@@ -69,9 +69,9 @@
       <div class="sect-inner">
         <div class="sect-head">
           <span class="sect-num">[01]</span>
-          <h2 class="sect-title" data-i18n="whySection">WHY TOPOLOGY MATTERS</h2>
+          <h2 class="sect-title">WHY TOPOLOGY MATTERS</h2>
         </div>
-        <p class="sect-desc" data-i18n="whyIntro">
+        <p class="sect-desc">
           A mesh with hidden defects will silently break your pipeline —
           from sculpting to rigging to final render.
           TopolGuard finds them before your tools do.
@@ -79,18 +79,18 @@
         <div class="card-grid card-grid-3">
           <div class="section-card">
             <div class="card-num">01</div>
-            <h3 class="card-title" data-i18n="whyDeformation">DEFORMATION</h3>
-            <p class="card-desc" data-i18n="whyDeformationDesc">Bad topology warps under rigging. Hidden non-manifold edges create unpredictable deformation artifacts in character animation.</p>
+            <h3 class="card-title">DEFORMATION</h3>
+            <p class="card-desc">Bad topology warps under rigging. Hidden non-manifold edges create unpredictable deformation artifacts in character animation.</p>
           </div>
           <div class="section-card">
             <div class="card-num">02</div>
-            <h3 class="card-title" data-i18n="whyPipeline">PIPELINE</h3>
-            <p class="card-desc" data-i18n="whyPipelineDesc">Non-manifold geometry breaks boolean operations, UV unwrapping, and 3D printing slicers. One bad edge cascades through every downstream tool.</p>
+            <h3 class="card-title">PIPELINE</h3>
+            <p class="card-desc">Non-manifold geometry breaks boolean operations, UV unwrapping, and 3D printing slicers. One bad edge cascades through every downstream tool.</p>
           </div>
           <div class="section-card">
             <div class="card-num">03</div>
-            <h3 class="card-title" data-i18n="whyRender">RENDER</h3>
-            <p class="card-desc" data-i18n="whyRenderDesc">Flipped normals and degenerate faces cause shading artifacts, invisible geometry, and wasted render cycles in real-time engines.</p>
+            <h3 class="card-title">RENDER</h3>
+            <p class="card-desc">Flipped normals and degenerate faces cause shading artifacts, invisible geometry, and wasted render cycles in real-time engines.</p>
           </div>
         </div>
       </div>
@@ -101,28 +101,28 @@
       <div class="sect-inner">
         <div class="sect-head">
           <span class="sect-num">[02]</span>
-          <h2 class="sect-title" data-i18n="checkSection">WHAT WE CHECK</h2>
+          <h2 class="sect-title">WHAT WE CHECK</h2>
         </div>
         <div class="card-grid card-grid-4">
           <div class="section-card">
             <div class="card-num">01</div>
-            <h3 class="card-title" data-i18n="checkNonManifold">NON-MANIFOLD EDGES</h3>
-            <p class="card-desc" data-i18n="checkNonManifoldDesc">Edges shared by 0 or 3+ faces. Break booleans, 3D print slicers, and UV unwrapping.</p>
+            <h3 class="card-title">NON-MANIFOLD EDGES</h3>
+            <p class="card-desc">Edges shared by 0 or 3+ faces. Break booleans, 3D print slicers, and UV unwrapping.</p>
           </div>
           <div class="section-card">
             <div class="card-num">02</div>
-            <h3 class="card-title" data-i18n="checkSkinny">SKINNY TRIANGLES</h3>
-            <p class="card-desc" data-i18n="checkSkinnyDesc">Near-zero area or extreme aspect ratios. Cause shading artifacts and simulation instability.</p>
+            <h3 class="card-title">SKINNY TRIANGLES</h3>
+            <p class="card-desc">Near-zero area or extreme aspect ratios. Cause shading artifacts and simulation instability.</p>
           </div>
           <div class="section-card">
             <div class="card-num">03</div>
-            <h3 class="card-title" data-i18n="checkNgon">N-GONS</h3>
-            <p class="card-desc" data-i18n="checkNgonDesc">Faces with 5 or more vertices. Tessellate unpredictably across renderers and game engines.</p>
+            <h3 class="card-title">N-GONS</h3>
+            <p class="card-desc">Faces with 5 or more vertices. Tessellate unpredictably across renderers and game engines.</p>
           </div>
           <div class="section-card">
             <div class="card-num">04</div>
-            <h3 class="card-title" data-i18n="checkFlipped">FLIPPED NORMALS</h3>
-            <p class="card-desc" data-i18n="checkFlippedDesc">Faces pointing inward instead of outward. Render invisible or inverted in real-time engines.</p>
+            <h3 class="card-title">FLIPPED NORMALS</h3>
+            <p class="card-desc">Faces pointing inward instead of outward. Render invisible or inverted in real-time engines.</p>
           </div>
         </div>
       </div>
@@ -134,9 +134,9 @@
       <div class="sect-inner">
         <div class="sect-head">
           <span class="sect-num">[03]</span>
-          <h2 class="sect-title" data-i18n="howSection">HOW IT LOOKS</h2>
+          <h2 class="sect-title">HOW IT LOOKS</h2>
         </div>
-        <p class="sect-desc" data-i18n="howIntro">
+        <p class="sect-desc">
           Below are actual scan results from two AI-generated meshes (Tripo AI).
           One is clean. The other was decimated and arrived with topology defects.
         </p>
@@ -145,13 +145,13 @@
         <div class="compare-row">
           <div class="compare-img-placeholder">
             <span class="placeholder-icon">⬡</span>
-            <span class="placeholder-title" data-i18n="phPending">SCREENSHOT PENDING</span>
-            <span class="placeholder-desc" data-i18n="phSub">Inspector view will appear here</span>
+            <span class="placeholder-title">SCREENSHOT PENDING</span>
+            <span class="placeholder-desc">Inspector view will appear here</span>
           </div>
           <div class="compare-img-placeholder">
             <span class="placeholder-icon">⬡</span>
-            <span class="placeholder-title" data-i18n="phPending">SCREENSHOT PENDING</span>
-            <span class="placeholder-desc" data-i18n="phSub">Inspector view will appear here</span>
+            <span class="placeholder-title">SCREENSHOT PENDING</span>
+            <span class="placeholder-desc">Inspector view will appear here</span>
           </div>
         </div>
 
@@ -162,20 +162,20 @@
           <div class="terminal-card clean">
             <div class="terminal-header">
               <span class="terminal-dot ok"></span>
-              <span data-i18n="scanClean">SCAN RESULT — CLEAN</span>
+              <span>SCAN RESULT — CLEAN</span>
             </div>
             <div class="terminal-body">
               <!-- TODO: 실제 Inspector 측정값으로 교체 -->
-              <div class="t-row"><span class="t-label" data-i18n="scanModel">Model</span><span class="t-val">Good_Low_Poly_Male_body_AI</span></div>
-              <div class="t-row"><span class="t-label" data-i18n="scanVerts">Vertices</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-label" data-i18n="scanFaces">Faces</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-label">Model</span><span class="t-val">Good_Low_Poly_Male_body_AI</span></div>
+              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Non-Manifold</span><span class="t-val">—</span></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Skinny Tri</span><span class="t-val">—</span></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">—</span></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Flipped Normals</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
-              <div class="t-row t-score"><span class="t-label" data-i18n="scanModeling">MODELING SCORE</span><span class="t-val">— / 100</span></div>
+              <div class="t-row t-score"><span class="t-label">MODELING SCORE</span><span class="t-val">— / 100</span></div>
             </div>
           </div>
 
@@ -183,25 +183,25 @@
           <div class="terminal-card defective">
             <div class="terminal-header">
               <span class="terminal-dot error"></span>
-              <span data-i18n="scanDefective">SCAN RESULT — DEFECTIVE</span>
+              <span>SCAN RESULT — DEFECTIVE</span>
             </div>
             <div class="terminal-body">
               <!-- TODO: 실제 Inspector 측정값으로 교체 -->
-              <div class="t-row"><span class="t-label" data-i18n="scanModel">Model</span><span class="t-val">Bad_Low_Poly_Male_body_AI</span></div>
-              <div class="t-row"><span class="t-label" data-i18n="scanVerts">Vertices</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-label" data-i18n="scanFaces">Faces</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-label">Model</span><span class="t-val">Bad_Low_Poly_Male_body_AI</span></div>
+              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">—</span></div>
+              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Non-Manifold</span><span class="t-val">—</span></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Skinny Tri</span><span class="t-val">—</span></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">—</span></div>
               <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Flipped Normals</span><span class="t-val">—</span></div>
               <div class="t-divider"></div>
-              <div class="t-row t-score"><span class="t-label" data-i18n="scanModeling">MODELING SCORE</span><span class="t-val">— / 100</span></div>
+              <div class="t-row t-score"><span class="t-label">MODELING SCORE</span><span class="t-val">— / 100</span></div>
             </div>
           </div>
 
         </div>
-        <p class="sample-note" data-i18n="sampleNote">
+        <p class="sample-note">
           All sample meshes are AI-generated via Tripo AI.
           No human-authored 3D assets are redistributed.
         </p>
@@ -212,17 +212,17 @@
     <section class="sect sect-cta" id="scan">
       <div class="sect-inner">
         <h2 class="cta-headline">INITIATE<br>SCAN<span class="dot">.</span></h2>
-        <p class="cta-desc" data-i18n="initBody">
+        <p class="cta-desc">
           Drop your .obj file into the inspector.
           Everything runs in your browser — zero uploads, zero tracking.
         </p>
-        <a href="app.html" class="cta-btn" data-i18n="launchBtn">
+        <a href="app.html" class="cta-btn">
           Launch Inspector <span class="arrow">→</span>
         </a>
         <div class="cta-features">
-          <span data-i18n="initLocal">100% LOCAL</span>
-          <span data-i18n="initNoUpload">ZERO UPLOADS</span>
-          <span data-i18n="initInstant">INSTANT RESULTS</span>
+          <span>100% LOCAL</span>
+          <span>ZERO UPLOADS</span>
+          <span>INSTANT RESULTS</span>
         </div>
       </div>
     </section>
@@ -232,8 +232,8 @@
       <div class="footer-inner">
         <span class="footer-brand">TOPOL<span>GUARD</span></span>
         <div class="footer-links">
-          <a href="manual.html" data-i18n="footerManual">MANUAL</a>
-          <a href="app.html" data-i18n="footerInspector">INSPECTOR</a>
+          <a href="manual.html">MANUAL</a>
+          <a href="app.html">INSPECTOR</a>
         </div>
         <span class="footer-copy">MIT LICENSE · 2025</span>
       </div>
@@ -243,7 +243,6 @@
 
   <!-- 스크립트 (순서 중요) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/i18n.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/landing.js"></script>
