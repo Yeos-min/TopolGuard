@@ -7,7 +7,7 @@
 /* 앱 페이지 전용 body 레이아웃 */
 body[data-page="app"] {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   height: 100vh;
   overflow: hidden;
   font-size: 13px;
@@ -16,7 +16,7 @@ body[data-page="app"] {
 body[data-page="app"] * { margin: 0; padding: 0; }
 
 /* 모드 전환 부드럽게 */
-body, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
+body, #left-sidebar, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
 .stat-card, #health-card, .issue-item, .error-toggle-row,
 .color-entry, .tog-btn, .qs-btn, #view-modes, .view-btn,
 #anim-toggle-wrap, #heatmap-bar, #hud, #skip-btn {
@@ -48,6 +48,12 @@ body, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
   #sidebar-body::-webkit-scrollbar { width: 3px; }
   #sidebar-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
   #sidebar-body { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+
+  /* ── LEFT SIDEBAR ── */
+  #left-sidebar { width: 220px; min-width: 220px; background: var(--panel); border-right: 1px solid var(--border); padding: 10px 12px; overflow-y: auto; z-index: 10; }
+  #left-sidebar::-webkit-scrollbar { width: 3px; }
+  #left-sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  #left-sidebar { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 
   /* ── SECTIONS ── */
   .section-title { font-size: 9px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; margin: 12px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--border); font-family: var(--mono); display: flex; align-items: center; gap: 6px; }
@@ -259,10 +265,7 @@ body, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
 .sample-btn { display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: var(--panel2); border: 1px solid var(--border); border-radius: 2px; color: var(--dim); font-family: var(--mono); font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: all 0.15s; }
 .sample-btn:hover { border-color: var(--border2); color: var(--text); }
 .sample-icon { font-size: 12px; flex-shrink: 0; }
-.sample-btn.good .sample-icon { color: var(--ok); }
-.sample-btn.bad .sample-icon { color: var(--warn); }
-.sample-btn.good.active { border-color: var(--ok); background: rgba(98,163,83,0.08); color: var(--text); }
-.sample-btn.bad.active { border-color: var(--warn); background: rgba(217,163,54,0.08); color: var(--text); }
+.sample-btn.active { border-color: var(--accent); background: rgba(232,125,62,0.08); color: var(--text); }
 
 /* ── SIDEBAR HISTORY ── */
 #history-list { margin-bottom: 4px; }

@@ -302,26 +302,25 @@
    [01] [02] 통합 카드 시스템 — 숫자 넘버링
    ────────────────────────────────────────────────────── */
 
-.num-grid {
+.card-grid {
   display: grid;
-  gap: 20px;
+  gap: 16px;
 }
-.num-grid-3 { grid-template-columns: repeat(3, 1fr); }
-.num-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.card-grid-3 { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card-grid-4 { grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
-.num-card {
+.section-card {
   padding: 24px 28px;
   border: 1px solid var(--border2);
   border-radius: 4px;
-  background: rgba(255,255,255,0.01);
+  background: var(--panel2);
   transition: border-color 0.3s var(--ease);
 }
-.num-card:hover {
+.section-card:hover {
   border-color: var(--dim);
 }
 
-.num-label {
-  display: block;
+.card-num {
   font-family: var(--mono);
   font-size: 36px;
   font-weight: 700;
@@ -330,16 +329,16 @@
   margin-bottom: 16px;
 }
 
-.num-card h3 {
+.card-title {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 17px;
   letter-spacing: 0.14em;
   color: var(--text);
   margin: 0 0 8px;
   font-weight: 600;
 }
 
-.num-card p {
+.card-desc {
   font-family: var(--sans);
   font-size: 13px;
   line-height: 1.55;
@@ -611,7 +610,7 @@
 
 .sect-head,
 .sect-desc,
-.num-card,
+.section-card,
 .terminal-card,
 .cta-headline,
 .cta-desc,
@@ -626,8 +625,7 @@
 /* Reveal when section enters viewport */
 .in-view .sect-head,
 .in-view .sect-desc,
-.in-view .why-card,
-.in-view .check-card,
+.in-view .section-card,
 .in-view .terminal-card,
 .in-view .cta-headline,
 .in-view .cta-desc,
@@ -638,11 +636,11 @@
   transform: translateY(0);
 }
 
-/* Stagger: num-cards */
-.in-view .num-card:nth-child(1) { transition-delay: 0.05s; }
-.in-view .num-card:nth-child(2) { transition-delay: 0.15s; }
-.in-view .num-card:nth-child(3) { transition-delay: 0.25s; }
-.in-view .num-card:nth-child(4) { transition-delay: 0.35s; }
+/* Stagger: section-cards */
+.in-view .section-card:nth-child(1) { transition-delay: 0.05s; }
+.in-view .section-card:nth-child(2) { transition-delay: 0.15s; }
+.in-view .section-card:nth-child(3) { transition-delay: 0.25s; }
+.in-view .section-card:nth-child(4) { transition-delay: 0.35s; }
 
 /* Stagger: terminal cards */
 .in-view .terminal-card:nth-child(1) { transition-delay: 0.05s; }
@@ -661,7 +659,7 @@
    ────────────────────────────────────────────────────── */
 
 @media (max-width: 1100px) {
-  .num-grid-4 {
+  .card-grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -675,8 +673,8 @@
   .sect { padding: 80px 28px; }
   .sect-cta { padding: 100px 28px; }
 
-  .num-grid-3 { grid-template-columns: 1fr; }
-  .num-grid-4 { grid-template-columns: 1fr; }
+  .card-grid-3 { grid-template-columns: 1fr; }
+  .card-grid-4 { grid-template-columns: 1fr; }
   .compare-row { grid-template-columns: 1fr; }
 
   .cta-features {

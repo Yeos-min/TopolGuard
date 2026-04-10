@@ -22,7 +22,8 @@
     '</div>' +
     '<div class="sys">' +
       '<span class="dot"></span>' +
-      '<span>SYS.ONLINE // OP.READY</span>' +
+      '<span data-i18n-hide-on="ko">SYS.ONLINE // OP.READY</span>' +
+      '<button class="lang-btn" onclick="toggleLang()">EN | 한</button>' +
       '<button class="theme-btn" onclick="tgToggleTheme()" title="Toggle theme">◐</button>' +
     '</div>';
 
