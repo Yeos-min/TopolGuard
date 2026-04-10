@@ -5,21 +5,6 @@
 // app.html 에서 CDN <script> 로 먼저 로드되어 전역 THREE 에 있어야 합니다.
 // ════════════════════════════════════════════════════════
 
-// ════════════════════════════════════════════════════════
-// i18n HELPER
-// ════════════════════════════════════════════════════════
-function _t(key) {
-  if (typeof LANG_STRINGS !== 'undefined' && LANG_STRINGS[currentLang] && LANG_STRINGS[currentLang][key]) {
-    return LANG_STRINGS[currentLang][key];
-  }
-  return key;
-}
-
-// langchange 이벤트 시 동적 요소 재렌더링
-document.addEventListener('langchange', function () {
-  renderHistory();
-  renderSampleButtons();
-});
 
 // ════════════════════════════════════════════════════════
 // ANIMATION SYSTEM
@@ -44,8 +29,8 @@ function toggleAnimSetting() {
   localStorage.setItem('tg_anim', animEnabled);
   applyAnimToggleUI();
   showToast('info',
-    animEnabled ? _t('toastAnimOn') : _t('toastAnimOff'),
-    animEnabled ? _t('toastAnimOnBody') : _t('toastAnimOffBody'),
+    animEnabled ? '애니메이션 ON' : '애니메이션 OFF',
+    animEnabled ? '다음 검사부터 연출이 재생돼요.' : '결과가 즉시 표시돼요.',
     2000);
 }
 
@@ -163,7 +148,7 @@ function renderHistory() {
 
     el.innerHTML =
       '<div class="history-name"><span class="' + dotClass + '">' + dotChar + '</span>' + escapeHtml(entry.name) + '</div>' +
-      '<div class="history-meta">' + formatVerts(entry.verts) + ' verts · ' + (typeof LANG_STRINGS !== 'undefined' ? LANG_STRINGS[currentLang].historyScore : 'Score') + ' ' + entry.health + ' · <span class="history-time" data-time="' + entry.loadedAt + '">' + relativeTime(entry.loadedAt) + '</span></div>';
+      '<div class="history-meta">' + formatVerts(entry.verts) + ' 정점 · 점수 ' + entry.health + ' · <span class="history-time" data-time="' + entry.loadedAt + '">' + relativeTime(entry.loadedAt) + '</span></div>';
 
     container.appendChild(el);
   });
@@ -192,9 +177,9 @@ function formatVerts(v) {
 
 function relativeTime(ts) {
   var diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
-  return Math.floor(diff / 3600) + ' hr ago';
+  if (diff < 60) return '방금';
+  if (diff < 3600) return Math.floor(diff / 60) + '분 전';
+  return Math.floor(diff / 3600) + '시간 전';
 }
 
 function escapeHtml(s) {
@@ -255,7 +240,7 @@ document.addEventListener('keydown', function(e) {
 // ════════════════════════════════════════════════════════
 function loadSample(path, name, icon) {
   _pendingLoad = { isSample: true, samplePath: path, name: name || path.split('/').pop() };
-  showToast('info', icon + ' ' + name + ' ' + _t('toastLoading'), _t('toastLoadingBody'), 3000);
+  showToast('info', icon + ' ' + name + ' 로드 중', '샘플 파일을 불러오고 있어요...', 3000);
   fetch(path)
     .then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -269,8 +254,8 @@ function loadSample(path, name, icon) {
     .catch(function(err) {
       console.error(err);
       _pendingLoad = null;
-      showToast('error', _t('toastLoadFail'),
-        _t('toastLoadFailBody') + ' (' + path + ')', 6000);
+      showToast('error', '샘플을 불러오지 못했어요',
+        '파일을 가져올 수 없어요. (' + path + ')', 6000);
     });
 }
 
@@ -319,27 +304,27 @@ function quickCountVertices(text) {
 
 function validateAndLoad(file) {
   if (!file.name.toLowerCase().endsWith('.obj')) {
-    showToast('error', _t('toastBadFormat'), _t('toastBadFormatBody') + file.name);
+    showToast('error', '이 파일은 열 수 없어요', '.obj 파일만 열 수 있어요. 현재 파일: ' + file.name);
     return;
   }
   const sizeMB = (file.size / (1024*1024)).toFixed(1);
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    showToast('error', _t('toastTooBig'), _t('toastTooBigBody').replace('{0}', MAX_FILE_SIZE_MB).replace('{1}', sizeMB));
+    showToast('error', '파일이 너무 커요', '최대 ' + MAX_FILE_SIZE_MB + 'MB까지 열 수 있어요. 현재: ' + sizeMB + 'MB');
     return;
   }
   const reader = new FileReader();
-  reader.onerror = function() { showToast('error', _t('toastReadFail'), _t('toastReadFailBody')); };
+  reader.onerror = function() { showToast('error', '파일을 읽지 못했어요', '파일이 손상되었을 수 있어요.'); };
   reader.onload = function(ev) {
     const text = ev.target.result;
     const vertCount = quickCountVertices(text);
     if (vertCount > MAX_VERTEX_COUNT) {
-      showToast('error', _t('toastVertLimit'),
-        _t('toastVertLimitBody').replace('{0}', MAX_VERTEX_COUNT.toLocaleString()).replace('{1}', vertCount.toLocaleString()), 10000);
+      showToast('error', '정점 수 초과 — 열 수 없어요',
+        '최대 ' + MAX_VERTEX_COUNT.toLocaleString() + '개까지 지원해요. 이 파일: ' + vertCount.toLocaleString() + '개', 10000);
       return;
     }
     if (vertCount > WARN_VERTEX_COUNT) {
-      showToast('warn', _t('toastLargeModel'),
-        _t('toastLargeModelBody').replace('{0}', vertCount.toLocaleString()), 7000);
+      showToast('warn', '대용량 모델이에요',
+        vertCount.toLocaleString() + '개 이상 정점 — 검사에 시간이 걸릴 수 있어요.', 7000);
     }
     _pendingLoad = { isSample: false, name: file.name, objText: text };
     const url = URL.createObjectURL(file);
@@ -445,14 +430,14 @@ const overlayGroup = new THREE.Group();
 scene.add(overlayGroup);
 
 const overlays = {
-  degen:       { group: new THREE.Group(), color: '#ff2222', label: 'Degenerate face',    count: 0 },
-  ngon:        { group: new THREE.Group(), color: '#ff00ff', label: 'N-gon (5각형+)',     count: 0 },
-  dupvert:     { group: new THREE.Group(), color: '#ffdd00', label: '위치 중복 정점',     count: 0 },
-  flipped:     { group: new THREE.Group(), color: '#ff6ec7', label: '뒤집힌 면 (법선)',  count: 0 },
-  nonmanifold: { group: new THREE.Group(), color: '#ff2222', label: '비매니폴드 엣지',    count: 0 },
-  boundary:    { group: new THREE.Group(), color: '#ff8c00', label: '열린 경계 엣지',     count: 0 },
-  isolated:    { group: new THREE.Group(), color: '#ff3366', label: '고립 정점',           count: 0 },
-  skinny:      { group: new THREE.Group(), color: '#ffd700', label: 'Skinny Triangle',    count: 0 },
+  degen:       { group: new THREE.Group(), color: '#ff2222', label: '면이 올바르지 않아요',     count: 0 },
+  ngon:        { group: new THREE.Group(), color: '#ff00ff', label: '면에 꼭짓점이 너무 많아요', count: 0 },
+  dupvert:     { group: new THREE.Group(), color: '#ffdd00', label: '점이 겹쳐있어요',          count: 0 },
+  flipped:     { group: new THREE.Group(), color: '#ff6ec7', label: '면 방향이 반대예요',       count: 0 },
+  nonmanifold: { group: new THREE.Group(), color: '#ff2222', label: '면이 이상하게 붙어있어요', count: 0 },
+  boundary:    { group: new THREE.Group(), color: '#ff8c00', label: '모델이 닫혀있지 않아요',   count: 0 },
+  isolated:    { group: new THREE.Group(), color: '#ff3366', label: '혼자 떠있는 점이 있어요',  count: 0 },
+  skinny:      { group: new THREE.Group(), color: '#ffd700', label: '삼각형이 너무 얇아요',     count: 0 },
 };
 Object.values(overlays).forEach(o => { o.group.visible = true; overlayGroup.add(o.group); });
 
@@ -506,7 +491,7 @@ function resetColors() {
     if (input)  input.value = hex;
     if (swatch) swatch.style.background = hex;
   });
-  showToast('info', _t('toastColorReset'), _t('toastColorResetBody'), 2000);
+  showToast('info', '색상 초기화', '기본 색상으로 되돌렸어요.', 2000);
 }
 function randomizeColors() {
   const palette = ['#ff2d55','#ff9f0a','#ffd60a','#30d158','#64d2ff','#0a84ff','#bf5af2','#ff6b6b','#4ecdc4','#a8e6cf','#ff8b94'];
@@ -520,7 +505,7 @@ function randomizeColors() {
     if (input)  input.value = hex;
     if (swatch) swatch.style.background = hex;
   });
-  showToast('info', _t('toastColorRandom'), _t('toastColorRandomBody'), 2000);
+  showToast('info', '랜덤 색상 적용', '새로운 색상 조합으로 바꿨어요.', 2000);
 }
 buildColorThemeUI();
 
@@ -593,14 +578,14 @@ function buildInspectorUI(stats) {
   empty.style.display = 'none';
 
   const rows = [
-    { label: 'Degenerate',    val: stats.degenCount,       color: '--error' },
+    { label: '비정상 면',     val: stats.degenCount,       color: '--error' },
     { label: 'N-gon',         val: stats.ngonCount,        color: '--error' },
-    { label: 'Dup. Vertices', val: stats.dupVertCount,     color: '--ok'    },
-    { label: 'Flipped Faces', val: stats.flippedCount,     color: '--warn'  },
-    { label: 'Non-Manifold',  val: stats.nonManifoldCount, color: '--error' },
-    { label: 'Open Boundary', val: stats.boundaryCount,    color: '--warn'  },
-    { label: 'Isolated Verts',val: stats.isolatedCount,    color: '--warn'  },
-    { label: 'Skinny Tris',   val: stats.skinnyCount,      color: '--warn', badge: 'NEW' },
+    { label: '중복 정점',     val: stats.dupVertCount,     color: '--ok'    },
+    { label: '뒤집힌 면',     val: stats.flippedCount,     color: '--warn'  },
+    { label: '비매니폴드',    val: stats.nonManifoldCount, color: '--error' },
+    { label: '열린 경계',     val: stats.boundaryCount,    color: '--warn'  },
+    { label: '고립 정점',     val: stats.isolatedCount,    color: '--warn'  },
+    { label: '얇은 삼각형',   val: stats.skinnyCount,      color: '--warn', badge: 'NEW' },
   ];
 
   rows.forEach(function(r) {
@@ -619,7 +604,7 @@ function buildInspectorUI(stats) {
 // HEALTH SCORE
 // ════════════════════════════════════════════════════════
 function computeHealthScore(faceCount, stats) {
-  if (faceCount === 0) return { score: 0, grade: 'N/A', desc: '면이 없음', color: '#888' };
+  if (faceCount === 0) return { score: 0, grade: 'N/A', desc: '면이 없어요', color: '#888' };
   let score = 100;
   const fc = Math.max(faceCount, 1);
 
@@ -653,12 +638,12 @@ function computeHealthScore(faceCount, stats) {
   score = Math.max(0, Math.min(100, Math.round(score)));
 
   let grade, desc, color;
-  if (score >= 95) { grade = 'S';  desc = '완벽한 토폴로지';       color = '#30d158'; }
-  else if (score >= 85) { grade = 'A'; desc = '우수한 메시 품질';   color = '#62a353'; }
-  else if (score >= 70) { grade = 'B'; desc = '양호 — 소수 문제';   color = '#d9a336'; }
-  else if (score >= 50) { grade = 'C'; desc = '주의 — 오류 수정 권장'; color = '#e87d3e'; }
-  else if (score >= 30) { grade = 'D'; desc = '불량 — 다수 오류 존재'; color = '#cf4b4b'; }
-  else                  { grade = 'F'; desc = '심각한 토폴로지 문제';   color = '#ff2222'; }
+  if (score >= 95) { grade = 'S';  desc = '완벽한 토폴로지예요';         color = '#30d158'; }
+  else if (score >= 85) { grade = 'A'; desc = '우수한 메시 품질이에요';   color = '#62a353'; }
+  else if (score >= 70) { grade = 'B'; desc = '양호해요 — 소수 문제';     color = '#d9a336'; }
+  else if (score >= 50) { grade = 'C'; desc = '주의 — 오류 수정이 필요해요'; color = '#e87d3e'; }
+  else if (score >= 30) { grade = 'D'; desc = '불량 — 다수 오류가 있어요';   color = '#cf4b4b'; }
+  else                  { grade = 'F'; desc = '심각한 토폴로지 문제예요'; color = '#ff2222'; }
 
   return { score, grade, desc, color };
 }
@@ -1378,8 +1363,8 @@ function runAnalysis(originalGeometry, allGeometries) {
   // ── Issue List ──
   const realDups = rawVerts - mergedVerts;
   const issues = [];
-  if (strayDataWarning) issues.push({type:'warn', icon:'⚠', text:'Stray Data 감지됨', sub:'바운딩 박스가 메시보다 현저히 큽니다.'});
-  if (hasUvInObj)       issues.push({type:'ok',   icon:'ℹ', text:'UV 데이터 포함', sub:'UV 언렙 모델 — 정점 분리는 정상 처리됩니다.'});
+  if (strayDataWarning) issues.push({type:'warn', icon:'⚠', text:'Stray Data가 감지됐어요', sub:'바운딩 박스가 메시보다 현저히 커요.'});
+  if (hasUvInObj)       issues.push({type:'ok',   icon:'ℹ', text:'UV 데이터가 포함되어 있어요', sub:'UV 언렙 모델 — 정점 분리는 정상이에요.'});
 
   // realDups = rawVerts - mergedVerts
   // UV/Normal 있으면 분리 정점이 당연히 많음 → 정상, 표시 생략
@@ -1387,54 +1372,54 @@ function runAnalysis(originalGeometry, allGeometries) {
   if (realDups <= 0 || hasUvInObj) {
     // UV 있을 땐 이 항목 자체를 표시 안 함 (dupVert 항목에서 통합 안내)
   } else {
-    issues.push({type:'warn', icon:'⚠', text:'렌더러 분리 정점', count: realDups.toLocaleString()+'개',
-      sub:'UV 데이터 없이 정점이 분리됨 — 확인 권장'});
+    issues.push({type:'warn', icon:'⚠', text:'렌더러 분리 정점이 있어요', count: realDups.toLocaleString()+'개',
+      sub:'UV 데이터 없이 정점이 분리되어 있어요 — 확인해 보세요'});
   }
 
   // 중복 정점 판정:
   // UV/Normal이 있는 파일 → 분리 정점은 렌더러 필수 처리 → 정상(ok)
   // UV/Normal이 없는 파일 → 위치까지 같으면 진짜 중복 → 경고(warn)
   if (dupVertCount <= 0) {
-    issues.push({type:'ok', icon:'✓', text:'중복 정점 없음'});
+    issues.push({type:'ok', icon:'✓', text:'중복 정점이 없어요'});
   } else if (hasUvInObj) {
     issues.push({type:'ok', icon:'✓',
-      text:'UV/Normal 분리 정점 — 정상',
-      sub: dupVertCount.toLocaleString() + '개 (UV 언렙 처리로 인한 정상 분리, 오류 아님)'});
+      text:'UV/Normal 분리 정점 — 정상이에요',
+      sub: dupVertCount.toLocaleString() + '개 (UV 언렙 처리로 인한 정상 분리, 오류 아니에요)'});
   } else {
     issues.push({type:'warn', icon:'⚠',
-      text:'동일 위치 중복 정점',
+      text:'동일 위치에 중복 정점이 있어요',
       count: dupVertCount.toLocaleString() + '개',
-      sub: 'UV 데이터 없이 위치까지 겹침 — Merge 권장'});
+      sub: 'UV 데이터 없이 위치까지 겹쳐요 — Merge를 권장해요'});
   }
 
   if (ngonCount === 0 && rawObjText === '') {
-    issues.push({type:'warn', icon:'ℹ', text:'N-gon 검사 불가'});
+    issues.push({type:'warn', icon:'ℹ', text:'N-gon 검사를 할 수 없어요'});
   } else if (ngonCount === 0) {
-    issues.push({type:'ok', icon:'✓', text:'N-gon 없음', sub: quadCount > 0 ? '쿼드 '+quadCount+'개 포함 (정상)' : '전부 삼각형'});
+    issues.push({type:'ok', icon:'✓', text:'N-gon이 없어요', sub: quadCount > 0 ? '쿼드 '+quadCount+'개 포함 (정상)' : '전부 삼각형이에요'});
   } else {
-    issues.push({type:'error', icon:'✕', text:'N-gon (5각형 이상)', count: ngonCount.toLocaleString()+'개'});
+    issues.push({type:'error', icon:'✕', text:'N-gon이 있어요 (5각형 이상)', count: ngonCount.toLocaleString()+'개'});
   }
 
-  if (overlays.degen.count===0)        issues.push({type:'ok',    icon:'✓', text:'Degenerate face 없음'});
-  else                                  issues.push({type:'error', icon:'✕', text:'Degenerate face (넓이 ≈ 0)', count: overlays.degen.count+'개'});
+  if (overlays.degen.count===0)        issues.push({type:'ok',    icon:'✓', text:'비정상 면이 없어요'});
+  else                                  issues.push({type:'error', icon:'✕', text:'비정상 면이 있어요 (넓이 ≈ 0)', count: overlays.degen.count+'개'});
 
-  if (overlays.skinny.count===0)       issues.push({type:'ok',    icon:'✓', text:'Skinny Triangle 없음 (종횡비<10:1)'});
-  else                                  issues.push({type:'warn',  icon:'⚠', text:'Skinny Triangle (종횡비 ≥10:1)', count: overlays.skinny.count+'개', sub:'렌더링 아티팩트 발생 원인'});
+  if (overlays.skinny.count===0)       issues.push({type:'ok',    icon:'✓', text:'얇은 삼각형이 없어요 (종횡비<10:1)'});
+  else                                  issues.push({type:'warn',  icon:'⚠', text:'얇은 삼각형이 있어요 (종횡비 ≥10:1)', count: overlays.skinny.count+'개', sub:'렌더링 아티팩트가 생길 수 있어요'});
 
-  if (overlays.flipped.count===0)      issues.push({type:'ok',    icon:'✓', text:'뒤집힌 면 없음'});
-  else                                  issues.push({type:'error', icon:'✕', text:'뒤집힌 면 (법선 반전)', count: overlays.flipped.count+'개'});
+  if (overlays.flipped.count===0)      issues.push({type:'ok',    icon:'✓', text:'뒤집힌 면이 없어요'});
+  else                                  issues.push({type:'error', icon:'✕', text:'뒤집힌 면이 있어요 (법선 반전)', count: overlays.flipped.count+'개'});
 
   if (edgeSt) {
-    if (overlays.nonmanifold.count===0) issues.push({type:'ok',    icon:'✓', text:'비매니폴드 엣지 없음'});
-    else                                 issues.push({type:'error', icon:'✕', text:'비매니폴드 엣지', count: overlays.nonmanifold.count+'개'});
-    if (overlays.boundary.count===0)    issues.push({type:'ok',    icon:'✓', text:'닫힌 메쉬 (열린 경계 없음)'});
-    else                                 issues.push({type:'warn',  icon:'⚠', text:'열린 경계 엣지', count: overlays.boundary.count+'개'});
+    if (overlays.nonmanifold.count===0) issues.push({type:'ok',    icon:'✓', text:'비매니폴드 엣지가 없어요'});
+    else                                 issues.push({type:'error', icon:'✕', text:'비매니폴드 엣지가 있어요', count: overlays.nonmanifold.count+'개'});
+    if (overlays.boundary.count===0)    issues.push({type:'ok',    icon:'✓', text:'닫힌 메쉬예요 (열린 경계 없음)'});
+    else                                 issues.push({type:'warn',  icon:'⚠', text:'열린 경계 엣지가 있어요', count: overlays.boundary.count+'개'});
   } else {
-    issues.push({type:'warn', icon:'⚠', text:'엣지 분석 불가 (머지 실패)'});
+    issues.push({type:'warn', icon:'⚠', text:'엣지 분석을 할 수 없어요 (머지 실패)'});
   }
 
-  if (trueIsolatedCount === 0) issues.push({type:'ok',   icon:'✓', text:'고립 정점 없음'});
-  else                          issues.push({type:'warn', icon:'⚠', text:'고립 정점 (면에 연결 안 된 정점)', count: trueIsolatedCount+'개'});
+  if (trueIsolatedCount === 0) issues.push({type:'ok',   icon:'✓', text:'고립 정점이 없어요'});
+  else                          issues.push({type:'warn', icon:'⚠', text:'고립 정점이 있어요 (면에 연결 안 됨)', count: trueIsolatedCount+'개'});
 
   const issueList = document.getElementById('issue-list');
 
@@ -1490,7 +1475,7 @@ function setProgress(pct, label) {
 function loadModel(url, rawText) {
   rawObjText = rawText || '';
   document.getElementById('upload-btn').style.pointerEvents = 'none';
-  setProgress(10, '파일 로드 중...');
+  setProgress(10, '파일을 불러오고 있어요...');
 
   // ── 이전 모델 완전 해제 (GPU 메모리 누수 방지) ──
   // scene.remove()만으로는 WebGL VRAM이 해제되지 않음
@@ -1544,7 +1529,7 @@ function loadModel(url, rawText) {
   // Reset health display
   document.getElementById('health-score-val').textContent = '—';
   document.getElementById('health-grade').textContent = 'N/A';
-  document.getElementById('health-desc').textContent = '분석 중...';
+  document.getElementById('health-desc').textContent = '검사 중이에요...';
   document.getElementById('health-bar-fill').style.width = '0%';
 
   const hasLineElements = /^l\s/m.test(rawObjText);
@@ -1557,14 +1542,14 @@ function loadModel(url, rawText) {
   const loader = new THREE.OBJLoader();
 
   loader.load(cleanedUrl, function(obj) {
-    setProgress(50, '분석 중...');
+    setProgress(50, '검사 중이에요...');
     modelGroup = new THREE.Group();
     let firstGeometry = null;
     const allGeometries = [];  // density map용 전체 geometry 수집
 
     if (hasLineElements) {
       document.getElementById('issue-list').innerHTML =
-        '<div class="issue-item warn"><span class="issue-icon">ℹ</span><span>Line element(l) 감지됨 — 분석에서 제외됩니다.</span></div>';
+        '<div class="issue-item warn"><span class="issue-icon">ℹ</span><span>Line element(l)이 감지됐어요 — 분석에서 제외돼요.</span></div>';
     }
 
     obj.traverse(function(child) {
@@ -1598,7 +1583,7 @@ function loadModel(url, rawText) {
 
     if (!firstGeometry) {
       document.getElementById('issue-list').innerHTML =
-        '<div class="issue-item warn"><span class="issue-icon">⚠</span><span>면(face)이 없는 파일입니다</span></div>';
+        '<div class="issue-item warn"><span class="issue-icon">⚠</span><span>면(face)이 없는 파일이에요</span></div>';
     }
 
     scene.add(modelGroup);
@@ -1616,16 +1601,16 @@ function loadModel(url, rawText) {
     overlayGroup.rotation.copy(modelGroup.rotation);
     overlayGroup.scale.copy(modelGroup.scale);
 
-    setProgress(80, '위상 분석 중...');
+    setProgress(80, '위상을 분석하고 있어요...');
     setTimeout(function() {
       try {
         if (firstGeometry) runAnalysis(firstGeometry, allGeometries);
       } catch(e) {
         console.error('분석 오류:', e);
         document.getElementById('issue-list').innerHTML =
-          '<div class="issue-item error"><span class="issue-icon">✕</span><span>분석 중 오류가 발생했습니다</span></div>';
+          '<div class="issue-item error"><span class="issue-icon">✕</span><span>분석 중 오류가 발생했어요</span></div>';
       }
-      setProgress(100, '완료');
+      setProgress(100, '검사가 끝났어요');
       document.getElementById('upload-btn').style.pointerEvents = '';
 
       // 히스토리에 추가
@@ -1647,7 +1632,7 @@ function loadModel(url, rawText) {
     }, 50);
 
   }, function(xhr) {
-    if (xhr.total) setProgress(10 + (xhr.loaded/xhr.total)*40, '로드 중...');
+    if (xhr.total) setProgress(10 + (xhr.loaded/xhr.total)*40, '불러오고 있어요...');
   }, function(err) {
     console.error(err);
     document.getElementById('issue-list').innerHTML =
