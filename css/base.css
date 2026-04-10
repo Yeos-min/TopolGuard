@@ -91,23 +91,4 @@ button { font-family: inherit; cursor: pointer; }
   border-color: var(--accent);
 }
 
-.tg-topnav .lang-btn {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--dim);
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-family: var(--mono);
-  font-size: 10px;
-  margin-left: 8px;
-  transition: all 0.15s var(--ease);
-}
-.tg-topnav .lang-btn:hover {
-  color: var(--text);
-  border-color: var(--accent);
-}
-.tg-topnav .lang-btn b { color: var(--accent); }
-
-html[lang="ko"] [data-i18n-hide-on="ko"] { display: none; }
-
 body.has-topnav { padding-top: 36px; }
