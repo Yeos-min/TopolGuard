@@ -6,6 +6,22 @@
 // ════════════════════════════════════════════════════════
 
 // ════════════════════════════════════════════════════════
+// i18n HELPER
+// ════════════════════════════════════════════════════════
+function _t(key) {
+  if (typeof LANG_STRINGS !== 'undefined' && LANG_STRINGS[currentLang] && LANG_STRINGS[currentLang][key]) {
+    return LANG_STRINGS[currentLang][key];
+  }
+  return key;
+}
+
+// langchange 이벤트 시 동적 요소 재렌더링
+document.addEventListener('langchange', function () {
+  renderHistory();
+  renderSampleButtons();
+});
+
+// ════════════════════════════════════════════════════════
 // ANIMATION SYSTEM
 // ════════════════════════════════════════════════════════
 
@@ -28,8 +44,8 @@ function toggleAnimSetting() {
   localStorage.setItem('tg_anim', animEnabled);
   applyAnimToggleUI();
   showToast('info',
-    animEnabled ? '애니메이션 ON' : '애니메이션 OFF',
-    animEnabled ? '다음 분석부터 연출이 재생됩니다.' : '결과가 즉시 표시됩니다.',
+    animEnabled ? _t('toastAnimOn') : _t('toastAnimOff'),
+    animEnabled ? _t('toastAnimOnBody') : _t('toastAnimOffBody'),
     2000);
 }
 
@@ -239,7 +255,7 @@ document.addEventListener('keydown', function(e) {
 // ════════════════════════════════════════════════════════
 function loadSample(path, name, icon) {
   _pendingLoad = { isSample: true, samplePath: path, name: name || path.split('/').pop() };
-  showToast('info', icon + ' ' + name + ' 로드 중', '샘플 파일을 불러옵니다...', 3000);
+  showToast('info', icon + ' ' + name + ' ' + _t('toastLoading'), _t('toastLoadingBody'), 3000);
   fetch(path)
     .then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -253,8 +269,8 @@ function loadSample(path, name, icon) {
     .catch(function(err) {
       console.error(err);
       _pendingLoad = null;
-      showToast('error', '샘플 로드 실패',
-        '"' + path + '" 파일을 찾을 수 없습니다.<br>깃헙 저장소의 samples/ 폴더에 파일이 있는지 확인하세요.', 6000);
+      showToast('error', _t('toastLoadFail'),
+        _t('toastLoadFailBody') + ' (' + path + ')', 6000);
     });
 }
 
@@ -303,27 +319,27 @@ function quickCountVertices(text) {
 
 function validateAndLoad(file) {
   if (!file.name.toLowerCase().endsWith('.obj')) {
-    showToast('error', '지원하지 않는 파일 형식', '.obj 파일만 업로드 가능합니다. 현재 파일: ' + file.name);
+    showToast('error', _t('toastBadFormat'), _t('toastBadFormatBody') + file.name);
     return;
   }
   const sizeMB = (file.size / (1024*1024)).toFixed(1);
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    showToast('error', '파일이 너무 큽니다', '최대 ' + MAX_FILE_SIZE_MB + 'MB까지 지원됩니다. 현재: ' + sizeMB + 'MB');
+    showToast('error', _t('toastTooBig'), _t('toastTooBigBody').replace('{0}', MAX_FILE_SIZE_MB).replace('{1}', sizeMB));
     return;
   }
   const reader = new FileReader();
-  reader.onerror = function() { showToast('error', '파일 읽기 실패', '파일이 손상되었을 수 있습니다.'); };
+  reader.onerror = function() { showToast('error', _t('toastReadFail'), _t('toastReadFailBody')); };
   reader.onload = function(ev) {
     const text = ev.target.result;
     const vertCount = quickCountVertices(text);
     if (vertCount > MAX_VERTEX_COUNT) {
-      showToast('error', '버텍스 수 초과 — 로드 불가',
-        '이 파일의 버텍스: 약 ' + vertCount.toLocaleString() + '개 (최대 ' + MAX_VERTEX_COUNT.toLocaleString() + '개)', 10000);
+      showToast('error', _t('toastVertLimit'),
+        _t('toastVertLimitBody').replace('{0}', MAX_VERTEX_COUNT.toLocaleString()).replace('{1}', vertCount.toLocaleString()), 10000);
       return;
     }
     if (vertCount > WARN_VERTEX_COUNT) {
-      showToast('warn', '대용량 모델 감지',
-        '버텍스 약 ' + vertCount.toLocaleString() + '개 — 분석에 시간이 걸릴 수 있습니다.', 7000);
+      showToast('warn', _t('toastLargeModel'),
+        _t('toastLargeModelBody').replace('{0}', vertCount.toLocaleString()), 7000);
     }
     _pendingLoad = { isSample: false, name: file.name, objText: text };
     const url = URL.createObjectURL(file);
@@ -490,7 +506,7 @@ function resetColors() {
     if (input)  input.value = hex;
     if (swatch) swatch.style.background = hex;
   });
-  showToast('info', '색상 초기화', '기본 색상으로 되돌렸습니다.', 2000);
+  showToast('info', _t('toastColorReset'), _t('toastColorResetBody'), 2000);
 }
 function randomizeColors() {
   const palette = ['#ff2d55','#ff9f0a','#ffd60a','#30d158','#64d2ff','#0a84ff','#bf5af2','#ff6b6b','#4ecdc4','#a8e6cf','#ff8b94'];
@@ -504,7 +520,7 @@ function randomizeColors() {
     if (input)  input.value = hex;
     if (swatch) swatch.style.background = hex;
   });
-  showToast('info', '랜덤 색상 적용', '새로운 색상 조합으로 변경했습니다.', 2000);
+  showToast('info', _t('toastColorRandom'), _t('toastColorRandomBody'), 2000);
 }
 buildColorThemeUI();
 

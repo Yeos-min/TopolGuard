@@ -110,7 +110,30 @@ var LANG_STRINGS = {
     historyScore: "Score",
     // Footer
     footerManual: "MANUAL",
-    footerInspector: "INSPECTOR"
+    footerInspector: "INSPECTOR",
+    // Toast messages
+    toastAnimOn: "Animation ON",
+    toastAnimOnBody: "Effects will play from next scan.",
+    toastAnimOff: "Animation OFF",
+    toastAnimOffBody: "Results shown instantly.",
+    toastLoading: "Loading",
+    toastLoadingBody: "Fetching sample file...",
+    toastLoadFail: "Sample load failed",
+    toastLoadFailBody: "Could not fetch the file.",
+    toastBadFormat: "Unsupported file format",
+    toastBadFormatBody: "Only .obj files are supported. Current file: ",
+    toastTooBig: "File too large",
+    toastTooBigBody: "Max size is {0}MB. Current: {1}MB",
+    toastReadFail: "File read error",
+    toastReadFailBody: "The file may be corrupted.",
+    toastVertLimit: "Vertex limit exceeded — cannot load",
+    toastVertLimitBody: "Max {0} vertices supported. This file has {1}.",
+    toastLargeModel: "Large model detected",
+    toastLargeModelBody: "Over {0} vertices — analysis may take a moment.",
+    toastColorReset: "Colors reset",
+    toastColorResetBody: "Restored default colors.",
+    toastColorRandom: "Random colors applied",
+    toastColorRandomBody: "Changed to a new color combination."
   },
   ko: {
     // Landing — Hero
@@ -219,7 +242,30 @@ var LANG_STRINGS = {
     historyScore: "점수",
     // Footer
     footerManual: "사용법",
-    footerInspector: "검사"
+    footerInspector: "검사",
+    // Toast messages
+    toastAnimOn: "애니메이션 ON",
+    toastAnimOnBody: "다음 분석부터 연출이 재생됩니다.",
+    toastAnimOff: "애니메이션 OFF",
+    toastAnimOffBody: "결과가 즉시 표시됩니다.",
+    toastLoading: "로드 중",
+    toastLoadingBody: "샘플 파일을 불러옵니다...",
+    toastLoadFail: "샘플 로드 실패",
+    toastLoadFailBody: "파일을 불러올 수 없습니다.",
+    toastBadFormat: "지원하지 않는 파일 형식",
+    toastBadFormatBody: ".obj 파일만 업로드 가능합니다. 현재 파일: ",
+    toastTooBig: "파일이 너무 큽니다",
+    toastTooBigBody: "최대 {0}MB까지 지원됩니다. 현재: {1}MB",
+    toastReadFail: "파일 읽기 실패",
+    toastReadFailBody: "파일이 손상되었을 수 있습니다.",
+    toastVertLimit: "버텍스 수 초과 — 로드 불가",
+    toastVertLimitBody: "최대 {0}개까지 지원됩니다. 이 파일: {1}개",
+    toastLargeModel: "대용량 모델 감지",
+    toastLargeModelBody: "{0}개 이상 버텍스 — 분석에 시간이 걸릴 수 있습니다.",
+    toastColorReset: "색상 초기화",
+    toastColorResetBody: "기본 색상으로 되돌렸습니다.",
+    toastColorRandom: "랜덤 색상 적용",
+    toastColorRandomBody: "새로운 색상 조합으로 변경했습니다."
   }
 };
 
