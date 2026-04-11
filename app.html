@@ -14,6 +14,61 @@
 
 <div id="toast-container"></div>
 
+<!-- APP TOPBAR -->
+<div id="app-topbar">
+  <div class="topbar-left">
+    <span class="topbar-logo">Topol<span class="topbar-logo-accent">Guard</span></span>
+    <span class="topbar-sep">/</span>
+    <span class="topbar-crumb">INSPECTOR</span>
+    <span class="topbar-sep topbar-file-sep" id="breadcrumb-file-sep" style="display:none;">/</span>
+    <span class="topbar-crumb topbar-filename" id="breadcrumb-filename"></span>
+  </div>
+
+  <div class="topbar-center">
+    <div class="topbar-view-group">
+      <button class="topbar-view-btn active" data-mode="wireframe">WIRE</button>
+      <button class="topbar-view-btn" data-mode="solid">SOLID</button>
+      <button class="topbar-view-btn" data-mode="both">BOTH</button>
+      <button class="topbar-view-btn" data-mode="heatmap">DENSITY</button>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="topbar-menu-wrap">
+      <button class="topbar-icon-btn" id="topbar-menu-btn" title="OPTIONS">⋮</button>
+      <div class="topbar-dropdown" id="topbar-dropdown">
+        <div class="topbar-dropdown-row">
+          <span>BOUNDING BOX</span>
+          <button class="mini-toggle" id="bbox-toggle" data-on="true"></button>
+        </div>
+        <div class="topbar-dropdown-row">
+          <div class="topbar-slider-header">
+            <span>MARKER SIZE</span>
+            <span class="topbar-slider-value" id="marker-size-val">1.0×</span>
+          </div>
+          <input type="range" class="topbar-slider" id="marker-size-slider"
+                 min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+      </div>
+    </div>
+    <a href="index.html" class="topbar-icon-btn" title="HOME" style="text-decoration:none;">⌂</a>
+    <button id="anim-icon-btn" class="topbar-icon-btn" onclick="toggleAnimSetting()" title="ANIMATION">▶</button>
+    <button id="theme-toggle" class="topbar-icon-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
+  </div>
+</div>
+
+<!-- DENSITY LEGEND 서브바 (DENSITY 모드일 때만 표시) -->
+<div id="density-subbar" class="density-subbar" style="display:none;">
+  <span style="color:#3b82f6;">●</span>
+  <span>LOW</span>
+  <div class="hm-grad"></div>
+  <span>HIGH</span>
+  <span style="color:#ef4444;">●</span>
+  <span class="density-subbar-label">VERTEX DENSITY</span>
+</div>
+
+<div id="app-body">
+
 <!-- LEFT SIDEBAR — SAMPLES + HISTORY -->
 <div id="left-sidebar">
   <div class="section-title">QUICK START</div>
@@ -76,60 +131,9 @@
   <div id="hud">
     <div>스크롤 — 확대</div><div>드래그 — 회전</div><div>우클릭 — 이동</div>
   </div>
-  <div id="viewport-tabs">
-    <div class="vp-tab-strip">
-      <button class="vp-tab" data-tab="view" title="VIEW MODE">▦</button>
-      <button class="vp-tab" data-tab="options" title="OPTIONS">⚙</button>
-    </div>
-    <div class="vp-tab-panels">
-      <div class="vp-panel" data-panel="view">
-        <div class="vp-panel-title">VIEW MODE</div>
-        <div class="vp-radio-group">
-          <button class="vp-radio active" data-mode="wireframe">WIRE</button>
-          <button class="vp-radio" data-mode="solid">SOLID</button>
-          <button class="vp-radio" data-mode="both">BOTH</button>
-          <button class="vp-radio" data-mode="heatmap">DENSITY</button>
-        </div>
-        <div class="vp-density-legend" style="display:none;">
-          <div class="legend-row">
-            <span style="color:#3b82f6;">●</span>
-            <span>LOW</span>
-            <div class="hm-grad"></div>
-            <span>HIGH</span>
-            <span style="color:#ef4444;">●</span>
-          </div>
-          <div class="legend-label">VERTEX DENSITY</div>
-        </div>
-      </div>
-      <div class="vp-panel" data-panel="options">
-        <div class="vp-panel-title">OPTIONS</div>
-        <div class="vp-toggle-row">
-          <span>SHOW BOUNDING BOX</span>
-          <button class="mini-toggle" id="bbox-toggle" data-on="true"></button>
-        </div>
-        <div class="vp-slider-row">
-          <div class="vp-slider-header">
-            <span>MARKER SIZE</span>
-            <span class="vp-slider-value" id="marker-size-val">1.0×</span>
-          </div>
-          <input type="range" class="vp-slider" id="marker-size-slider"
-                 min="0.2" max="3.0" step="0.1" value="1.0">
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div id="sidebar">
-  <div id="sidebar-header">
-    <div>
-      <div class="logo">Topol<span>Guard</span></div>
-      <div class="logo-sub">3D MESH TOPOLOGY INSPECTOR</div>
-    </div>
-    <a href="index.html" class="header-icon-btn header-home-btn" title="HOME" style="text-decoration:none;">⌂</a>
-    <button id="anim-icon-btn" class="header-icon-btn" onclick="toggleAnimSetting()" title="ANIMATION">▶</button>
-    <button id="theme-toggle" class="header-icon-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
-  </div>
   <div id="sidebar-body">
 
     <!-- MODELING SCORE -->
@@ -185,6 +189,8 @@
     <label id="upload-btn" for="file-upload">▲ UPLOAD .OBJ</label>
     <input type="file" id="file-upload" accept=".obj" style="display:none;">
   </div>
+</div>
+
 </div>
 
 <!-- Three.js + loaders (CDN, 순서 중요) -->

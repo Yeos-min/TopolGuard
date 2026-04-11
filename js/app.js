@@ -240,6 +240,10 @@ document.addEventListener('keydown', function(e) {
 // ════════════════════════════════════════════════════════
 function loadSample(path, name, icon) {
   _pendingLoad = { isSample: true, samplePath: path, name: name || path.split('/').pop() };
+  var bcName = document.getElementById('breadcrumb-filename');
+  var bcSep = document.getElementById('breadcrumb-file-sep');
+  if (bcName) bcName.textContent = name || path.split('/').pop();
+  if (bcSep) bcSep.style.display = '';
   showToast('info', icon + ' ' + name + ' 로드 중', '샘플 파일을 불러오고 있어요...', 3000);
   fetch(path)
     .then(function(res) {
@@ -327,6 +331,10 @@ function validateAndLoad(file) {
         vertCount.toLocaleString() + '개 이상 정점 — 검사에 시간이 걸릴 수 있어요.', 7000);
     }
     _pendingLoad = { isSample: false, name: file.name, objText: text };
+    var bcName = document.getElementById('breadcrumb-filename');
+    var bcSep = document.getElementById('breadcrumb-file-sep');
+    if (bcName) bcName.textContent = file.name;
+    if (bcSep) bcSep.style.display = '';
     const url = URL.createObjectURL(file);
     loadModel(url, text);
   };
@@ -376,15 +384,12 @@ let lastBoundingBoxSize = 1;
 
 function setViewMode(mode, btn) {
   currentMode = mode;
-  document.querySelectorAll('.vp-radio').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  else {
-    const targetBtn = document.querySelector('.vp-radio[data-mode="' + mode + '"]');
-    if (targetBtn) targetBtn.classList.add('active');
-  }
+  document.querySelectorAll('.topbar-view-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+  });
   applyViewMode();
-  const heatLegend = document.querySelector('.vp-density-legend');
-  if (heatLegend) heatLegend.style.display = mode === 'heatmap' ? 'block' : 'none';
+  var densitySubbar = document.getElementById('density-subbar');
+  if (densitySubbar) densitySubbar.style.display = mode === 'heatmap' ? 'flex' : 'none';
 }
 
 function applyViewMode() {
@@ -401,38 +406,30 @@ function applyViewMode() {
 }
 
 function initViewportTabs() {
-  const tabButtons = document.querySelectorAll('.vp-tab');
-  const panelsWrap = document.querySelector('.vp-tab-panels');
-  const panels = document.querySelectorAll('.vp-panel');
-  const modeButtons = document.querySelectorAll('.vp-radio');
-  const bboxToggleBtn = document.getElementById('bbox-toggle');
+  const topbarViewBtns = document.querySelectorAll('.topbar-view-btn');
+  var menuBtn = document.getElementById('topbar-menu-btn');
+  var dropdown = document.getElementById('topbar-dropdown');
+  var bboxToggleBtn = document.getElementById('bbox-toggle');
 
-  tabButtons.forEach(function(tabBtn) {
-    tabBtn.addEventListener('click', function() {
-      const tabName = tabBtn.getAttribute('data-tab');
-      const panel = document.querySelector('.vp-panel[data-panel="' + tabName + '"]');
-      const isActive = tabBtn.classList.contains('active');
-
-      if (isActive) {
-        tabButtons.forEach(b => b.classList.remove('active'));
-        panels.forEach(p => p.classList.remove('active'));
-        if (panelsWrap) panelsWrap.classList.remove('open');
-        return;
-      }
-
-      tabButtons.forEach(b => b.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
-      tabBtn.classList.add('active');
-      if (panel) panel.classList.add('active');
-      if (panelsWrap) panelsWrap.classList.add('open');
-    });
-  });
-
-  modeButtons.forEach(function(btn) {
+  topbarViewBtns.forEach(function(btn) {
     btn.addEventListener('click', function() {
-      setViewMode(btn.getAttribute('data-mode'), btn);
+      topbarViewBtns.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      setViewMode(btn.getAttribute('data-mode'), null);
     });
   });
+
+  if (menuBtn && dropdown) {
+    menuBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', function(e) {
+      if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+  }
 
   if (bboxToggleBtn) {
     bboxToggleBtn.addEventListener('click', function() {
@@ -443,16 +440,17 @@ function initViewportTabs() {
 
   // 마커 크기 슬라이더 바인딩
   const markerSlider = document.getElementById('marker-size-slider');
-  const markerSliderVal = document.getElementById('marker-size-val');
-  if (markerSlider && markerSliderVal) {
+  const markerVal = document.getElementById('marker-size-val');
+  if (markerSlider) {
     markerSlider.addEventListener('input', function() {
-      userMarkerScale = parseFloat(markerSlider.value);
-      markerSliderVal.textContent = userMarkerScale.toFixed(1) + '×';
+      var v = parseFloat(markerSlider.value);
+      userMarkerScale = v;
+      if (markerVal) markerVal.textContent = v.toFixed(1) + '×';
       updateMarkerSize();
     });
   }
 
-  setViewMode(currentMode);
+  setViewMode(currentMode, null);
 }
 
 // ════════════════════════════════════════════════════════
