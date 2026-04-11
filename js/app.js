@@ -497,7 +497,7 @@ function updateBBoxHelper(object, allVertsBox) {
     bboxHelper = null;
   }
   const box = allVertsBox || new THREE.Box3().setFromObject(object);
-  bboxHelper = new THREE.Box3Helper(box, 0x10b981);
+  bboxHelper = new THREE.Box3Helper(box, 0xe87d3e);
   bboxHelper.visible = bboxVisible;
   scene.add(bboxHelper);
 }
