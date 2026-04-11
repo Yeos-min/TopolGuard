@@ -40,7 +40,7 @@
   var basePositions = geometry.attributes.position.array.slice();
 
   var wireMat = new THREE.LineBasicMaterial({
-    color: 0xe8c4a8,
+    color: 0x3eb389,
     transparent: true,
     opacity: 0.55,
   });
@@ -50,7 +50,7 @@
   // ── 테마 변경에 따라 와이어 색 바꿈 ──
   function updateColor() {
     var isLight = document.body.classList.contains('light');
-    wireMat.color.setHex(isLight ? 0x8a5030 : 0xe8c4a8);
+    wireMat.color.setHex(isLight ? 0x3eb389 : 0x3eb389);
     wireMat.opacity = isLight ? 0.35 : 0.55;
     scene.fog.color.setHex(isLight ? 0xf0f0f4 : 0x0d0d11);
   }

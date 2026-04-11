@@ -18,15 +18,15 @@
   --faint:   #4a4a5c;
 
   --accent:  #10b981;
-  --accent2: #f5a572;
+  --accent2: #3eb389;
   --error:   #cf4b4b;
   --warn:    #d9a336;
   --ok:      #62a353;
   --blue:    #4a9fd4;
 
   /* 랜딩 와이어프레임 톤 */
-  --wire:    #e8c4a8;
-  --wire-dim:#3a2a20;
+  --wire:    #3eb389;
+  --wire-dim:#1f5a48;
 
   /* Typography */
   --mono: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
@@ -50,11 +50,11 @@ body.light {
   --dim:     #606080;
   --faint:   #9090a8;
   --accent:  #10b981;
-  --accent2: #b8501a;
+  --accent2: #3eb389;
   --error:   #c03030;
   --warn:    #b07000;
   --ok:      #3a7a30;
   --blue:    #2a7ab0;
-  --wire:    #8a5030;
-  --wire-dim:#d0c0b0;
+  --wire:    #3eb389;
+  --wire-dim:#1f5a48;
 }
