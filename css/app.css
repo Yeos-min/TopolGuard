@@ -412,3 +412,23 @@ body, #left-sidebar, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
   font-weight: 700;
   letter-spacing: -0.5px;
 }
+
+/* ════════════════════════════════════════════════════════
+   PART R-2: Empty issue cards (count 0 dim 처리)
+   ════════════════════════════════════════════════════════ */
+
+.issue-card.issue-card-empty {
+  opacity: 0.35;
+  cursor: default;
+}
+.issue-card.issue-card-empty:hover {
+  border-color: var(--border);
+}
+.issue-card.issue-card-empty .issue-glyph,
+.issue-card.issue-card-empty .issue-label,
+.issue-card.issue-card-empty .issue-count {
+  color: var(--dim);
+}
+.issue-card.issue-card-empty .issue-chevron {
+  display: none;
+}
