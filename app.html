@@ -134,26 +134,29 @@
 
     <!-- MODELING SCORE -->
     <div class="section-title">MESH SCORE</div>
-    <div id="health-card">
+    <div id="health-card" class="health-card-hero">
       <div class="health-label">MESH QUALITY INDEX</div>
       <div class="health-score-row">
         <div id="health-score-val" style="color:var(--dim);">—</div>
         <div class="health-score-meta">
           <div id="health-grade" style="color:var(--dim);">N/A</div>
-          <div id="health-desc">파일을 업로드하면 품질 점수를 계산해요</div>
         </div>
       </div>
+      <div id="health-desc">파일을 업로드하면 품질 점수를 계산해요</div>
       <div id="health-bar-wrap"><div id="health-bar-fill" style="width:0%;background:var(--dim);"></div></div>
     </div>
 
     <!-- MESH INFO -->
     <div class="section-title">MESH INFO</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-label">VERTICES</div><div class="stat-value" id="v-count">—</div></div>
-      <div class="stat-card"><div class="stat-label">FACES</div><div class="stat-value" id="f-count">—</div></div>
-      <div class="stat-card"><div class="stat-label">EDGES (est.)</div><div class="stat-value" id="e-count">—</div></div>
-      <div class="stat-card"><div class="stat-label">EULER χ</div><div class="stat-value" id="euler">—</div></div>
-      <div class="stat-card full"><div class="stat-label">SIZE (X / Y / Z)</div><div class="stat-value" id="bbox" style="font-size:13px;">—</div></div>
+    <div class="stat-grid stat-grid-stack">
+      <div class="stat-card stat-card-lg"><div class="stat-label">VERTICES</div><div class="stat-value" id="v-count">—</div></div>
+      <div class="stat-card stat-card-lg"><div class="stat-label">FACES</div><div class="stat-value" id="f-count">—</div></div>
+    </div>
+    <!-- DOM 호환용 hidden placeholders (JS가 참조할 수 있음, 표시는 안 함) -->
+    <div style="display:none;">
+      <span id="e-count"></span>
+      <span id="euler"></span>
+      <span id="bbox"></span>
     </div>
 
     <!-- TOPOLOGY ISSUES -->
