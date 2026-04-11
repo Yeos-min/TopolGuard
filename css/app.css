@@ -364,11 +364,11 @@ body, #left-sidebar, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
   margin-bottom: 8px;
 }
 #health-card.health-card-hero #health-score-val {
-  font-family: var(--display);
+  font-family: var(--mono);
   font-size: 64px;
   line-height: 1;
-  font-weight: 400;
-  letter-spacing: -1px;
+  font-weight: 700;
+  letter-spacing: -2px;
 }
 #health-card.health-card-hero .health-score-meta {
   display: flex;
@@ -406,8 +406,9 @@ body, #left-sidebar, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
   margin-bottom: 6px;
 }
 .stat-card.stat-card-lg .stat-value {
-  font-family: var(--display);
+  font-family: var(--mono);
   font-size: 28px;
   line-height: 1;
-  font-weight: 400;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
