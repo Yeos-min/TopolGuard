@@ -747,7 +747,8 @@ function createIssueCard(issueKey, meta, count) {
   var color = overlay ? overlay.color : '#888888';
   var canFocus = !!getFirstIssuePosition(issueKey);
   var card = document.createElement('div');
-  card.className = 'issue-card collapsed' + (count === 0 ? ' issue-card-empty' : '');
+  var severity = ISSUE_SEVERITY[issueKey] || 'info';
+  card.className = 'issue-card collapsed severity-' + severity + (count === 0 ? ' issue-card-empty' : '');
   card.setAttribute('data-issue', issueKey);
   card.setAttribute('data-expanded', 'false');
   card.innerHTML =
