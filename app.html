@@ -16,17 +16,17 @@
 
 <!-- LEFT SIDEBAR — SAMPLES + HISTORY -->
 <div id="left-sidebar">
-  <div class="section-title">샘플</div>
+  <div class="section-title">QUICK START</div>
   <div class="sample-btns">
     <button class="sample-btn" id="sample-good-btn" onclick="loadSampleFromSidebar('good')">
-      <span class="sample-icon">✓</span> <span>정상</span>
+      <span class="sample-icon">✓</span> <span>CLEAN</span>
     </button>
     <button class="sample-btn" id="sample-bad-btn" onclick="loadSampleFromSidebar('bad')">
-      <span class="sample-icon">⚠</span> <span>문제</span>
+      <span class="sample-icon">⚠</span> <span>DEFECTIVE</span>
     </button>
   </div>
 
-  <div class="section-title">기록</div>
+  <div class="section-title">HISTORY</div>
   <div id="history-list">
     <div id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px; font-family:var(--mono);">아직 로드된 파일이 없어요</div>
   </div>
@@ -41,11 +41,11 @@
 
   <!-- QUICK START 오버레이 (파일 없을 때) -->
   <div id="quick-start" class="visible">
-    <div class="qs-title">빠른 시작 — AI 모델 비교하기</div>
+    <div class="qs-title">QUICK START — AI 모델 비교하기</div>
     <div class="qs-grid qs-grid-2">
       <button class="qs-btn qs-good" onclick="loadSample('samples/Good_Low_Poly_Male_body_AI.obj','Good Sample','✓')">
         <span class="qs-btn-icon">✓</span>
-        <span class="qs-btn-name">정상</span>
+        <span class="qs-btn-name">✓ CLEAN</span>
         <span class="qs-btn-desc">
           <span>Tripo AI · 깔끔한 저폴리</span><br>
           <span class="qs-btn-meta">2.5k verts · 350KB</span>
@@ -53,17 +53,17 @@
       </button>
       <button class="qs-btn qs-bad" onclick="loadSample('samples/Bad_Low_Poly_Male_body_AI.obj','Bad Sample','⚠')">
         <span class="qs-btn-icon">⚠</span>
-        <span class="qs-btn-name">문제</span>
+        <span class="qs-btn-name">⚠ DEFECTIVE</span>
         <span class="qs-btn-desc">
           <span>Tripo AI · 덴스하고 위상 이상</span><br>
           <span class="qs-btn-meta">11k verts · 1.2MB · decimated</span>
         </span>
       </button>
     </div>
-    <div class="qs-or">— 또는 —</div>
+    <div class="qs-or">— OR —</div>
     <div class="qs-upload-hint">
-      <label for="file-upload"><span>파일 직접 업로드</span></label>
-      <span>하거나 여기에 드래그하세요</span>
+      <label for="file-upload"><span>UPLOAD FILE</span></label>
+      <span>또는 여기에 드래그하세요</span>
     </div>
   </div>
 
@@ -76,20 +76,38 @@
   <div id="hud">
     <div>스크롤 — 확대</div><div>드래그 — 회전</div><div>우클릭 — 이동</div>
   </div>
-  <div id="bottom-bar">
-    <div id="view-modes">
-      <button class="view-btn active" id="btn-wire"  onclick="setViewMode('wireframe',this)">와이어</button>
-      <button class="view-btn"        id="btn-solid" onclick="setViewMode('solid',this)">솔리드</button>
-      <button class="view-btn"        id="btn-both"  onclick="setViewMode('both',this)">전체</button>
-      <button class="view-btn"        id="btn-heat"  onclick="setViewMode('heatmap',this)">밀도</button>
+  <div id="viewport-tabs">
+    <div class="vp-tab-strip">
+      <button class="vp-tab" data-tab="view" title="VIEW MODE">▦</button>
+      <button class="vp-tab" data-tab="options" title="OPTIONS">⚙</button>
     </div>
-    <div id="heatmap-bar">
-      <span style="color:#3b82f6;">●</span><span>낮음</span><div class="hm-grad"></div><span>높음</span><span style="color:#ef4444;">●</span>
-      <span style="margin-left:4px; color:var(--text);">정점 밀도</span>
-    </div>
-    <div id="anim-toggle-wrap" class="on" onclick="toggleAnimSetting()" title="분석 결과 애니메이션 연출 켜기/끄기">
-      <div id="anim-switch"></div>
-      <span id="anim-toggle-label">ANIM</span>
+    <div class="vp-tab-panels">
+      <div class="vp-panel" data-panel="view">
+        <div class="vp-panel-title">VIEW MODE</div>
+        <div class="vp-radio-group">
+          <button class="vp-radio active" data-mode="wireframe">WIRE</button>
+          <button class="vp-radio" data-mode="solid">SOLID</button>
+          <button class="vp-radio" data-mode="both">BOTH</button>
+          <button class="vp-radio" data-mode="heatmap">DENSITY</button>
+        </div>
+        <div class="vp-density-legend" style="display:none;">
+          <div class="legend-row">
+            <span style="color:#3b82f6;">●</span>
+            <span>LOW</span>
+            <div class="hm-grad"></div>
+            <span>HIGH</span>
+            <span style="color:#ef4444;">●</span>
+          </div>
+          <div class="legend-label">VERTEX DENSITY</div>
+        </div>
+      </div>
+      <div class="vp-panel" data-panel="options">
+        <div class="vp-panel-title">OPTIONS</div>
+        <div class="vp-toggle-row">
+          <span>SHOW BOUNDING BOX</span>
+          <button class="mini-toggle" id="bbox-toggle" data-on="true"></button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -100,15 +118,16 @@
       <div class="logo">Topol<span>Guard</span></div>
       <div class="logo-sub">3D MESH TOPOLOGY INSPECTOR</div>
     </div>
-    <a href="index.html" class="logo-badge" title="홈으로" style="text-decoration:none;">홈</a>
-    <button id="theme-toggle" onclick="toggleTheme()" title="라이트/다크 모드 전환">🌙</button>
+    <a href="index.html" class="header-icon-btn header-home-btn" title="HOME" style="text-decoration:none;">⌂</a>
+    <button id="anim-icon-btn" class="header-icon-btn" onclick="toggleAnimSetting()" title="ANIMATION">▶</button>
+    <button id="theme-toggle" class="header-icon-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
   </div>
   <div id="sidebar-body">
 
     <!-- MODELING SCORE -->
-    <div class="section-title">모델링 점수</div>
+    <div class="section-title">MESH SCORE</div>
     <div id="health-card">
-      <div class="health-label">모델 품질 지수</div>
+      <div class="health-label">MESH QUALITY INDEX</div>
       <div class="health-score-row">
         <div id="health-score-val" style="color:var(--dim);">—</div>
         <div class="health-score-meta">
@@ -120,52 +139,30 @@
     </div>
 
     <!-- MESH INFO -->
-    <div class="section-title">모델 정보</div>
+    <div class="section-title">MESH INFO</div>
     <div class="stat-grid">
-      <div class="stat-card"><div class="stat-label">정점</div><div class="stat-value" id="v-count">—</div></div>
-      <div class="stat-card"><div class="stat-label">면</div><div class="stat-value" id="f-count">—</div></div>
-      <div class="stat-card"><div class="stat-label">모서리 (추정)</div><div class="stat-value" id="e-count">—</div></div>
-      <div class="stat-card"><div class="stat-label">오일러 χ</div><div class="stat-value" id="euler">—</div></div>
+      <div class="stat-card"><div class="stat-label">VERTICES</div><div class="stat-value" id="v-count">—</div></div>
+      <div class="stat-card"><div class="stat-label">FACES</div><div class="stat-value" id="f-count">—</div></div>
+      <div class="stat-card"><div class="stat-label">EDGES (est.)</div><div class="stat-value" id="e-count">—</div></div>
+      <div class="stat-card"><div class="stat-label">EULER χ</div><div class="stat-value" id="euler">—</div></div>
+      <div class="stat-card full"><div class="stat-label">SIZE (X / Y / Z)</div><div class="stat-value" id="bbox" style="font-size:13px;">—</div></div>
     </div>
-
-    <!-- STATISTICS INSPECTOR -->
-    <div class="section-title">상세 통계</div>
-    <div id="inspector-grid" style="display:none; flex-direction:column; gap:2px;"></div>
-    <div id="inspector-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px;">파일 업로드 후 표시돼요</div>
 
     <!-- TOPOLOGY ISSUES -->
-    <div class="section-title">발견된 문제</div>
+    <div class="section-title">ISSUES FOUND</div>
     <div id="issue-list">
-      <div style="font-size:12px; color:var(--dim); text-align:center; padding:20px 0;">
-        <div style="font-size:28px; opacity:0.15; margin-bottom:8px;">⬡</div>
-        <div style="font-family:var(--mono); font-size:11px;">.obj 파일을 올려주세요</div>
+      <div id="issue-cards-container">
+        <div style="font-size:12px; color:var(--dim); text-align:center; padding:20px 0;">
+          <div style="font-size:28px; opacity:0.15; margin-bottom:8px;">⬡</div>
+          <div style="font-family:var(--mono); font-size:11px;">.obj 파일을 올려주세요</div>
+        </div>
       </div>
     </div>
-
-    <!-- BOUNDING BOX -->
-    <div class="section-title">경계 상자</div>
-    <div class="stat-grid">
-      <div class="stat-card full"><div class="stat-label">크기 (X / Y / Z)</div><div class="stat-value" id="bbox" style="font-size:13px;">—</div></div>
-    </div>
-    <button class="tog-btn active" id="bbox-toggle" style="margin-top:4px;" onclick="toggleBBoxHelper()">
-      <span class="dot" style="background:#e87d3e;border-radius:1px;"></span>
-      <span class="tog-label">경계 상자 표시</span>
-      <span class="tog-status" id="bbox-toggle-label">ON</span>
-    </button>
-
-    <!-- ERROR LAYER TOGGLES -->
-    <div class="section-title">오류 레이어</div>
-    <div id="legend-empty" style="font-size:11px; color:var(--dim); padding:4px 0;">파일 업로드 후 표시돼요</div>
-    <div id="overlay-toggles" style="display:none;"></div>
 
     <!-- COLOR THEME -->
-    <div class="section-title">색상 테마</div>
+    <div class="section-title">COLOR THEME</div>
     <div id="color-theme-panel" style="margin-bottom:6px;">
-      <div id="color-entries" style="display:flex; flex-direction:column; gap:3px;"></div>
-      <div style="display:flex; gap:4px; margin-top:6px;">
-        <button onclick="resetColors()" style="flex:1; padding:5px 0; background:var(--panel2); border:1px solid var(--border2); border-radius:2px; color:var(--dim); font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:color 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">↺ 초기화</button>
-        <button onclick="randomizeColors()" style="flex:1; padding:5px 0; background:var(--panel2); border:1px solid var(--border2); border-radius:2px; color:var(--dim); font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:color 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">⚄ 무작위</button>
-      </div>
+      <button onclick="resetColors()" style="width:100%; padding:6px 0; background:var(--panel2); border:1px solid var(--border2); border-radius:2px; color:var(--dim); font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:color 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">↺ RESET</button>
     </div>
 
   </div><!-- /sidebar-body -->
@@ -174,7 +171,7 @@
       <div id="progress-bar"><div id="progress-fill"></div></div>
       <div id="progress-label">분석 중이에요...</div>
     </div>
-    <label id="upload-btn" for="file-upload">▲ .OBJ 업로드</label>
+    <label id="upload-btn" for="file-upload">▲ UPLOAD .OBJ</label>
     <input type="file" id="file-upload" accept=".obj" style="display:none;">
   </div>
 </div>
