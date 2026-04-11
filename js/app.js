@@ -1288,8 +1288,7 @@ function runAnalysis(originalGeometry, allGeometries) {
   const mpos = indexedGeo.attributes.position.array;
   const indices = indexedGeo.index ? indexedGeo.index.array : null;
 
-  document.getElementById('v-count').textContent = mergedVerts.toLocaleString() +
-    (rawVerts !== mergedVerts ? ' (raw: ' + rawVerts.toLocaleString() + ')' : '');
+  document.getElementById('v-count').textContent = mergedVerts.toLocaleString();
   document.getElementById('f-count').textContent = Math.round(faceCount).toLocaleString();
 
   // Edge map
