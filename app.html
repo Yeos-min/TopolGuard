@@ -107,6 +107,14 @@
           <span>SHOW BOUNDING BOX</span>
           <button class="mini-toggle" id="bbox-toggle" data-on="true"></button>
         </div>
+        <div class="vp-slider-row">
+          <div class="vp-slider-header">
+            <span>MARKER SIZE</span>
+            <span class="vp-slider-value" id="marker-size-val">1.0×</span>
+          </div>
+          <input type="range" class="vp-slider" id="marker-size-slider"
+                 min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
       </div>
     </div>
   </div>
@@ -146,7 +154,6 @@
       <div class="stat-card"><div class="stat-label">EDGES (est.)</div><div class="stat-value" id="e-count">—</div></div>
       <div class="stat-card"><div class="stat-label">EULER χ</div><div class="stat-value" id="euler">—</div></div>
       <div class="stat-card full"><div class="stat-label">SIZE (X / Y / Z)</div><div class="stat-value" id="bbox" style="font-size:13px;">—</div></div>
-
     </div>
 
     <!-- TOPOLOGY ISSUES -->

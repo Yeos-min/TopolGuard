@@ -354,6 +354,7 @@ viewport.appendChild(renderer.domElement);
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+controls.addEventListener('change', updateMarkerSize);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -441,6 +442,17 @@ function initViewportTabs() {
     bboxToggleBtn.setAttribute('data-on', bboxVisible ? 'true' : 'false');
   }
 
+  // 마커 크기 슬라이더 바인딩
+  const markerSlider = document.getElementById('marker-size-slider');
+  const markerSliderVal = document.getElementById('marker-size-val');
+  if (markerSlider && markerSliderVal) {
+    markerSlider.addEventListener('input', function() {
+      userMarkerScale = parseFloat(markerSlider.value);
+      markerSliderVal.textContent = userMarkerScale.toFixed(1) + '×';
+      updateMarkerSize();
+    });
+  }
+
   setViewMode(currentMode);
 }
 
@@ -449,6 +461,26 @@ function initViewportTabs() {
 // ════════════════════════════════════════════════════════
 let bboxHelper = null;
 let bboxVisible = true;
+
+// ════════════════════════════════════════════════════════
+// MARKER SIZE CONTROL
+// ════════════════════════════════════════════════════════
+let userMarkerScale = 1.0;  // 사용자 슬라이더 값 (0.2 ~ 3.0)
+const MARKER_BASE_FACTOR = 0.012;  // 거리 대비 마커 크기 비율
+
+function updateMarkerSize() {
+  const distance = camera.position.distanceTo(controls.target);
+  const baseSize = distance * MARKER_BASE_FACTOR;
+  const finalSize = baseSize * userMarkerScale;
+
+  Object.values(overlays).forEach(function(overlay) {
+    overlay.group.traverse(function(obj) {
+      if (obj.isPoints && obj.material && obj.material.size !== undefined) {
+        obj.material.size = finalSize;
+      }
+    });
+  });
+}
 
 function toggleBBoxHelper() {
   bboxVisible = !bboxVisible;
@@ -1299,7 +1331,7 @@ function runAnalysis(originalGeometry, allGeometries) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(degenVerts, 3));
     overlays.degen.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.degen.color), size: ptSize, sizeAttenuation: true, depthTest: false })));
+      new THREE.PointsMaterial({ color: hexToInt(overlays.degen.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   // ── Skinny triangles: OBJ 원문 직접 파싱 (쿼드/N-gon 완전 제외) ──
@@ -1344,7 +1376,7 @@ function runAnalysis(originalGeometry, allGeometries) {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute(isoVerts, 3));
       overlays.isolated.group.add(new THREE.Points(g,
-        new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: ptSize*1.4, sizeAttenuation: true, depthTest: false })));
+        new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: 1, sizeAttenuation: false, depthTest: false })));
     }
   }
 
@@ -1499,7 +1531,7 @@ function runAnalysis(originalGeometry, allGeometries) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(dupVertPoints, 3));
     overlays.dupvert.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.dupvert.color), size: ptSize, sizeAttenuation: true, depthTest: false })));
+      new THREE.PointsMaterial({ color: hexToInt(overlays.dupvert.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   overlays.isolated.count = trueIsolatedCount;
@@ -1507,7 +1539,7 @@ function runAnalysis(originalGeometry, allGeometries) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(trueIsolatedPoints, 3));
     overlays.isolated.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: ptSize*1.5, sizeAttenuation: true, depthTest: false })));
+      new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   // ── Build heatmap ──
@@ -1531,6 +1563,7 @@ function runAnalysis(originalGeometry, allGeometries) {
   updateHealthUI(healthResult);
 
   renderIssueCards(stats);
+  updateMarkerSize();
 
   // ── 연산용 임시 Geometry 해제 (JS 힙 부하 방지) ──
   // VRAM에는 안 올라가지만 dispose() 안 하면 GC가 치울 때까지 메모리 점유
