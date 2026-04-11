@@ -497,7 +497,7 @@ function updateBBoxHelper(object, allVertsBox) {
     bboxHelper = null;
   }
   const box = allVertsBox || new THREE.Box3().setFromObject(object);
-  bboxHelper = new THREE.Box3Helper(box, 0xe87d3e);
+  bboxHelper = new THREE.Box3Helper(box, 0x10b981);
   bboxHelper.visible = bboxVisible;
   scene.add(bboxHelper);
 }
@@ -842,7 +842,7 @@ function computeHealthScore(faceCount, stats) {
   if (score >= 95) { grade = 'S';  desc = '완벽한 토폴로지예요';         color = '#30d158'; }
   else if (score >= 85) { grade = 'A'; desc = '우수한 메시 품질이에요';   color = '#62a353'; }
   else if (score >= 70) { grade = 'B'; desc = '양호해요 — 소수 문제';     color = '#d9a336'; }
-  else if (score >= 50) { grade = 'C'; desc = '주의 — 오류 수정이 필요해요'; color = '#e87d3e'; }
+  else if (score >= 50) { grade = 'C'; desc = '주의 — 오류 수정이 필요해요'; color = '#10b981'; }
   else if (score >= 30) { grade = 'D'; desc = '불량 — 다수 오류가 있어요';   color = '#cf4b4b'; }
   else                  { grade = 'F'; desc = '심각한 토폴로지 문제예요'; color = '#ff2222'; }
 
