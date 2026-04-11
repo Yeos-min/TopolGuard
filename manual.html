@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manual — TopolGuard</title>
-  <meta name="description" content="TopolGuard manual: what we check, how the Health Score works, and how to read the Inspector.">
+  <meta name="description" content="TopolGuard manual: what we check, how the Modeling Score works, and how to read the Inspector.">
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
@@ -43,7 +43,7 @@
       <div class="tree-group">
         <span class="label">Inspector</span>
         <ul>
-          <li><a href="#health">Health Score</a></li>
+          <li><a href="#health">Modeling Score</a></li>
           <li><a href="#views">View Modes</a></li>
           <li><a href="#density">Density Heatmap</a></li>
         </ul>
@@ -87,7 +87,7 @@
       <ol>
         <li><a href="app.html">Inspector 페이지</a>를 엽니다.</li>
         <li>좌하단 <code>▲ UPLOAD .OBJ</code>를 누르거나 뷰포트에 파일을 드래그합니다.</li>
-        <li>우측 사이드바에서 <b>Health Score</b>와 <b>Topology Issues</b>를 확인합니다.</li>
+        <li>우측 사이드바에서 <b>Modeling Score</b>와 <b>Topology Issues</b>를 확인합니다.</li>
         <li><b>ERROR LAYERS</b> 토글로 특정 오류만 하이라이트해서 볼 수 있습니다.</li>
       </ol>
       <div class="callout">
@@ -196,7 +196,7 @@
         정리(clean up) 단계에서 제거해야 할 항목입니다.
       </p>
 
-      <h2 id="health">Health Score</h2>
+      <h2 id="health">Modeling Score</h2>
       <p>
         상단의 <b>MESH QUALITY INDEX</b>는 0 ~ 100점의 단일 수치로, 발견된 이슈의 <b>가중 페널티</b>를
         100에서 차감해 계산합니다. 가중치는 다음 원칙을 따릅니다:
@@ -284,7 +284,7 @@
         <li><a href="#degenerate">Degenerate</a></li>
         <li><a href="#flipped">Flipped</a></li>
         <li><a href="#isolated">Isolated Verts</a></li>
-        <li><a href="#health">Health Score</a></li>
+        <li><a href="#health">Modeling Score</a></li>
         <li><a href="#views">View Modes</a></li>
         <li><a href="#density">Density</a></li>
         <li><a href="#euler">Euler χ</a></li>

@@ -17,11 +17,8 @@ let animSkipped = false;
 let animTimeouts = [];  // 취소 가능하도록 timeout ID 수집
 
 function applyAnimToggleUI() {
-  const wrap  = document.getElementById('anim-toggle-wrap');
-  const label = document.getElementById('anim-toggle-label');
-  if (!wrap) return;
-  wrap.classList.toggle('on', animEnabled);
-  label.textContent = animEnabled ? 'ANIM' : 'ANIM';
+  const animBtn = document.getElementById('anim-icon-btn');
+  if (animBtn) animBtn.classList.toggle('active', animEnabled);
 }
 
 function toggleAnimSetting() {
@@ -85,7 +82,10 @@ function countUpTo(el, targetVal, duration, suffix) {
 }
 
 // 초기 UI 반영
-document.addEventListener('DOMContentLoaded', applyAnimToggleUI);
+document.addEventListener('DOMContentLoaded', function() {
+  applyAnimToggleUI();
+  initViewportTabs();
+});
 
 // ════════════════════════════════════════════════════════
 // HISTORY SYSTEM (메모리 방식 — localStorage 미사용)
@@ -354,6 +354,7 @@ viewport.appendChild(renderer.domElement);
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+controls.addEventListener('change', updateMarkerSize);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -372,14 +373,19 @@ scene.add(grid);
 let currentMode = 'wireframe';
 let currentMeshes = [];
 let heatmapMeshes = []; // stores heatmap THREE.Mesh objects
+let lastBoundingBoxSize = 1;
 
 function setViewMode(mode, btn) {
   currentMode = mode;
-  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.vp-radio').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  else {
+    const targetBtn = document.querySelector('.vp-radio[data-mode="' + mode + '"]');
+    if (targetBtn) targetBtn.classList.add('active');
+  }
   applyViewMode();
-  const heatBar = document.getElementById('heatmap-bar');
-  heatBar.classList.toggle('visible', mode === 'heatmap');
+  const heatLegend = document.querySelector('.vp-density-legend');
+  if (heatLegend) heatLegend.style.display = mode === 'heatmap' ? 'block' : 'none';
 }
 
 function applyViewMode() {
@@ -395,19 +401,95 @@ function applyViewMode() {
   heatmapMeshes.forEach(m => { m.visible = currentMode === 'heatmap'; });
 }
 
+function initViewportTabs() {
+  const tabButtons = document.querySelectorAll('.vp-tab');
+  const panelsWrap = document.querySelector('.vp-tab-panels');
+  const panels = document.querySelectorAll('.vp-panel');
+  const modeButtons = document.querySelectorAll('.vp-radio');
+  const bboxToggleBtn = document.getElementById('bbox-toggle');
+
+  tabButtons.forEach(function(tabBtn) {
+    tabBtn.addEventListener('click', function() {
+      const tabName = tabBtn.getAttribute('data-tab');
+      const panel = document.querySelector('.vp-panel[data-panel="' + tabName + '"]');
+      const isActive = tabBtn.classList.contains('active');
+
+      if (isActive) {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        if (panelsWrap) panelsWrap.classList.remove('open');
+        return;
+      }
+
+      tabButtons.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tabBtn.classList.add('active');
+      if (panel) panel.classList.add('active');
+      if (panelsWrap) panelsWrap.classList.add('open');
+    });
+  });
+
+  modeButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setViewMode(btn.getAttribute('data-mode'), btn);
+    });
+  });
+
+  if (bboxToggleBtn) {
+    bboxToggleBtn.addEventListener('click', function() {
+      toggleBBoxHelper();
+    });
+    bboxToggleBtn.setAttribute('data-on', bboxVisible ? 'true' : 'false');
+  }
+
+  // 마커 크기 슬라이더 바인딩
+  const markerSlider = document.getElementById('marker-size-slider');
+  const markerSliderVal = document.getElementById('marker-size-val');
+  if (markerSlider && markerSliderVal) {
+    markerSlider.addEventListener('input', function() {
+      userMarkerScale = parseFloat(markerSlider.value);
+      markerSliderVal.textContent = userMarkerScale.toFixed(1) + '×';
+      updateMarkerSize();
+    });
+  }
+
+  setViewMode(currentMode);
+}
+
 // ════════════════════════════════════════════════════════
 // BOUNDING BOX HELPER
 // ════════════════════════════════════════════════════════
 let bboxHelper = null;
 let bboxVisible = true;
 
+// ════════════════════════════════════════════════════════
+// MARKER SIZE CONTROL
+// ════════════════════════════════════════════════════════
+let userMarkerScale = 1.0;  // 사용자 슬라이더 값 (0.2 ~ 3.0)
+const MARKER_BASE_FACTOR = 0.012;  // 거리 대비 마커 크기 비율
+
+function updateMarkerSize() {
+  const distance = camera.position.distanceTo(controls.target);
+  const baseSize = distance * MARKER_BASE_FACTOR;
+  const finalSize = baseSize * userMarkerScale;
+
+  Object.values(overlays).forEach(function(overlay) {
+    overlay.group.traverse(function(obj) {
+      if (obj.isPoints && obj.material && obj.material.size !== undefined) {
+        obj.material.size = finalSize;
+      }
+    });
+  });
+}
+
 function toggleBBoxHelper() {
   bboxVisible = !bboxVisible;
   const btn = document.getElementById('bbox-toggle');
-  const lbl = document.getElementById('bbox-toggle-label');
   if (bboxHelper) bboxHelper.visible = bboxVisible;
-  btn.classList.toggle('active', bboxVisible);
-  lbl.textContent = bboxVisible ? 'ON' : 'OFF';
+  if (btn) {
+    btn.setAttribute('data-on', bboxVisible ? 'true' : 'false');
+    btn.classList.toggle('active', bboxVisible);
+  }
 }
 
 function updateBBoxHelper(object, allVertsBox) {
@@ -446,6 +528,58 @@ Object.values(overlays).forEach(o => { o.group.visible = true; overlayGroup.add(
 // ════════════════════════════════════════════════════════
 const DEFAULT_COLORS = {};
 Object.entries(overlays).forEach(([k,o]) => { DEFAULT_COLORS[k] = o.color; });
+var ISSUE_META = {
+  'non-manifold': {
+    glyph: '✕',
+    label: 'NON-MANIFOLD',
+    desc: '세 면 이상이 한 모서리를 공유하고 있어요. 불리언·UV·3D 프린팅이 막힐 수 있어요.'
+  },
+  'boundary': {
+    glyph: '○',
+    label: 'BOUNDARY EDGE',
+    desc: '메쉬에 열린 경계가 있어요. 3D 프린팅이나 시뮬레이션이 어려울 수 있어요.'
+  },
+  'skinny': {
+    glyph: '△',
+    label: 'SKINNY TRIANGLE',
+    desc: '극단적으로 얇고 긴 삼각형이 있어요. 셰이딩이나 시뮬레이션이 불안정해질 수 있어요.'
+  },
+  'ngon': {
+    glyph: '⬡',
+    label: 'N-GON',
+    desc: '5각형 이상의 면이 있어요. 엔진마다 다르게 쪼개져서 결과가 예측 불가예요.'
+  },
+  'degenerate': {
+    glyph: '◠',
+    label: 'DEGENERATE',
+    desc: '면적이 거의 0인 면이 있어요. 법선이 정의되지 않아서 렌더링에서 튀어요.'
+  },
+  'flipped': {
+    glyph: '⇄',
+    label: 'FLIPPED NORMAL',
+    desc: '이웃 면과 반대 방향을 향하는 면이 있어요. 렌더러에서 사라지거나 검게 보일 수 있어요.'
+  },
+  'isolated': {
+    glyph: '·',
+    label: 'ISOLATED VERTEX',
+    desc: '어떤 면에도 속하지 않는 떠 있는 점이 있어요. 정리하는 게 좋아요.'
+  },
+  'duplicate': {
+    glyph: '◉',
+    label: 'DUPLICATE VERTEX',
+    desc: '위치가 거의 같은 점 여러 개가 있어요. 모으거나 합치는 게 좋아요.'
+  }
+};
+var ISSUE_TO_OVERLAY_KEY = {
+  'non-manifold': 'nonmanifold',
+  'boundary': 'boundary',
+  'skinny': 'skinny',
+  'ngon': 'ngon',
+  'degenerate': 'degen',
+  'flipped': 'flipped',
+  'isolated': 'isolated',
+  'duplicate': 'dupvert'
+};
 
 function hexToInt(hex) { return parseInt(hex.replace('#',''), 16); }
 
@@ -457,32 +591,8 @@ function applyOverlayColor(key, hex) {
       mats.forEach(m => { if (m.color) m.color.set(hex); });
     }
   });
-  // sync swatch in toggle UI
-  const dot = document.querySelector('#overlay-toggles [data-key="'+key+'"] .etr-dot');
-  if (dot) dot.style.background = hex;
 }
 
-function buildColorThemeUI() {
-  const wrap = document.getElementById('color-entries');
-  wrap.innerHTML = '';
-  Object.entries(overlays).forEach(function([key, o]) {
-    const entry = document.createElement('div');
-    entry.className = 'color-entry';
-    entry.innerHTML =
-      '<span class="color-entry-label">' + o.label + '</span>' +
-      '<div class="color-swatch-wrap">' +
-        '<div class="color-swatch" id="swatch-'+key+'" style="background:'+o.color+'"></div>' +
-        '<input type="color" class="color-input-hidden" id="colorpick-'+key+'" value="'+o.color+'">' +
-      '</div>';
-    wrap.appendChild(entry);
-    const input  = entry.querySelector('input[type=color]');
-    const swatch = entry.querySelector('.color-swatch');
-    input.addEventListener('input', function() {
-      swatch.style.background = input.value;
-      applyOverlayColor(key, input.value);
-    });
-  });
-}
 function resetColors() {
   Object.entries(DEFAULT_COLORS).forEach(function([key, hex]) {
     applyOverlayColor(key, hex);
@@ -507,7 +617,6 @@ function randomizeColors() {
   });
   showToast('info', '랜덤 색상 적용', '새로운 색상 조합으로 바꿨어요.', 2000);
 }
-buildColorThemeUI();
 
 // ════════════════════════════════════════════════════════
 // CLEAR OVERLAYS
@@ -531,73 +640,168 @@ function clearOverlays() {
   heatmapMeshes = [];
 }
 
-// ════════════════════════════════════════════════════════
-// ERROR LAYER TOGGLE UI (new checkbox-style)
-// ════════════════════════════════════════════════════════
-function buildToggleUI() {
-  const wrap  = document.getElementById('overlay-toggles');
-  const empty = document.getElementById('legend-empty');
-  wrap.innerHTML = '';
-  const hasAny = Object.values(overlays).some(o => o.count > 0);
-  if (!hasAny) {
-    empty.textContent = '문제 있는 요소가 없습니다 ✓';
-    empty.style.display = 'block';
-    wrap.style.display = 'none';
+function getCountForIssue(issueKey, stats) {
+  if (issueKey === 'non-manifold') return stats.nonManifoldCount || 0;
+  if (issueKey === 'boundary') return stats.boundaryCount || 0;
+  if (issueKey === 'skinny') return stats.skinnyCount || 0;
+  if (issueKey === 'ngon') return stats.ngonCount || 0;
+  if (issueKey === 'degenerate') return stats.degenCount || 0;
+  if (issueKey === 'flipped') return stats.flippedCount || 0;
+  if (issueKey === 'isolated') return stats.isolatedCount || 0;
+  if (issueKey === 'duplicate') return stats.dupVertCount || 0;
+  return 0;
+}
+
+function getOverlayByIssueKey(issueKey) {
+  const overlayKey = ISSUE_TO_OVERLAY_KEY[issueKey];
+  if (!overlayKey) return null;
+  return overlays[overlayKey] || null;
+}
+
+function getFirstIssuePosition(issueType) {
+  var overlay = getOverlayByIssueKey(issueType);
+  if (!overlay || !overlay.group || overlay.group.children.length === 0) return null;
+  var child = overlay.group.children[0];
+  if (!child.geometry || !child.geometry.attributes || !child.geometry.attributes.position) return null;
+  var arr = child.geometry.attributes.position.array;
+  if (!arr || arr.length < 3) return null;
+  return new THREE.Vector3(arr[0], arr[1], arr[2]);
+}
+
+function focusOnIssue(issueType) {
+  var pos = getFirstIssuePosition(issueType);
+  if (!pos) {
+    showToast('info', '위치를 찾을 수 없어요', '이 이슈의 위치 정보를 가져올 수 없어요.', 3000);
     return;
   }
-  empty.style.display = 'none';
-  wrap.style.display = 'block';
 
-  Object.entries(overlays).forEach(function([key, o]) {
-    if (o.count === 0) return;
-    const row = document.createElement('div');
-    row.className = 'error-toggle-row';
-    row.setAttribute('data-key', key);
-    const isRound = (key === 'isolated');
-    row.innerHTML =
-      '<div class="etr-dot' + (isRound?' round':'') + '" style="background:' + o.color + '"></div>' +
-      '<span class="etr-name">' + o.label + '</span>' +
-      '<span class="etr-count">' + o.count.toLocaleString() + '</span>' +
-      '<div class="etr-switch"></div>';
-    row.addEventListener('click', function() {
-      o.group.visible = !o.group.visible;
-      row.classList.toggle('layer-off', !o.group.visible);
-    });
-    wrap.appendChild(row);
+  var startPos = camera.position.clone();
+  var startTarget = controls.target.clone();
+  var endTarget = pos.clone();
+  var distance = Math.max(lastBoundingBoxSize * 0.3, 0.1);
+  var direction = camera.position.clone().sub(controls.target);
+  if (direction.lengthSq() < 1e-8) direction.set(0.3, 0.4, 1.0);
+  direction.normalize();
+  var endPos = endTarget.clone().add(direction.multiplyScalar(distance));
+
+  var duration = 500;
+  var startTime = performance.now();
+
+  function tween() {
+    var elapsed = performance.now() - startTime;
+    var t = Math.min(elapsed / duration, 1);
+    var ease = t * t * (3 - 2 * t);
+    camera.position.lerpVectors(startPos, endPos, ease);
+    controls.target.lerpVectors(startTarget, endTarget, ease);
+    controls.update();
+    if (t < 1) requestAnimationFrame(tween);
+  }
+  tween();
+}
+
+function renderIssueCards(stats) {
+  var container = document.getElementById('issue-cards-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  var activeIssues = [];
+  for (var key in ISSUE_META) {
+    var count = getCountForIssue(key, stats);
+    if (count > 0) activeIssues.push({ key: key, count: count });
+  }
+
+  if (activeIssues.length === 0) {
+    container.innerHTML = '<div class="all-pass">✓ 모든 검사를 통과했어요</div>';
+    return;
+  }
+
+  activeIssues.sort(function(a, b) { return b.count - a.count; });
+  activeIssues.forEach(function(issue) {
+    var meta = ISSUE_META[issue.key];
+    var card = createIssueCard(issue.key, meta, issue.count);
+    container.appendChild(card);
   });
 }
 
-// ════════════════════════════════════════════════════════
-// STATISTICS INSPECTOR PANEL
-// ════════════════════════════════════════════════════════
-function buildInspectorUI(stats) {
-  const grid  = document.getElementById('inspector-grid');
-  const empty = document.getElementById('inspector-empty');
-  grid.innerHTML = '';
-  grid.style.display = 'flex';
-  empty.style.display = 'none';
+function createIssueCard(issueKey, meta, count) {
+  var overlay = getOverlayByIssueKey(issueKey);
+  var overlayKey = ISSUE_TO_OVERLAY_KEY[issueKey];
+  var isOn = !overlay || overlay.group.visible;
+  var color = overlay ? overlay.color : '#888888';
+  var canFocus = !!getFirstIssuePosition(issueKey);
+  var card = document.createElement('div');
+  card.className = 'issue-card collapsed';
+  card.setAttribute('data-issue', issueKey);
+  card.setAttribute('data-expanded', 'false');
+  card.innerHTML =
+    '<div class="issue-card-header">' +
+      '<span class="issue-glyph">' + meta.glyph + '</span>' +
+      '<span class="issue-label">' + meta.label + '</span>' +
+      '<span class="issue-count">' + count.toLocaleString() + '</span>' +
+      '<span class="issue-chevron">▸</span>' +
+    '</div>' +
+    '<div class="issue-card-body">' +
+      '<p class="issue-desc">' + meta.desc + '</p>' +
+      '<div class="issue-control">' +
+        '<span class="control-label">SHOW LAYERS</span>' +
+        '<button class="mini-toggle" data-on="' + (isOn ? 'true' : 'false') + '"></button>' +
+      '</div>' +
+      '<div class="issue-control">' +
+        '<span class="control-label">OVERLAY COLOR</span>' +
+        '<div class="color-swatch-wrap">' +
+          '<div class="color-swatch" id="swatch-' + overlayKey + '" style="background:' + color + '"></div>' +
+          '<input type="color" class="color-input-hidden" id="colorpick-' + overlayKey + '" value="' + color + '">' +
+        '</div>' +
+      '</div>' +
+      '<button class="focus-btn"' + (canFocus ? '' : ' disabled') + '>🎯 해당 위치로 이동</button>' +
+    '</div>';
 
-  const rows = [
-    { label: '비정상 면',     val: stats.degenCount,       color: '--error' },
-    { label: 'N-gon',         val: stats.ngonCount,        color: '--error' },
-    { label: '중복 정점',     val: stats.dupVertCount,     color: '--ok'    },
-    { label: '뒤집힌 면',     val: stats.flippedCount,     color: '--warn'  },
-    { label: '비매니폴드',    val: stats.nonManifoldCount, color: '--error' },
-    { label: '열린 경계',     val: stats.boundaryCount,    color: '--warn'  },
-    { label: '고립 정점',     val: stats.isolatedCount,    color: '--warn'  },
-    { label: '얇은 삼각형',   val: stats.skinnyCount,      color: '--warn', badge: 'NEW' },
-  ];
-
-  rows.forEach(function(r) {
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 8px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;font-size:10px;';
-    const isOk = r.val === 0;
-    row.innerHTML =
-      '<span style="color:' + (isOk?'var(--ok)':'var('+r.color+')') + ';font-family:var(--mono);font-size:10px;">' + (isOk?'✓':'●') + '</span>' +
-      '<span style="flex:1;color:var(--dim);">' + r.label + (r.badge?'  <span class="badge new">'+r.badge+'</span>':'') + '</span>' +
-      '<span style="font-family:var(--mono);font-weight:700;color:' + (isOk?'var(--ok)':'var('+r.color+')') + ';">' + r.val.toLocaleString() + '</span>';
-    grid.appendChild(row);
+  var header = card.querySelector('.issue-card-header');
+  header.addEventListener('click', function() {
+    var isExpanded = card.getAttribute('data-expanded') === 'true';
+    card.classList.toggle('expanded');
+    card.classList.toggle('collapsed', !card.classList.contains('expanded'));
+    card.setAttribute('data-expanded', isExpanded ? 'false' : 'true');
   });
+
+  var toggleBtn = card.querySelector('.mini-toggle');
+  toggleBtn.addEventListener('click', function(ev) {
+    ev.stopPropagation();
+    if (!overlay) return;
+    overlay.group.visible = !overlay.group.visible;
+    toggleBtn.setAttribute('data-on', overlay.group.visible ? 'true' : 'false');
+  });
+
+  var swatch = card.querySelector('.color-swatch');
+  var colorInput = card.querySelector('input[type=color]');
+  swatch.addEventListener('click', function(ev) {
+    ev.stopPropagation();
+    colorInput.click();
+  });
+  colorInput.addEventListener('click', function(ev) { ev.stopPropagation(); });
+  colorInput.addEventListener('input', function(ev) {
+    ev.stopPropagation();
+    swatch.style.background = colorInput.value;
+    if (overlayKey) applyOverlayColor(overlayKey, colorInput.value);
+  });
+
+  var focusBtn = card.querySelector('.focus-btn');
+  focusBtn.addEventListener('click', function(ev) {
+    ev.stopPropagation();
+    if (focusBtn.disabled) return;
+    focusOnIssue(issueKey);
+  });
+
+  return card;
+}
+
+function renderIssueMessage(type, icon, text) {
+  var container = document.getElementById('issue-cards-container');
+  if (!container) return;
+  container.innerHTML =
+    '<div class="issue-item ' + type + '">' +
+      '<span class="issue-icon">' + icon + '</span><span>' + text + '</span>' +
+    '</div>';
 }
 
 // ════════════════════════════════════════════════════════
@@ -1056,6 +1260,7 @@ function runAnalysis(originalGeometry, allGeometries) {
   const bb = trueBB || meshBB;
   const bbSize = new THREE.Vector3();
   bb.getSize(bbSize);
+  lastBoundingBoxSize = Math.max(bbSize.length(), 1);
 
   document.getElementById('bbox').textContent =
     bbSize.x.toFixed(3) + ' / ' + bbSize.y.toFixed(3) + ' / ' + bbSize.z.toFixed(3);
@@ -1087,7 +1292,7 @@ function runAnalysis(originalGeometry, allGeometries) {
   const indices = indexedGeo.index ? indexedGeo.index.array : null;
 
   document.getElementById('v-count').textContent = mergedVerts.toLocaleString() +
-    (rawVerts !== mergedVerts ? ' (' + rawVerts.toLocaleString() + ')' : '');
+    (rawVerts !== mergedVerts ? ' (raw: ' + rawVerts.toLocaleString() + ')' : '');
   document.getElementById('f-count').textContent = Math.round(faceCount).toLocaleString();
 
   // Edge map
@@ -1126,7 +1331,7 @@ function runAnalysis(originalGeometry, allGeometries) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(degenVerts, 3));
     overlays.degen.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.degen.color), size: ptSize, sizeAttenuation: true, depthTest: false })));
+      new THREE.PointsMaterial({ color: hexToInt(overlays.degen.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   // ── Skinny triangles: OBJ 원문 직접 파싱 (쿼드/N-gon 완전 제외) ──
@@ -1171,7 +1376,7 @@ function runAnalysis(originalGeometry, allGeometries) {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute(isoVerts, 3));
       overlays.isolated.group.add(new THREE.Points(g,
-        new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: ptSize*1.4, sizeAttenuation: true, depthTest: false })));
+        new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: 1, sizeAttenuation: false, depthTest: false })));
     }
   }
 
@@ -1326,7 +1531,7 @@ function runAnalysis(originalGeometry, allGeometries) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(dupVertPoints, 3));
     overlays.dupvert.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.dupvert.color), size: ptSize, sizeAttenuation: true, depthTest: false })));
+      new THREE.PointsMaterial({ color: hexToInt(overlays.dupvert.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   overlays.isolated.count = trueIsolatedCount;
@@ -1334,7 +1539,7 @@ function runAnalysis(originalGeometry, allGeometries) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(trueIsolatedPoints, 3));
     overlays.isolated.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: ptSize*1.5, sizeAttenuation: true, depthTest: false })));
+      new THREE.PointsMaterial({ color: hexToInt(overlays.isolated.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   // ── Build heatmap ──
@@ -1353,106 +1558,12 @@ function runAnalysis(originalGeometry, allGeometries) {
     densityCV,
   };
 
-  // ── Inspector UI ──
-  buildInspectorUI(stats);
-
   // ── Health Score ──
   const healthResult = computeHealthScore(faceCount, stats);
   updateHealthUI(healthResult);
 
-  // ── Issue List ──
-  const realDups = rawVerts - mergedVerts;
-  const issues = [];
-  if (strayDataWarning) issues.push({type:'warn', icon:'⚠', text:'Stray Data가 감지됐어요', sub:'바운딩 박스가 메시보다 현저히 커요.'});
-  if (hasUvInObj)       issues.push({type:'ok',   icon:'ℹ', text:'UV 데이터가 포함되어 있어요', sub:'UV 언렙 모델 — 정점 분리는 정상이에요.'});
-
-  // realDups = rawVerts - mergedVerts
-  // UV/Normal 있으면 분리 정점이 당연히 많음 → 정상, 표시 생략
-  // UV/Normal 없으면 진짜 중복 가능성 → 경고
-  if (realDups <= 0 || hasUvInObj) {
-    // UV 있을 땐 이 항목 자체를 표시 안 함 (dupVert 항목에서 통합 안내)
-  } else {
-    issues.push({type:'warn', icon:'⚠', text:'렌더러 분리 정점이 있어요', count: realDups.toLocaleString()+'개',
-      sub:'UV 데이터 없이 정점이 분리되어 있어요 — 확인해 보세요'});
-  }
-
-  // 중복 정점 판정:
-  // UV/Normal이 있는 파일 → 분리 정점은 렌더러 필수 처리 → 정상(ok)
-  // UV/Normal이 없는 파일 → 위치까지 같으면 진짜 중복 → 경고(warn)
-  if (dupVertCount <= 0) {
-    issues.push({type:'ok', icon:'✓', text:'중복 정점이 없어요'});
-  } else if (hasUvInObj) {
-    issues.push({type:'ok', icon:'✓',
-      text:'UV/Normal 분리 정점 — 정상이에요',
-      sub: dupVertCount.toLocaleString() + '개 (UV 언렙 처리로 인한 정상 분리, 오류 아니에요)'});
-  } else {
-    issues.push({type:'warn', icon:'⚠',
-      text:'동일 위치에 중복 정점이 있어요',
-      count: dupVertCount.toLocaleString() + '개',
-      sub: 'UV 데이터 없이 위치까지 겹쳐요 — Merge를 권장해요'});
-  }
-
-  if (ngonCount === 0 && rawObjText === '') {
-    issues.push({type:'warn', icon:'ℹ', text:'N-gon 검사를 할 수 없어요'});
-  } else if (ngonCount === 0) {
-    issues.push({type:'ok', icon:'✓', text:'N-gon이 없어요', sub: quadCount > 0 ? '쿼드 '+quadCount+'개 포함 (정상)' : '전부 삼각형이에요'});
-  } else {
-    issues.push({type:'error', icon:'✕', text:'N-gon이 있어요 (5각형 이상)', count: ngonCount.toLocaleString()+'개'});
-  }
-
-  if (overlays.degen.count===0)        issues.push({type:'ok',    icon:'✓', text:'비정상 면이 없어요'});
-  else                                  issues.push({type:'error', icon:'✕', text:'비정상 면이 있어요 (넓이 ≈ 0)', count: overlays.degen.count+'개'});
-
-  if (overlays.skinny.count===0)       issues.push({type:'ok',    icon:'✓', text:'얇은 삼각형이 없어요 (종횡비<10:1)'});
-  else                                  issues.push({type:'warn',  icon:'⚠', text:'얇은 삼각형이 있어요 (종횡비 ≥10:1)', count: overlays.skinny.count+'개', sub:'렌더링 아티팩트가 생길 수 있어요'});
-
-  if (overlays.flipped.count===0)      issues.push({type:'ok',    icon:'✓', text:'뒤집힌 면이 없어요'});
-  else                                  issues.push({type:'error', icon:'✕', text:'뒤집힌 면이 있어요 (법선 반전)', count: overlays.flipped.count+'개'});
-
-  if (edgeSt) {
-    if (overlays.nonmanifold.count===0) issues.push({type:'ok',    icon:'✓', text:'비매니폴드 엣지가 없어요'});
-    else                                 issues.push({type:'error', icon:'✕', text:'비매니폴드 엣지가 있어요', count: overlays.nonmanifold.count+'개'});
-    if (overlays.boundary.count===0)    issues.push({type:'ok',    icon:'✓', text:'닫힌 메쉬예요 (열린 경계 없음)'});
-    else                                 issues.push({type:'warn',  icon:'⚠', text:'열린 경계 엣지가 있어요', count: overlays.boundary.count+'개'});
-  } else {
-    issues.push({type:'warn', icon:'⚠', text:'엣지 분석을 할 수 없어요 (머지 실패)'});
-  }
-
-  if (trueIsolatedCount === 0) issues.push({type:'ok',   icon:'✓', text:'고립 정점이 없어요'});
-  else                          issues.push({type:'warn', icon:'⚠', text:'고립 정점이 있어요 (면에 연결 안 됨)', count: trueIsolatedCount+'개'});
-
-  const issueList = document.getElementById('issue-list');
-
-  if (!animEnabled || animSkipped) {
-    // 즉시 표시
-    issueList.innerHTML = issues.map(function(it) {
-      return '<div class="issue-item '+it.type+'">' +
-        '<span class="issue-icon">'+it.icon+'</span>' +
-        '<span>'+it.text+
-          (it.count ? '<br><span class="issue-count">'+it.count+'</span>' : '')+
-          (it.sub   ? '<br><span class="issue-count">'+it.sub+'</span>'   : '')+
-        '</span></div>';
-    }).join('');
-  } else {
-    // 순차 페이드인: 아이템 하나씩 등장
-    issueList.innerHTML = '';
-    issues.forEach(function(it, idx) {
-      animDelay(function() {
-        const el = document.createElement('div');
-        el.className = 'issue-item ' + it.type + ' anim-in';
-        el.style.animationDelay = '0ms'; // 이미 딜레이 걸림
-        el.innerHTML =
-          '<span class="issue-icon">'+it.icon+'</span>' +
-          '<span>'+it.text+
-            (it.count ? '<br><span class="issue-count">'+it.count+'</span>' : '')+
-            (it.sub   ? '<br><span class="issue-count">'+it.sub+'</span>'   : '')+
-          '</span>';
-        issueList.appendChild(el);
-      }, 300 + idx * 80);
-    });
-  }
-
-  buildToggleUI();
+  renderIssueCards(stats);
+  updateMarkerSize();
 
   // ── 연산용 임시 Geometry 해제 (JS 힙 부하 방지) ──
   // VRAM에는 안 올라가지만 dispose() 안 하면 GC가 치울 때까지 메모리 점유
@@ -1548,8 +1659,7 @@ function loadModel(url, rawText) {
     const allGeometries = [];  // density map용 전체 geometry 수집
 
     if (hasLineElements) {
-      document.getElementById('issue-list').innerHTML =
-        '<div class="issue-item warn"><span class="issue-icon">ℹ</span><span>Line element(l)이 감지됐어요 — 분석에서 제외돼요.</span></div>';
+      renderIssueMessage('warn', 'ℹ', 'Line element(l)이 감지됐어요 — 분석에서 제외돼요.');
     }
 
     obj.traverse(function(child) {
@@ -1582,8 +1692,7 @@ function loadModel(url, rawText) {
     });
 
     if (!firstGeometry) {
-      document.getElementById('issue-list').innerHTML =
-        '<div class="issue-item warn"><span class="issue-icon">⚠</span><span>면(face)이 없는 파일이에요</span></div>';
+      renderIssueMessage('warn', '⚠', '면(face)이 없는 파일이에요');
     }
 
     scene.add(modelGroup);
@@ -1607,8 +1716,7 @@ function loadModel(url, rawText) {
         if (firstGeometry) runAnalysis(firstGeometry, allGeometries);
       } catch(e) {
         console.error('분석 오류:', e);
-        document.getElementById('issue-list').innerHTML =
-          '<div class="issue-item error"><span class="issue-icon">✕</span><span>분석 중 오류가 발생했어요</span></div>';
+        renderIssueMessage('error', '✕', '분석 중 오류가 발생했어요');
       }
       setProgress(100, '검사가 끝났어요');
       document.getElementById('upload-btn').style.pointerEvents = '';
@@ -1635,8 +1743,7 @@ function loadModel(url, rawText) {
     if (xhr.total) setProgress(10 + (xhr.loaded/xhr.total)*40, '불러오고 있어요...');
   }, function(err) {
     console.error(err);
-    document.getElementById('issue-list').innerHTML =
-      '<div class="issue-item error"><span class="issue-icon">✕</span><span>파일 로드 실패</span></div>';
+    renderIssueMessage('error', '✕', '파일 로드 실패');
     document.getElementById('upload-btn').style.pointerEvents = '';
   });
 }
@@ -1676,7 +1783,7 @@ let isLight = localStorage.getItem('tg_theme') === 'light';
 function applyTheme() {
   document.body.classList.toggle('light', isLight);
   const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = isLight ? '☀️' : '🌙';
+  if (btn) btn.textContent = isLight ? '○' : '◐';
 
   // Three.js 씬 배경색도 동기화
   if (scene) {
