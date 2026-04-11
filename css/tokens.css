@@ -28,6 +28,15 @@
   --severity-error:    #e87d3e;
   --severity-warning:  #d9a336;
   --severity-info:     #4a9fd4;
+  /* PART R-3-A+B: Issue color tokens (severity family + per-issue tone) */
+  --issue-non-manifold: #cf4b4b;
+  --issue-degenerate:   #e85b7a;
+  --issue-boundary:     #e87d3e;
+  --issue-flipped:      #d65a2e;
+  --issue-ngon:         #d9a336;
+  --issue-skinny:       #c89020;
+  --issue-duplicate:    #4a9fd4;
+  --issue-isolated:     #5fb8e8;
 
   /* 랜딩 와이어프레임 톤 */
   --wire:    #3eb389;
@@ -64,6 +73,14 @@ body.light {
   --severity-error:    #b85e28;
   --severity-warning:  #b07000;
   --severity-info:     #2a7ab0;
+  --issue-non-manifold: #b03838;
+  --issue-degenerate:   #c84668;
+  --issue-boundary:     #b85e28;
+  --issue-flipped:      #a84418;
+  --issue-ngon:         #b07000;
+  --issue-skinny:       #9a6e00;
+  --issue-duplicate:    #2a7ab0;
+  --issue-isolated:     #3a8ec8;
   --wire:    #3eb389;
   --wire-dim:#1f5a48;
 }

@@ -466,3 +466,48 @@ body, #left-sidebar, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
 .issue-card.issue-card-empty.severity-info .issue-count {
   color: var(--dim);
 }
+
+/* ════════════════════════════════════════════════════════
+   PART R-3-A+B: Per-issue color tokens (overrides severity colors)
+   기존 PART R-3의 severity-* 규칙은 fallback으로 남겨둠
+   ════════════════════════════════════════════════════════ */
+
+.issue-card[data-issue="non-manifold"] .issue-glyph,
+.issue-card[data-issue="non-manifold"] .issue-count {
+  color: var(--issue-non-manifold);
+}
+.issue-card[data-issue="degenerate"] .issue-glyph,
+.issue-card[data-issue="degenerate"] .issue-count {
+  color: var(--issue-degenerate);
+}
+.issue-card[data-issue="boundary"] .issue-glyph,
+.issue-card[data-issue="boundary"] .issue-count {
+  color: var(--issue-boundary);
+}
+.issue-card[data-issue="flipped"] .issue-glyph,
+.issue-card[data-issue="flipped"] .issue-count {
+  color: var(--issue-flipped);
+}
+.issue-card[data-issue="ngon"] .issue-glyph,
+.issue-card[data-issue="ngon"] .issue-count {
+  color: var(--issue-ngon);
+}
+.issue-card[data-issue="skinny"] .issue-glyph,
+.issue-card[data-issue="skinny"] .issue-count {
+  color: var(--issue-skinny);
+}
+.issue-card[data-issue="duplicate"] .issue-glyph,
+.issue-card[data-issue="duplicate"] .issue-count {
+  color: var(--issue-duplicate);
+}
+.issue-card[data-issue="isolated"] .issue-glyph,
+.issue-card[data-issue="isolated"] .issue-count {
+  color: var(--issue-isolated);
+}
+
+/* dim 카드는 PART R-2 규칙이 위 색상을 var(--dim)으로 덮음.
+   우선순위 보장을 위해 명시적으로 다시 선언 */
+.issue-card.issue-card-empty[data-issue] .issue-glyph,
+.issue-card.issue-card-empty[data-issue] .issue-count {
+  color: var(--dim);
+}

@@ -508,15 +508,26 @@ function updateBBoxHelper(object, allVertsBox) {
 const overlayGroup = new THREE.Group();
 scene.add(overlayGroup);
 
+// PART R-3-A+B: Read issue color tokens from CSS variables
+function getIssueTokenColor(varName, fallback) {
+  try {
+    var v = getComputedStyle(document.documentElement)
+              .getPropertyValue(varName).trim();
+    return v || fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
 const overlays = {
-  degen:       { group: new THREE.Group(), color: '#ff2222', label: '면이 올바르지 않아요',     count: 0 },
-  ngon:        { group: new THREE.Group(), color: '#ff00ff', label: '면에 꼭짓점이 너무 많아요', count: 0 },
-  dupvert:     { group: new THREE.Group(), color: '#ffdd00', label: '점이 겹쳐있어요',          count: 0 },
-  flipped:     { group: new THREE.Group(), color: '#ff6ec7', label: '면 방향이 반대예요',       count: 0 },
-  nonmanifold: { group: new THREE.Group(), color: '#ff2222', label: '면이 이상하게 붙어있어요', count: 0 },
-  boundary:    { group: new THREE.Group(), color: '#ff8c00', label: '모델이 닫혀있지 않아요',   count: 0 },
-  isolated:    { group: new THREE.Group(), color: '#ff3366', label: '혼자 떠있는 점이 있어요',  count: 0 },
-  skinny:      { group: new THREE.Group(), color: '#ffd700', label: '삼각형이 너무 얇아요',     count: 0 },
+  degen:       { group: new THREE.Group(), color: getIssueTokenColor('--issue-degenerate',   '#e85b7a'), label: '면이 올바르지 않아요',     count: 0 },
+  ngon:        { group: new THREE.Group(), color: getIssueTokenColor('--issue-ngon',         '#d9a336'), label: '면에 꼭짓점이 너무 많아요', count: 0 },
+  dupvert:     { group: new THREE.Group(), color: getIssueTokenColor('--issue-duplicate',    '#4a9fd4'), label: '점이 겹쳐있어요',          count: 0 },
+  flipped:     { group: new THREE.Group(), color: getIssueTokenColor('--issue-flipped',      '#d65a2e'), label: '면 방향이 반대예요',       count: 0 },
+  nonmanifold: { group: new THREE.Group(), color: getIssueTokenColor('--issue-non-manifold', '#cf4b4b'), label: '면이 이상하게 붙어있어요', count: 0 },
+  boundary:    { group: new THREE.Group(), color: getIssueTokenColor('--issue-boundary',     '#e87d3e'), label: '모델이 닫혀있지 않아요',   count: 0 },
+  isolated:    { group: new THREE.Group(), color: getIssueTokenColor('--issue-isolated',     '#5fb8e8'), label: '혼자 떠있는 점이 있어요',  count: 0 },
+  skinny:      { group: new THREE.Group(), color: getIssueTokenColor('--issue-skinny',       '#c89020'), label: '삼각형이 너무 얇아요',     count: 0 },
 };
 Object.values(overlays).forEach(o => { o.group.visible = true; overlayGroup.add(o.group); });
 
