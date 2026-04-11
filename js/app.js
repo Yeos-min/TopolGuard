@@ -466,7 +466,7 @@ let bboxVisible = true;
 // MARKER SIZE CONTROL
 // ════════════════════════════════════════════════════════
 let userMarkerScale = 1.0;  // 사용자 슬라이더 값 (0.2 ~ 3.0)
-const MARKER_BASE_FACTOR = 0.012;  // 거리 대비 마커 크기 비율
+const MARKER_BASE_FACTOR = 2.0;  // 거리 대비 픽셀 크기 비율 (sizeAttenuation:false 기준)
 
 function updateMarkerSize() {
   const distance = camera.position.distanceTo(controls.target);
