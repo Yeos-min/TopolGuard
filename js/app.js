@@ -728,8 +728,8 @@ function renderIssueCards(stats) {
   }
   // PART R-2: severity 우선, 같은 severity 내에서는 count 내림차순
   allIssues.sort(function(a, b) {
-    var sevA = SEVERITY_RANK[ISSUE_SEVERITY[a.key]] || 99;
-    var sevB = SEVERITY_RANK[ISSUE_SEVERITY[b.key]] || 99;
+    var sevA = SEVERITY_RANK[ISSUE_SEVERITY[a.key]] ?? 99;
+    var sevB = SEVERITY_RANK[ISSUE_SEVERITY[b.key]] ?? 99;
     if (sevA !== sevB) return sevA - sevB;
     return b.count - a.count;
   });
