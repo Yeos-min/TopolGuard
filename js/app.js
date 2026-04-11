@@ -499,15 +499,12 @@ Object.entries(overlays).forEach(([k,o]) => { DEFAULT_COLORS[k] = o.color; });
 var ISSUE_META = {
   'non-manifold': {
     glyph: '✕',
- codex/reconstruct-ui-for-topolguard-kbqpg5
     label: 'NON-MANIFOLD',
     desc: '세 면 이상이 한 모서리를 공유하고 있어요. 불리언·UV·3D 프린팅이 막힐 수 있어요.'
   },
   'boundary': {
     glyph: '○',
     label: 'BOUNDARY EDGE',
-=======
- main
     desc: '메쉬에 열린 경계가 있어요. 3D 프린팅이나 시뮬레이션이 어려울 수 있어요.'
   },
   'skinny': {
