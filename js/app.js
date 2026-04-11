@@ -354,7 +354,6 @@ viewport.appendChild(renderer.domElement);
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.addEventListener('change', updateMarkerSize);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -466,12 +465,10 @@ let bboxVisible = true;
 // MARKER SIZE CONTROL
 // ════════════════════════════════════════════════════════
 let userMarkerScale = 1.0;  // 사용자 슬라이더 값 (0.2 ~ 3.0)
-const MARKER_BASE_FACTOR = 2.0;  // 거리 대비 픽셀 크기 비율 (sizeAttenuation:false 기준)
+const MARKER_BASE_PIXELS = 10;  // 슬라이더 1.0 기준 픽셀 크기 (거리 무관)
 
 function updateMarkerSize() {
-  const distance = camera.position.distanceTo(controls.target);
-  const baseSize = distance * MARKER_BASE_FACTOR;
-  const finalSize = baseSize * userMarkerScale;
+  const finalSize = MARKER_BASE_PIXELS * userMarkerScale;
 
   Object.values(overlays).forEach(function(overlay) {
     overlay.group.traverse(function(obj) {
