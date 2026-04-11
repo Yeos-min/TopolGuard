@@ -148,16 +148,4 @@
     });
   }
 
-  // ── 하단 업타임 카운터 ──
-  var uptimeEl = document.getElementById('landing-uptime');
-  if (uptimeEl) {
-    var start = Date.now();
-    setInterval(function () {
-      var s = Math.floor((Date.now() - start) / 1000);
-      var h = String(Math.floor(s / 3600)).padStart(2, '0');
-      var m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
-      var sec = String(s % 60).padStart(2, '0');
-      uptimeEl.textContent = h + ':' + m + ':' + sec;
-    }, 1000);
-  }
 })();
