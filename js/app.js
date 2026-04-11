@@ -535,7 +535,6 @@ var ISSUE_META = {
   'duplicate': {
     glyph: '◉',
     label: 'DUPLICATE VERTEX',
- m
     desc: '위치가 거의 같은 점 여러 개가 있어요. 모으거나 합치는 게 좋아요.'
   }
 };
