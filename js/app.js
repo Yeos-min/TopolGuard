@@ -499,42 +499,55 @@ Object.entries(overlays).forEach(([k,o]) => { DEFAULT_COLORS[k] = o.color; });
 var ISSUE_META = {
   'non-manifold': {
     glyph: '✕',
+ codex/reconstruct-ui-for-topolguard-kbqpg5
     label: 'NON-MANIFOLD',
     desc: '세 면 이상이 한 모서리를 공유하고 있어요. 불리언·UV·3D 프린팅이 막힐 수 있어요.'
   },
   'boundary': {
     glyph: '○',
     label: 'BOUNDARY EDGE',
+=======
+ main
     desc: '메쉬에 열린 경계가 있어요. 3D 프린팅이나 시뮬레이션이 어려울 수 있어요.'
   },
   'skinny': {
     glyph: '△',
+ codex/reconstruct-ui-for-topolguard-kbqpg5
     label: 'SKINNY TRIANGLE',
+ main
     desc: '극단적으로 얇고 긴 삼각형이 있어요. 셰이딩이나 시뮬레이션이 불안정해질 수 있어요.'
   },
   'ngon': {
     glyph: '⬡',
+ codex/reconstruct-ui-for-topolguard-kbqpg5
     label: 'N-GON',
     desc: '5각형 이상의 면이 있어요. 엔진마다 다르게 쪼개져서 결과가 예측 불가예요.'
   },
   'degenerate': {
     glyph: '◠',
     label: 'DEGENERATE',
+ main
     desc: '면적이 거의 0인 면이 있어요. 법선이 정의되지 않아서 렌더링에서 튀어요.'
   },
   'flipped': {
     glyph: '⇄',
+ codex/reconstruct-ui-for-topolguard-kbqpg5
     label: 'FLIPPED NORMAL',
+ main
     desc: '이웃 면과 반대 방향을 향하는 면이 있어요. 렌더러에서 사라지거나 검게 보일 수 있어요.'
   },
   'isolated': {
     glyph: '·',
+ codex/reconstruct-ui-for-topolguard-kbqpg5
     label: 'ISOLATED VERTEX',
+ main
     desc: '어떤 면에도 속하지 않는 떠 있는 점이 있어요. 정리하는 게 좋아요.'
   },
   'duplicate': {
     glyph: '◉',
+ codex/reconstruct-ui-for-topolguard-kbqpg5
     label: 'DUPLICATE VERTEX',
+ main
     desc: '위치가 거의 같은 점 여러 개가 있어요. 모으거나 합치는 게 좋아요.'
   }
 };
@@ -700,7 +713,9 @@ function createIssueCard(issueKey, meta, count) {
   var card = document.createElement('div');
   card.className = 'issue-card collapsed';
   card.setAttribute('data-issue', issueKey);
+ codex/reconstruct-ui-for-topolguard-kbqpg5
   card.setAttribute('data-expanded', 'false');
+ main
   card.innerHTML =
     '<div class="issue-card-header">' +
       '<span class="issue-glyph">' + meta.glyph + '</span>' +
@@ -711,11 +726,13 @@ function createIssueCard(issueKey, meta, count) {
     '<div class="issue-card-body">' +
       '<p class="issue-desc">' + meta.desc + '</p>' +
       '<div class="issue-control">' +
+ codex/reconstruct-ui-for-topolguard-kbqpg5
         '<span class="control-label">SHOW LAYERS</span>' +
         '<button class="mini-toggle" data-on="' + (isOn ? 'true' : 'false') + '"></button>' +
       '</div>' +
       '<div class="issue-control">' +
         '<span class="control-label">OVERLAY COLOR</span>' +
+ main
         '<div class="color-swatch-wrap">' +
           '<div class="color-swatch" id="swatch-' + overlayKey + '" style="background:' + color + '"></div>' +
           '<input type="color" class="color-input-hidden" id="colorpick-' + overlayKey + '" value="' + color + '">' +
@@ -726,6 +743,7 @@ function createIssueCard(issueKey, meta, count) {
 
   var header = card.querySelector('.issue-card-header');
   header.addEventListener('click', function() {
+ codex/reconstruct-ui-for-topolguard-kbqpg5
     var isExpanded = card.getAttribute('data-expanded') === 'true';
     card.classList.toggle('expanded');
     card.classList.toggle('collapsed', !card.classList.contains('expanded'));
@@ -760,6 +778,7 @@ function createIssueCard(issueKey, meta, count) {
     focusOnIssue(issueKey);
   });
 
+ main
   return card;
 }
 
