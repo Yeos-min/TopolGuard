@@ -567,6 +567,19 @@ var ISSUE_META = {
     desc: '위치가 거의 같은 점 여러 개가 있어요. 모으거나 합치는 게 좋아요.'
   }
 };
+
+// PART R-2: Issue severity classification (인계 문서 v2 정책)
+var ISSUE_SEVERITY = {
+  'non-manifold': 'critical',
+  'degenerate':   'critical',
+  'flipped':      'error',
+  'boundary':     'error',
+  'ngon':         'warning',
+  'skinny':       'warning',
+  'duplicate':    'info',
+  'isolated':     'info'
+};
+var SEVERITY_RANK = { 'critical': 0, 'error': 1, 'warning': 2, 'info': 3 };
 var ISSUE_TO_OVERLAY_KEY = {
   'non-manifold': 'nonmanifold',
   'boundary': 'boundary',
@@ -700,20 +713,27 @@ function renderIssueCards(stats) {
   var container = document.getElementById('issue-cards-container');
   if (!container) return;
   container.innerHTML = '';
-
-  var activeIssues = [];
+  // PART R-2: 모든 이슈 수집 (count 0 포함)
+  var allIssues = [];
+  var totalCount = 0;
   for (var key in ISSUE_META) {
     var count = getCountForIssue(key, stats);
-    if (count > 0) activeIssues.push({ key: key, count: count });
+    allIssues.push({ key: key, count: count });
+    totalCount += count;
   }
-
-  if (activeIssues.length === 0) {
+  // 모든 카운트가 0이면 통과 메시지만 표시
+  if (totalCount === 0) {
     container.innerHTML = '<div class="all-pass">✓ 모든 검사를 통과했어요</div>';
     return;
   }
-
-  activeIssues.sort(function(a, b) { return b.count - a.count; });
-  activeIssues.forEach(function(issue) {
+  // PART R-2: severity 우선, 같은 severity 내에서는 count 내림차순
+  allIssues.sort(function(a, b) {
+    var sevA = SEVERITY_RANK[ISSUE_SEVERITY[a.key]] || 99;
+    var sevB = SEVERITY_RANK[ISSUE_SEVERITY[b.key]] || 99;
+    if (sevA !== sevB) return sevA - sevB;
+    return b.count - a.count;
+  });
+  allIssues.forEach(function(issue) {
     var meta = ISSUE_META[issue.key];
     var card = createIssueCard(issue.key, meta, issue.count);
     container.appendChild(card);
@@ -727,7 +747,7 @@ function createIssueCard(issueKey, meta, count) {
   var color = overlay ? overlay.color : '#888888';
   var canFocus = !!getFirstIssuePosition(issueKey);
   var card = document.createElement('div');
-  card.className = 'issue-card collapsed';
+  card.className = 'issue-card collapsed' + (count === 0 ? ' issue-card-empty' : '');
   card.setAttribute('data-issue', issueKey);
   card.setAttribute('data-expanded', 'false');
   card.innerHTML =
@@ -755,6 +775,7 @@ function createIssueCard(issueKey, meta, count) {
 
   var header = card.querySelector('.issue-card-header');
   header.addEventListener('click', function() {
+    if (count === 0) return; // PART R-2: 빈 이슈는 펼치지 않음
     var isExpanded = card.getAttribute('data-expanded') === 'true';
     card.classList.toggle('expanded');
     card.classList.toggle('collapsed', !card.classList.contains('expanded'));
