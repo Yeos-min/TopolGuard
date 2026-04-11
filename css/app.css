@@ -432,3 +432,37 @@ body, #left-sidebar, #sidebar, #sidebar-header, #sidebar-body, #sidebar-footer,
 .issue-card.issue-card-empty .issue-chevron {
   display: none;
 }
+
+/* ════════════════════════════════════════════════════════
+   PART R-3: Issue severity colors (glyph + count only)
+   ════════════════════════════════════════════════════════ */
+
+.issue-card.severity-critical .issue-glyph,
+.issue-card.severity-critical .issue-count {
+  color: var(--severity-critical);
+}
+.issue-card.severity-error .issue-glyph,
+.issue-card.severity-error .issue-count {
+  color: var(--severity-error);
+}
+.issue-card.severity-warning .issue-glyph,
+.issue-card.severity-warning .issue-count {
+  color: var(--severity-warning);
+}
+.issue-card.severity-info .issue-glyph,
+.issue-card.severity-info .issue-count {
+  color: var(--severity-info);
+}
+
+/* dim 카드는 PART R-2의 issue-card-empty 규칙이 위 색상을 var(--dim)으로
+   덮어쓰도록 보장 (우선순위 유지) */
+.issue-card.issue-card-empty.severity-critical .issue-glyph,
+.issue-card.issue-card-empty.severity-critical .issue-count,
+.issue-card.issue-card-empty.severity-error .issue-glyph,
+.issue-card.issue-card-empty.severity-error .issue-count,
+.issue-card.issue-card-empty.severity-warning .issue-glyph,
+.issue-card.issue-card-empty.severity-warning .issue-count,
+.issue-card.issue-card-empty.severity-info .issue-glyph,
+.issue-card.issue-card-empty.severity-info .issue-count {
+  color: var(--dim);
+}

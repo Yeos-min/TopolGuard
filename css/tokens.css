@@ -23,6 +23,11 @@
   --warn:    #d9a336;
   --ok:      #62a353;
   --blue:    #4a9fd4;
+  /* PART R-3: Issue severity colors (인계 문서 v2 정책) */
+  --severity-critical: #cf4b4b;
+  --severity-error:    #e87d3e;
+  --severity-warning:  #d9a336;
+  --severity-info:     #4a9fd4;
 
   /* 랜딩 와이어프레임 톤 */
   --wire:    #3eb389;
@@ -55,6 +60,10 @@ body.light {
   --warn:    #b07000;
   --ok:      #3a7a30;
   --blue:    #2a7ab0;
+  --severity-critical: #c03030;
+  --severity-error:    #b85e28;
+  --severity-warning:  #b07000;
+  --severity-info:     #2a7ab0;
   --wire:    #3eb389;
   --wire-dim:#1f5a48;
 }
