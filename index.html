@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,9 +36,9 @@
         </h1>
 
         <p class="landing-sub">
-          We audit your .obj topology — non-manifold edges, skinny triangles,
-          n-gons, flipped normals — and show you exactly where they hide.
-          Runs entirely in your browser. Nothing leaves your machine.
+          .obj 파일의 토폴로지를 검사합니다. Non-manifold 엣지, skinny triangle,
+          n-gon, 뒤집힌 normal — 수정이 필요한 지점을 정확히 짚어냅니다.
+          모든 분석은 브라우저 안에서 실행되며, 파일은 외부로 전송되지 않습니다.
         </p>
 
         <div class="landing-cta">
@@ -71,25 +71,25 @@
           <h2 class="sect-title">WHY TOPOLOGY MATTERS</h2>
         </div>
         <p class="sect-desc">
-          A mesh with hidden defects will silently break your pipeline —
-          from sculpting to rigging to final render.
-          TopolGuard finds them before your tools do.
+          토폴로지 결함은 파이프라인의 어느 단계에서든 문제가 됩니다.
+          스컬프팅, 리깅, 최종 렌더링까지 — 한 번 생긴 결함은 이후 모든 작업에 영향을 미칩니다.
+          TopolGuard는 결함이 다른 툴에 드러나기 전에 먼저 찾아내어 수정 지점을 명확히 보여줍니다.
         </p>
         <div class="card-grid card-grid-3">
           <div class="section-card">
             <div class="card-num">01</div>
             <h3 class="card-title">DEFORMATION</h3>
-            <p class="card-desc">Bad topology warps under rigging. Hidden non-manifold edges create unpredictable deformation artifacts in character animation.</p>
+            <p class="card-desc">잘못된 토폴로지는 리깅 과정에서 뒤틀립니다. 숨어있는 non-manifold 엣지는 캐릭터 애니메이션에서 예측 불가능한 변형 문제를 일으킵니다.</p>
           </div>
           <div class="section-card">
             <div class="card-num">02</div>
             <h3 class="card-title">PIPELINE</h3>
-            <p class="card-desc">Non-manifold geometry breaks boolean operations, UV unwrapping, and 3D printing slicers. One bad edge cascades through every downstream tool.</p>
+            <p class="card-desc">Non-manifold 지오메트리는 불리언 연산, UV 언래핑, 3D 프린팅 슬라이서를 깨뜨립니다. 엣지 하나의 결함이 이후의 모든 툴로 연쇄됩니다.</p>
           </div>
           <div class="section-card">
             <div class="card-num">03</div>
             <h3 class="card-title">RENDER</h3>
-            <p class="card-desc">Flipped normals and degenerate faces cause shading artifacts, invisible geometry, and wasted render cycles in real-time engines.</p>
+            <p class="card-desc">실시간 엔진에서 뒤집힌 normal과 degenerate 페이스는 셰이딩 문제, 보이지 않는 지오메트리, 렌더 사이클 낭비를 일으킵니다.</p>
           </div>
         </div>
       </div>
@@ -106,22 +106,22 @@
           <div class="section-card">
             <div class="card-num">01</div>
             <h3 class="card-title">NON-MANIFOLD EDGES</h3>
-            <p class="card-desc">Edges shared by 0 or 3+ faces. Break booleans, 3D print slicers, and UV unwrapping.</p>
+            <p class="card-desc">0개 또는 3개 이상의 페이스가 공유하는 엣지입니다. 불리언, 3D 프린팅 슬라이서, UV 언래핑을 깨뜨립니다.</p>
           </div>
           <div class="section-card">
             <div class="card-num">02</div>
             <h3 class="card-title">SKINNY TRIANGLES</h3>
-            <p class="card-desc">Near-zero area or extreme aspect ratios. Cause shading artifacts and simulation instability.</p>
+            <p class="card-desc">면적이 0에 가깝거나 극단적인 가로세로 비율을 가진 삼각형입니다. 셰이딩 문제와 시뮬레이션 불안정을 유발합니다.</p>
           </div>
           <div class="section-card">
             <div class="card-num">03</div>
             <h3 class="card-title">N-GONS</h3>
-            <p class="card-desc">Faces with 5 or more vertices. Tessellate unpredictably across renderers and game engines.</p>
+            <p class="card-desc">5개 이상의 버텍스로 이루어진 페이스입니다. 렌더러와 게임 엔진마다 삼각형으로 분할되는 방식이 다릅니다.</p>
           </div>
           <div class="section-card">
             <div class="card-num">04</div>
             <h3 class="card-title">FLIPPED NORMALS</h3>
-            <p class="card-desc">Faces pointing inward instead of outward. Render invisible or inverted in real-time engines.</p>
+            <p class="card-desc">바깥이 아닌 안쪽을 향하는 페이스입니다. 실시간 엔진에서 보이지 않거나 반전되어 렌더링됩니다.</p>
           </div>
         </div>
       </div>
@@ -136,8 +136,10 @@
           <h2 class="sect-title">HOW IT LOOKS</h2>
         </div>
         <p class="sect-desc">
-          Below are actual scan results from two AI-generated meshes (Tripo AI).
-          One is clean. The other was decimated and arrived with topology defects.
+          AI는 메시를 빠르게 만들어냅니다. 하지만 복잡한 디테일에는 여전히 사람의 손이 필요합니다.
+          아래는 Tripo AI로 생성한 동일 메시의 두 상태입니다 — 생성 직후의 AI Output과,
+          수동으로 결함을 수정한 Human Revised입니다.
+          TopolGuard는 이 수정 단계에서 가장 중요한 것, 즉 어디를 고쳐야 하는지를 알려줍니다.
         </p>
 
         <!-- 이미지 영역: Good (좌) / Bad (우) -->
@@ -145,12 +147,12 @@
           <div class="compare-img-placeholder">
             <span class="placeholder-icon">⬡</span>
             <span class="placeholder-title">SCREENSHOT PENDING</span>
-            <span class="placeholder-desc">Inspector view will appear here</span>
+            <span class="placeholder-desc">Inspector 화면이 여기에 표시됩니다</span>
           </div>
           <div class="compare-img-placeholder">
             <span class="placeholder-icon">⬡</span>
             <span class="placeholder-title">SCREENSHOT PENDING</span>
-            <span class="placeholder-desc">Inspector view will appear here</span>
+            <span class="placeholder-desc">Inspector 화면이 여기에 표시됩니다</span>
           </div>
         </div>
 
@@ -161,7 +163,7 @@
           <div class="terminal-card clean">
             <div class="terminal-header">
               <span class="terminal-dot ok"></span>
-              <span>SCAN RESULT — CLEAN</span>
+              <span>SCAN RESULT — AI OUTPUT</span>
             </div>
             <div class="terminal-body">
               <!-- TODO: 실제 Inspector 측정값으로 교체 -->
@@ -182,7 +184,7 @@
           <div class="terminal-card defective">
             <div class="terminal-header">
               <span class="terminal-dot error"></span>
-              <span>SCAN RESULT — DEFECTIVE</span>
+              <span>SCAN RESULT — HUMAN REVISED</span>
             </div>
             <div class="terminal-body">
               <!-- TODO: 실제 Inspector 측정값으로 교체 -->
@@ -201,8 +203,8 @@
 
         </div>
         <p class="sample-note">
-          All sample meshes are AI-generated via Tripo AI.
-          No human-authored 3D assets are redistributed.
+          모든 샘플 메시는 Tripo AI로 생성되었습니다.
+          사람이 제작한 3D 자산은 재배포되지 않습니다.
         </p>
       </div>
     </section>
@@ -212,8 +214,8 @@
       <div class="sect-inner">
         <h2 class="cta-headline">INITIATE<br>SCAN<span class="dot">.</span></h2>
         <p class="cta-desc">
-          Drop your .obj file into the inspector.
-          Everything runs in your browser — zero uploads, zero tracking.
+          .obj 파일을 Inspector에 드롭하면 분석이 시작됩니다.
+          모든 처리는 브라우저 안에서 완료되며, 업로드도 트래킹도 없습니다.
         </p>
         <a href="app.html" class="cta-btn">
           Launch Inspector <span class="arrow">→</span>
