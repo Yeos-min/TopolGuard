@@ -14,58 +14,54 @@
 
 <div id="toast-container"></div>
 
-<!-- APP TOPBAR -->
-<div id="app-topbar">
-  <div class="topbar-left">
-    <span class="topbar-logo">Topol<span class="topbar-logo-accent">Guard</span></span>
-    <span class="topbar-sep">/</span>
-    <span class="topbar-crumb">INSPECTOR</span>
-    <span class="topbar-sep topbar-file-sep" id="breadcrumb-file-sep" style="display:none;">/</span>
-    <span class="topbar-crumb topbar-filename" id="breadcrumb-filename"></span>
+<!-- UNIFIED TOPNAV (Inspector variant) -->
+<nav class="tg-topnav">
+  <button class="brand" onclick="location.href='index.html'">TOPOL<span>GUARD</span></button>
+  <div class="links">
+    <a href="index.html">HOME</a>
+    <a href="manual.html">MANUAL</a>
+    <a href="app.html" class="active">INSPECTOR</a>
   </div>
 
-  <div class="topbar-center">
-    <div class="topbar-view-group">
-      <button class="topbar-view-btn active" data-mode="wireframe">WIRE</button>
-      <button class="topbar-view-btn" data-mode="solid">SOLID</button>
-      <button class="topbar-view-btn" data-mode="both">BOTH</button>
-      <button class="topbar-view-btn" data-mode="heatmap">DENSITY</button>
+  <div class="center">
+    <div class="view-modes" id="topbar-view-modes">
+      <button class="active" data-mode="wireframe">WIRE</button>
+      <button data-mode="solid">SOLID</button>
+      <button data-mode="both">BOTH</button>
+      <button data-mode="heatmap">DENSITY</button>
+
+      <div class="density-popover" id="density-popover">
+        <span style="color:#3b82f6;">●</span>
+        <span>LOW</span>
+        <div class="hm-grad"></div>
+        <span>HIGH</span>
+        <span style="color:#ef4444;">●</span>
+        <span class="density-popover-label">VERTEX DENSITY</span>
+      </div>
     </div>
   </div>
 
-  <div class="topbar-right">
-    <div class="topbar-menu-wrap">
-      <button class="topbar-icon-btn" id="topbar-menu-btn" title="OPTIONS">⋮</button>
-      <div class="topbar-dropdown" id="topbar-dropdown">
-        <div class="topbar-dropdown-row">
+  <div class="inspector-ctrl">
+    <div class="menu-wrap">
+      <button class="icon-btn" id="topbar-menu-btn" title="OPTIONS">⋮</button>
+      <div class="menu-dropdown" id="topbar-menu-dropdown">
+        <div class="menu-row">
           <span>BOUNDING BOX</span>
           <button class="mini-toggle" id="bbox-toggle" data-on="true"></button>
         </div>
-        <div class="topbar-dropdown-row">
-          <div class="topbar-slider-header">
+        <div class="menu-row slider-row">
+          <div class="slider-header">
             <span>MARKER SIZE</span>
-            <span class="topbar-slider-value" id="marker-size-val">1.0×</span>
+            <span class="slider-val" id="marker-size-val">1.0×</span>
           </div>
-          <input type="range" class="topbar-slider" id="marker-size-slider"
-                 min="0.2" max="3.0" step="0.1" value="1.0">
+          <input type="range" id="marker-size-slider" min="0.2" max="3.0" step="0.1" value="1.0">
         </div>
       </div>
     </div>
-    <a href="index.html" class="topbar-icon-btn" title="HOME" style="text-decoration:none;">⌂</a>
-    <button id="anim-icon-btn" class="topbar-icon-btn" onclick="toggleAnimSetting()" title="ANIMATION">▶</button>
-    <button id="theme-toggle" class="topbar-icon-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
+    <button id="anim-icon-btn" class="icon-btn" onclick="toggleAnimSetting()" title="ANIMATION">▶</button>
+    <button id="theme-toggle" class="icon-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
   </div>
-</div>
-
-<!-- DENSITY LEGEND 서브바 (DENSITY 모드일 때만 표시) -->
-<div id="density-subbar" class="density-subbar" style="display:none;">
-  <span style="color:#3b82f6;">●</span>
-  <span>LOW</span>
-  <div class="hm-grad"></div>
-  <span>HIGH</span>
-  <span style="color:#ef4444;">●</span>
-  <span class="density-subbar-label">VERTEX DENSITY</span>
-</div>
+</nav>
 
 <div id="app-body">
 
