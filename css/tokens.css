@@ -35,8 +35,8 @@
   --issue-flipped:      #d65a2e;
   --issue-ngon:         #d9a336;
   --issue-skinny:       #c89020;
-  --issue-duplicate:    #4a9fd4;
-  --issue-isolated:     #5fb8e8;
+  --issue-duplicate:    #a78bfa;
+  --issue-isolated:     #c4b5fd;
 
   /* 랜딩 와이어프레임 톤 */
   --wire:    #3eb389;
@@ -79,8 +79,8 @@ body.light {
   --issue-flipped:      #a84418;
   --issue-ngon:         #b07000;
   --issue-skinny:       #9a6e00;
-  --issue-duplicate:    #2a7ab0;
-  --issue-isolated:     #3a8ec8;
+  --issue-duplicate:    #7c3aed;
+  --issue-isolated:     #9061f9;
   --wire:    #3eb389;
   --wire-dim:#1f5a48;
 }
