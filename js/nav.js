@@ -4,6 +4,8 @@
 // ════════════════════════════════════════════════════════
 
 (function () {
+  if (document.querySelector('.tg-topnav')) return;
+
   var current = document.body.getAttribute('data-page') || '';
 
   // app 페이지는 자체 사이드바가 있으므로 탑바 생략

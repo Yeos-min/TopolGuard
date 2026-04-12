@@ -240,10 +240,6 @@ document.addEventListener('keydown', function(e) {
 // ════════════════════════════════════════════════════════
 function loadSample(path, name, icon) {
   _pendingLoad = { isSample: true, samplePath: path, name: name || path.split('/').pop() };
-  var bcName = document.getElementById('breadcrumb-filename');
-  var bcSep = document.getElementById('breadcrumb-file-sep');
-  if (bcName) bcName.textContent = name || path.split('/').pop();
-  if (bcSep) bcSep.style.display = '';
   showToast('info', icon + ' ' + name + ' 로드 중', '샘플 파일을 불러오고 있어요...', 3000);
   fetch(path)
     .then(function(res) {
@@ -331,10 +327,6 @@ function validateAndLoad(file) {
         vertCount.toLocaleString() + '개 이상 정점 — 검사에 시간이 걸릴 수 있어요.', 7000);
     }
     _pendingLoad = { isSample: false, name: file.name, objText: text };
-    var bcName = document.getElementById('breadcrumb-filename');
-    var bcSep = document.getElementById('breadcrumb-file-sep');
-    if (bcName) bcName.textContent = file.name;
-    if (bcSep) bcSep.style.display = '';
     const url = URL.createObjectURL(file);
     loadModel(url, text);
   };
@@ -384,12 +376,18 @@ let lastBoundingBoxSize = 1;
 
 function setViewMode(mode, btn) {
   currentMode = mode;
-  document.querySelectorAll('.topbar-view-btn').forEach(function(b) {
+  document.querySelectorAll('#topbar-view-modes > button[data-mode]').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-mode') === mode);
   });
   applyViewMode();
-  var densitySubbar = document.getElementById('density-subbar');
-  if (densitySubbar) densitySubbar.style.display = mode === 'heatmap' ? 'flex' : 'none';
+  var densityPopover = document.getElementById('density-popover');
+  if (densityPopover) {
+    if (mode === 'heatmap') {
+      densityPopover.classList.add('open');
+    } else {
+      densityPopover.classList.remove('open');
+    }
+  }
 }
 
 function applyViewMode() {
@@ -406,51 +404,50 @@ function applyViewMode() {
 }
 
 function initViewportTabs() {
-  const topbarViewBtns = document.querySelectorAll('.topbar-view-btn');
+  const viewModeBtns = document.querySelectorAll('#topbar-view-modes > button[data-mode]');
   var menuBtn = document.getElementById('topbar-menu-btn');
-  var dropdown = document.getElementById('topbar-dropdown');
+  var menuDropdown = document.getElementById('topbar-menu-dropdown');
   var bboxToggleBtn = document.getElementById('bbox-toggle');
 
-  topbarViewBtns.forEach(function(btn) {
+  viewModeBtns.forEach(function(btn) {
     btn.addEventListener('click', function() {
-      topbarViewBtns.forEach(function(b) { b.classList.remove('active'); });
+      viewModeBtns.forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
       setViewMode(btn.getAttribute('data-mode'), null);
     });
   });
 
-  if (menuBtn && dropdown) {
+  if (menuBtn && menuDropdown) {
     menuBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      dropdown.classList.toggle('open');
+      menuDropdown.classList.toggle('open');
     });
     document.addEventListener('click', function(e) {
-      if (!dropdown.contains(e.target) && !menuBtn.contains(e.target)) {
-        dropdown.classList.remove('open');
+      if (!menuDropdown.contains(e.target) && e.target !== menuBtn) {
+        menuDropdown.classList.remove('open');
       }
     });
   }
 
   if (bboxToggleBtn) {
     bboxToggleBtn.addEventListener('click', function() {
-      toggleBBoxHelper();
+      var isOn = bboxToggleBtn.getAttribute('data-on') === 'true';
+      bboxToggleBtn.setAttribute('data-on', String(!isOn));
+      if (typeof boxHelper !== 'undefined' && boxHelper) {
+        boxHelper.visible = !isOn;
+      }
     });
-    bboxToggleBtn.setAttribute('data-on', bboxVisible ? 'true' : 'false');
   }
 
-  // 마커 크기 슬라이더 바인딩
-  const markerSlider = document.getElementById('marker-size-slider');
-  const markerVal = document.getElementById('marker-size-val');
+  var markerSlider = document.getElementById('marker-size-slider');
+  var markerVal = document.getElementById('marker-size-val');
   if (markerSlider) {
     markerSlider.addEventListener('input', function() {
       var v = parseFloat(markerSlider.value);
-      userMarkerScale = v;
       if (markerVal) markerVal.textContent = v.toFixed(1) + '×';
-      updateMarkerSize();
+      if (typeof updateMarkerSize === 'function') updateMarkerSize(v);
     });
   }
-
-  setViewMode(currentMode, null);
 }
 
 // ════════════════════════════════════════════════════════
