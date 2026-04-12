@@ -23,24 +23,6 @@
     <a href="app.html" class="active">INSPECTOR</a>
   </div>
 
-  <div class="center">
-    <div class="view-modes" id="topbar-view-modes">
-      <button class="active" data-mode="wireframe">WIRE</button>
-      <button data-mode="solid">SOLID</button>
-      <button data-mode="both">BOTH</button>
-      <button data-mode="heatmap">DENSITY</button>
-
-      <div class="density-popover" id="density-popover">
-        <span style="color:#3b82f6;">●</span>
-        <span>LOW</span>
-        <div class="hm-grad"></div>
-        <span>HIGH</span>
-        <span style="color:#ef4444;">●</span>
-        <span class="density-popover-label">VERTEX DENSITY</span>
-      </div>
-    </div>
-  </div>
-
   <div class="inspector-ctrl">
     <div class="menu-wrap">
       <button class="icon-btn" id="topbar-menu-btn" title="OPTIONS">⋮</button>
@@ -86,6 +68,24 @@
 <div id="viewport">
   <!-- SCAN LINE (분석 중 연출) -->
   <div class="scan-line" id="scan-line"></div>
+
+  <div id="viewport-controls">
+    <div class="view-modes" id="topbar-view-modes">
+      <button class="active" data-mode="wireframe">WIRE</button>
+      <button data-mode="solid">SOLID</button>
+      <button data-mode="both">BOTH</button>
+      <button data-mode="heatmap">DENSITY</button>
+
+      <div class="density-popover" id="density-popover">
+        <span style="color:#3b82f6;">●</span>
+        <span>LOW</span>
+        <div class="hm-grad"></div>
+        <span>HIGH</span>
+        <span style="color:#ef4444;">●</span>
+        <span class="density-popover-label">VERTEX DENSITY</span>
+      </div>
+    </div>
+  </div>
 
   <!-- SKIP ANIMATION 버튼 -->
   <button id="skip-btn" onclick="skipAnimation()">⏭ SKIP</button>
