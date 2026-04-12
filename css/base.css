@@ -77,8 +77,9 @@ button { font-family: inherit; cursor: pointer; }
 .tg-topnav .center {
   display: flex;
   align-items: center;
-  margin-left: 32px;
+  justify-content: center;   /* ← 추가 */
   flex: 1;
+  margin-left: 0;             /* ← 32px → 0 */
 }
 
 .tg-topnav .sys {
