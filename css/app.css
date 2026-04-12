@@ -28,7 +28,7 @@ body[data-page="app"] * { margin: 0; padding: 0; }
 /* 모드 전환 부드럽게 */
 body, #left-sidebar, #sidebar, #sidebar-body, #sidebar-footer,
 .stat-card, #health-card, .issue-item, .issue-card, .tog-btn, .qs-btn, #hud, #skip-btn,
-.tg-topnav, .tg-topnav .view-modes button, .tg-topnav .inspector-ctrl .icon-btn, .tg-topnav .menu-dropdown, .tg-topnav .density-popover {
+.tg-topnav, .tg-topnav .inspector-ctrl .icon-btn, .tg-topnav .menu-dropdown {
   transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
 
@@ -450,74 +450,6 @@ body[data-page="app"] .tg-topnav {
   flex-shrink: 0;
 }
 
-.tg-topnav .view-modes {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 3px;
-  position: relative;
-}
-
-.tg-topnav .view-modes button {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  padding: 6px 14px;
-  border: none;
-  border-radius: 3px;
-  background: transparent;
-  color: var(--dim);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  min-width: 64px;
-}
-.tg-topnav .view-modes button:hover {
-  color: var(--text);
-  background: var(--border);
-}
-.tg-topnav .view-modes button.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-.tg-topnav .density-popover {
-  display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: var(--panel);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  padding: 10px 14px;
-  z-index: 200;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-  white-space: nowrap;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: var(--dim);
-}
-.tg-topnav .density-popover.open {
-  display: flex;
-}
-.tg-topnav .density-popover .hm-grad {
-  width: 120px;
-  height: 8px;
-  border-radius: 4px;
-  background: linear-gradient(to right, #3b82f6, #22c55e, #eab308, #ef4444);
-}
-.tg-topnav .density-popover .density-popover-label {
-  color: var(--dim);
-  margin-left: 2px;
-}
-
 .tg-topnav .inspector-ctrl {
   display: flex;
   align-items: center;
@@ -597,4 +529,94 @@ body[data-page="app"] .tg-topnav {
 .tg-topnav .menu-row.slider-row input[type="range"] {
   width: 100%;
   accent-color: var(--accent);
+}
+
+/* ════════════════════════════════════════════════════════
+   PART R-5: Floating viewport controls (bottom center)
+   ════════════════════════════════════════════════════════ */
+
+#viewport-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 18;
+  pointer-events: none;
+}
+
+#viewport-controls .view-modes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 4px;
+  position: relative;
+  pointer-events: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+#viewport-controls .view-modes button {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  min-width: 64px;
+}
+#viewport-controls .view-modes button:hover {
+  color: var(--text);
+  background: var(--panel2);
+}
+#viewport-controls .view-modes button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+#viewport-controls .density-popover {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 10px 14px;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--dim);
+}
+#viewport-controls .density-popover.open {
+  display: flex;
+}
+#viewport-controls .density-popover .hm-grad {
+  width: 120px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #3b82f6, #22c55e, #eab308, #ef4444);
+}
+#viewport-controls .density-popover .density-popover-label {
+  color: var(--dim);
+  margin-left: 2px;
+}
+
+#viewport-controls .view-modes,
+#viewport-controls .view-modes button,
+#viewport-controls .density-popover {
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
