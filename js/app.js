@@ -607,6 +607,19 @@ function applyOverlayColor(key, hex) {
       mats.forEach(m => { if (m.color) m.color.set(hex); });
     }
   });
+  // R-3-C: 카드 glyph + 숫자 색상 동기화
+  var issueKey = Object.keys(ISSUE_TO_OVERLAY_KEY).find(function(k) {
+    return ISSUE_TO_OVERLAY_KEY[k] === key;
+  });
+  if (issueKey) {
+    var card = document.querySelector('.issue-card[data-issue="' + issueKey + '"]');
+    if (card) {
+      var glyph = card.querySelector('.issue-glyph');
+      var countEl = card.querySelector('.issue-count');
+      if (glyph) glyph.style.color = hex;
+      if (countEl) countEl.style.color = hex;
+    }
+  }
 }
 
 function resetColors() {
