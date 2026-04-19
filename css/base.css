@@ -25,14 +25,14 @@ button { font-family: inherit; cursor: pointer; }
 .tg-topnav {
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 44px;
+  height: 64px;
   background: var(--bg);
   border-bottom: 1px solid var(--border2);
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 14px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 16px;
   letter-spacing: 0.05em;
   color: var(--dim);
   z-index: 100;
@@ -42,7 +42,7 @@ button { font-family: inherit; cursor: pointer; }
 .tg-topnav .brand {
   color: var(--text);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 1px;
   margin-right: 28px;
   text-transform: uppercase;
@@ -123,7 +123,7 @@ button { font-family: inherit; cursor: pointer; }
   border-color: var(--accent);
 }
 
-body.has-topnav { padding-top: 44px; }
+body.has-topnav { padding-top: 64px; }
 
 /* 인스펙터에서는 has-topnav 대신 app-topbar가 자체적으로 위치 — padding 불필요 */
 body[data-page="app"] { padding-top: 0; }
