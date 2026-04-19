@@ -5,6 +5,8 @@
 
 :root {
   /* Dark mode (default) */
+  --topnav-h: 64px;
+
   --bg:      #0d0d11;
   --bg-app:  #1a1a1f;
   --panel:   #22222a;
@@ -52,6 +54,7 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+:root[data-theme="light"],
 body.light {
   --bg:      #f0f0f4;
   --bg-app:  #f0f0f4;

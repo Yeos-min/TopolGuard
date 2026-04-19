@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TopolGuard — 3D Mesh Topology Inspector</title>
   <meta name="description" content="Audit your .obj meshes for non-manifold edges, skinny triangles, n-gons, flipped normals. Runs entirely in your browser.">
+  <script>
+    (function() {
+      var t = localStorage.getItem('tg_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">

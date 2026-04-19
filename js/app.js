@@ -2061,6 +2061,7 @@ let isLight = localStorage.getItem('tg_theme') === 'light';
 
 function applyTheme() {
   document.body.classList.toggle('light', isLight);
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
   const btn = document.getElementById('theme-toggle');
   if (btn) btn.textContent = isLight ? '○' : '◐';
 
