@@ -715,7 +715,7 @@
 }
 
 .hero-cards-overlay .terminal-card {
-  width: 380px;
+  width: 600px;
   background: var(--panel);
   opacity: 1;
   transform: none;
@@ -734,7 +734,7 @@
 
 .hero-cards-overlay .hero-score-num {
   font-family: var(--mono);
-  font-size: 48px;
+  font-size: 80px;
   line-height: 1;
   letter-spacing: -1.5px;
   font-weight: 700;
@@ -742,7 +742,7 @@
 
 .hero-cards-overlay .hero-score-grade {
   font-family: var(--mono);
-  font-size: 24px;
+  font-size: 40px;
   line-height: 1;
   font-weight: 600;
 }
