@@ -576,11 +576,7 @@ function initViewportTabs() {
 
   if (bboxToggleBtn) {
     bboxToggleBtn.addEventListener('click', function() {
-      var isOn = bboxToggleBtn.getAttribute('data-on') === 'true';
-      bboxToggleBtn.setAttribute('data-on', String(!isOn));
-      if (typeof boxHelper !== 'undefined' && boxHelper) {
-        boxHelper.visible = !isOn;
-      }
+      if (typeof toggleBBoxHelper === 'function') toggleBBoxHelper();
     });
   }
 
@@ -589,8 +585,9 @@ function initViewportTabs() {
   if (markerSlider) {
     markerSlider.addEventListener('input', function() {
       var v = parseFloat(markerSlider.value);
+      userMarkerScale = v;
       if (markerVal) markerVal.textContent = v.toFixed(1) + '×';
-      if (typeof updateMarkerSize === 'function') updateMarkerSize(v);
+      if (typeof updateMarkerSize === 'function') updateMarkerSize();
     });
   }
 }
