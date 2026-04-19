@@ -13,7 +13,7 @@
 
 .hero {
   position: relative;
-  min-height: calc(100vh - 36px);
+  min-height: calc(85vh - 36px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -702,8 +702,7 @@
 .hero-cards-overlay {
   position: absolute;
   right: 48px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 120px;
   display: flex;
   gap: 16px;
   z-index: 3;
@@ -715,7 +714,7 @@
 }
 
 .hero-cards-overlay .terminal-card {
-  width: 380px;
+  width: 600px;
   background: var(--panel);
   opacity: 1;
   transform: none;
@@ -734,7 +733,7 @@
 
 .hero-cards-overlay .hero-score-num {
   font-family: var(--mono);
-  font-size: 48px;
+  font-size: 80px;
   line-height: 1;
   letter-spacing: -1.5px;
   font-weight: 700;
@@ -742,7 +741,7 @@
 
 .hero-cards-overlay .hero-score-grade {
   font-family: var(--mono);
-  font-size: 24px;
+  font-size: 40px;
   line-height: 1;
   font-weight: 600;
 }
