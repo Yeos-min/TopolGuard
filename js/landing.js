@@ -149,3 +149,350 @@
   }
 
 })();
+
+// Hero comparison cards: independent Three.js turntables.
+(function () {
+  if (typeof THREE === 'undefined') return;
+
+  var configs = [
+    {
+      id: 'ai',
+      selector: '[data-hero-canvas="ai"]',
+      modelPath: 'samples/Humanoid_AI.obj',
+      showMarkers: true
+    },
+    {
+      id: 'human',
+      selector: '[data-hero-canvas="human"]',
+      modelPath: 'samples/Humanoid_Human_Modified.obj',
+      showMarkers: false
+    }
+  ];
+
+  var cards = [];
+  var running = !document.hidden;
+
+  function parseObjTextForHero(text) {
+    var vertices = [];
+    var faces = [];
+    var lines = text.split(/\r?\n/);
+
+    lines.forEach(function (line) {
+      line = line.trim();
+      if (!line || line.charAt(0) === '#') return;
+
+      var parts = line.split(/\s+/);
+      if (parts[0] === 'v' && parts.length >= 4) {
+        vertices.push([
+          parseFloat(parts[1]) || 0,
+          parseFloat(parts[2]) || 0,
+          parseFloat(parts[3]) || 0
+        ]);
+      } else if (parts[0] === 'f' && parts.length >= 4) {
+        var face = [];
+        for (var i = 1; i < parts.length; i++) {
+          var raw = parts[i].split('/')[0];
+          var idx = parseInt(raw, 10);
+          if (!idx) continue;
+          if (idx < 0) idx = vertices.length + idx;
+          else idx = idx - 1;
+          if (idx >= 0 && idx < vertices.length) face.push(idx);
+        }
+        for (var j = 1; j < face.length - 1; j++) {
+          faces.push([face[0], face[j], face[j + 1]]);
+        }
+      }
+    });
+
+    return { vertices: vertices, faces: faces };
+  }
+
+  function makeGeometry(parsed) {
+    var positions = [];
+    parsed.faces.forEach(function (face) {
+      face.forEach(function (idx) {
+        var v = parsed.vertices[idx];
+        positions.push(v[0], v[1], v[2]);
+      });
+    });
+
+    var geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.computeBoundingBox();
+    return geometry;
+  }
+
+  function midpoint(a, b) {
+    return [
+      (a[0] + b[0]) * 0.5,
+      (a[1] + b[1]) * 0.5,
+      (a[2] + b[2]) * 0.5
+    ];
+  }
+
+  function triangleCentroid(a, b, c) {
+    return [
+      (a[0] + b[0] + c[0]) / 3,
+      (a[1] + b[1] + c[1]) / 3,
+      (a[2] + b[2] + c[2]) / 3
+    ];
+  }
+
+  function dist(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    var dz = a[2] - b[2];
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+  }
+
+  function collectHeroMarkers(parsed) {
+    var edges = {};
+    var skinny = [];
+
+    function addEdge(a, b) {
+      var lo = Math.min(a, b);
+      var hi = Math.max(a, b);
+      var key = lo + '_' + hi;
+      if (!edges[key]) edges[key] = { a: lo, b: hi, count: 0 };
+      edges[key].count++;
+    }
+
+    parsed.faces.forEach(function (face) {
+      addEdge(face[0], face[1]);
+      addEdge(face[1], face[2]);
+      addEdge(face[2], face[0]);
+
+      var a = parsed.vertices[face[0]];
+      var b = parsed.vertices[face[1]];
+      var c = parsed.vertices[face[2]];
+      var ab = dist(a, b);
+      var bc = dist(b, c);
+      var ca = dist(c, a);
+      var longest = Math.max(ab, bc, ca);
+      var shortest = Math.max(Math.min(ab, bc, ca), 0.000001);
+      if (longest / shortest > 12) skinny.push(triangleCentroid(a, b, c));
+    });
+
+    var nonManifold = [];
+    var boundary = [];
+    Object.keys(edges).forEach(function (key) {
+      var edge = edges[key];
+      var p = midpoint(parsed.vertices[edge.a], parsed.vertices[edge.b]);
+      if (edge.count > 2) nonManifold.push(p);
+      else if (edge.count === 1) boundary.push(p);
+    });
+
+    return {
+      nonManifold: nonManifold.slice(0, 220),
+      boundary: boundary.slice(0, 180),
+      skinny: skinny.slice(0, 220)
+    };
+  }
+
+  function cssColor(varName, fallback) {
+    var value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    if (!value) return fallback;
+    if (value.charAt(0) === '#') return value;
+    return fallback;
+  }
+
+  function makePoints(points, color) {
+    if (!points.length) return null;
+    var positions = [];
+    points.forEach(function (p) {
+      positions.push(p[0], p[1], p[2]);
+    });
+
+    var geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+    var material = new THREE.PointsMaterial({
+      color: color,
+      size: 4,
+      sizeAttenuation: false,
+      transparent: true,
+      opacity: 0.9,
+      depthTest: false
+    });
+
+    return new THREE.Points(geometry, material);
+  }
+
+  function normalizeGroup(group, geometry) {
+    geometry.computeBoundingBox();
+    var box = geometry.boundingBox;
+    var center = box.getCenter(new THREE.Vector3());
+    var size = box.getSize(new THREE.Vector3());
+    var maxDim = Math.max(size.x, size.y, size.z, 0.0001);
+
+    group.position.set(-center.x, -center.y, -center.z);
+    group.scale.setScalar(2.15 / maxDim);
+  }
+
+  function resizeCard(card) {
+    var rect = card.canvas.getBoundingClientRect();
+    var w = Math.max(1, Math.floor(rect.width));
+    var h = Math.max(1, Math.floor(rect.height));
+    if (card.width === w && card.height === h) return;
+    card.width = w;
+    card.height = h;
+    card.renderer.setSize(w, h, false);
+    card.camera.aspect = w / h;
+    card.camera.updateProjectionMatrix();
+  }
+
+  function applyTheme(card) {
+    var isLight = document.documentElement.getAttribute('data-theme') === 'light' ||
+      document.body.classList.contains('light');
+    card.lineMaterial.color.set(isLight ? 0x333333 : 0x888888);
+    card.lineMaterial.opacity = isLight ? 0.58 : 0.72;
+  }
+
+  function initCard(config) {
+    var canvas = document.querySelector(config.selector);
+    if (!canvas) return;
+
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+        alpha: true
+      });
+    } catch (e) {
+      return;
+    }
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+    camera.position.set(0, 0.48, 4.2);
+    camera.lookAt(0, 0.05, 0);
+
+    var root = new THREE.Group();
+    scene.add(root);
+
+    var lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x888888,
+      transparent: true,
+      opacity: 0.72
+    });
+
+    var card = {
+      id: config.id,
+      canvas: canvas,
+      renderer: renderer,
+      scene: scene,
+      camera: camera,
+      root: root,
+      lineMaterial: lineMaterial,
+      visible: true,
+      hover: false,
+      width: 0,
+      height: 0
+    };
+
+    canvas.closest('.terminal-card').addEventListener('mouseenter', function () {
+      card.hover = true;
+    });
+    canvas.closest('.terminal-card').addEventListener('mouseleave', function () {
+      card.hover = false;
+    });
+
+    resizeCard(card);
+    applyTheme(card);
+    cards.push(card);
+
+    fetch(config.modelPath)
+      .then(function (res) {
+        if (!res.ok) throw new Error('Failed to load hero model: ' + config.modelPath);
+        return res.text();
+      })
+      .then(function (text) {
+        var parsed = parseObjTextForHero(text);
+        var geometry = makeGeometry(parsed);
+        var edges = new THREE.EdgesGeometry(geometry, 18);
+        var lines = new THREE.LineSegments(edges, lineMaterial);
+        root.add(lines);
+
+        if (config.showMarkers) {
+          var markerSets = collectHeroMarkers(parsed);
+          var nonManifold = makePoints(markerSets.nonManifold, cssColor('--issue-non-manifold', '#cf4b4b'));
+          var boundary = makePoints(markerSets.boundary, cssColor('--issue-boundary', '#e87d3e'));
+          var skinny = makePoints(markerSets.skinny, cssColor('--issue-skinny', '#c89020'));
+          if (nonManifold) root.add(nonManifold);
+          if (boundary) root.add(boundary);
+          if (skinny) root.add(skinny);
+        }
+
+        normalizeGroup(root, geometry);
+        geometry.dispose();
+      })
+      .catch(function () {
+        canvas.classList.add('hero-card-canvas--failed');
+      });
+  }
+
+  function renderLoop() {
+    if (running) {
+      cards.forEach(function (card) {
+        if (!card.visible) return;
+        resizeCard(card);
+        var speed = card.hover ? 0.0075 : 0.005;
+        card.root.rotation.y += speed;
+        card.renderer.render(card.scene, card.camera);
+      });
+    }
+    requestAnimationFrame(renderLoop);
+  }
+
+  function initHeroCards() {
+    configs.forEach(initCard);
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          var canvas = entry.target;
+          cards.forEach(function (card) {
+            if (card.canvas === canvas) card.visible = entry.isIntersecting;
+          });
+        });
+      }, { threshold: 0.05 });
+
+      configs.forEach(function (config) {
+        var canvas = document.querySelector(config.selector);
+        if (canvas) observer.observe(canvas);
+      });
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      running = !document.hidden;
+    });
+
+    var themeObserver = new MutationObserver(function () {
+      cards.forEach(applyTheme);
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+    themeObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    window.addEventListener('resize', function () {
+      cards.forEach(resizeCard);
+    });
+
+    renderLoop();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroCards);
+  } else {
+    initHeroCards();
+  }
+})();

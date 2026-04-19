@@ -767,12 +767,12 @@ body.light {
   width: 100%;
   overflow: hidden;
   position: relative;
+  background: var(--hero-canvas-bg, transparent);
 }
 
-.hero-cards-overlay .hero-card-image {
+.hero-cards-overlay .hero-card-canvas {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
 }
 
