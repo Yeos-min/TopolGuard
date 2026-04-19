@@ -115,6 +115,7 @@ function initHistoryResize() {
   if (!drawer) return;
   var handleRight = drawer.querySelector('.history-resize-handle-right');
   var handleBottom = drawer.querySelector('.history-resize-handle-bottom');
+  var handleCorner = drawer.querySelector('.history-resize-handle-corner');
   var body = drawer.querySelector('.history-drawer-body');
   if (!handleRight || !handleBottom || !body) return;
 
@@ -166,6 +167,35 @@ function initHistoryResize() {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
+
+  if (handleCorner) {
+    handleCorner.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      var startX = e.clientX;
+      var startY = e.clientY;
+      var startWidth = drawer.offsetWidth;
+      var startHeight = body.offsetHeight;
+      MAX_HEIGHT = window.innerHeight * 0.85;
+
+      function onMouseMove(e) {
+        var newWidth = startWidth + (e.clientX - startX);
+        newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
+        drawer.style.width = newWidth + 'px';
+
+        var newHeight = startHeight + (e.clientY - startY);
+        newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
+        drawer.style.setProperty('--history-drawer-height', newHeight + 'px');
+      }
+      function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        localStorage.setItem('topolguard-history-width', drawer.style.width);
+        localStorage.setItem('topolguard-history-height', drawer.style.getPropertyValue('--history-drawer-height'));
+      }
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  }
 }
 
 // ════════════════════════════════════════════════════════
