@@ -697,3 +697,49 @@
   .landing-cta a { justify-content: center; }
   .landing-footer { padding: 20px; }
 }
+
+/* ====== L-1 retry: hero cards overlay ====== */
+.hero-cards-overlay {
+  position: absolute;
+  right: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 16px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hero-cards-overlay > * {
+  pointer-events: auto;
+}
+
+.hero-cards-overlay .terminal-card {
+  width: 380px;
+  background: var(--panel);
+  opacity: 1;
+  transform: none;
+}
+
+.hero-cards-overlay .terminal-body {
+  background: var(--panel);
+}
+
+.hero-cards-overlay .hero-score-c {
+  color: #e87d3e;
+  font-weight: 700;
+}
+
+.hero-cards-overlay .hero-score-a {
+  color: #62a353;
+  font-weight: 700;
+}
+
+@media (max-width: 1280px) {
+  .hero-cards-overlay { right: 24px; gap: 12px; }
+  .hero-cards-overlay .terminal-card { width: 320px; }
+}
+
+@media (max-width: 1024px) {
+  .hero-cards-overlay { display: none; }
+}
