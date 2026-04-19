@@ -30,7 +30,7 @@ body.light {
 
 .hero {
   position: relative;
-  min-height: calc(85vh - 36px);
+  min-height: calc(80vh - 36px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -763,16 +763,37 @@ body.light {
 }
 
 .hero-cards-overlay .hero-card-screenshot {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 10;
   width: 100%;
 }
 
+/* 공통 호버: 떠오름만 */
 .hero-cards-overlay .terminal-card:hover {
-  border-color: var(--accent);
-  box-shadow:
-    0 0 0 1px var(--accent),
-    0 8px 32px rgba(62, 179, 137, 0.18);
   transform: translateY(-2px);
+}
+
+/* AI Output (defective) 호버: 주황 */
+.hero-cards-overlay .terminal-card.defective:hover {
+  border-color: #e87d3e;
+  box-shadow:
+    0 0 0 1px #e87d3e,
+    0 8px 32px rgba(232, 125, 62, 0.22);
+}
+.hero-cards-overlay .terminal-card.defective:hover .hero-card-corner {
+  border-color: #e87d3e;
+  opacity: 1;
+}
+
+/* Human Revised (clean) 호버: 초록 */
+.hero-cards-overlay .terminal-card.clean:hover {
+  border-color: #62a353;
+  box-shadow:
+    0 0 0 1px #62a353,
+    0 8px 32px rgba(98, 163, 83, 0.22);
+}
+.hero-cards-overlay .terminal-card.clean:hover .hero-card-corner {
+  border-color: #62a353;
+  opacity: 1;
 }
 
 .hero-cards-overlay .hero-card-corner {
@@ -813,14 +834,11 @@ body.light {
   border-top: none;
 }
 
-.hero-cards-overlay .terminal-card:hover .hero-card-corner {
-  opacity: 1;
-  border-color: var(--accent);
-}
+/* 공통 코너 호버 규칙은 위에서 카드별(.defective/.clean)로 분기됨 */
 
 .hero-cards-overlay .hero-card-body-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 32px;
   padding: 24px 32px;
 }
@@ -830,6 +848,7 @@ body.light {
   display: flex;
   align-items: baseline;
   gap: 8px;
+  margin-top: -8px;   /* VT323 픽셀 폰트의 위 여백 시각 보정 */
 }
 
 .hero-cards-overlay .hero-card-issues-area {
@@ -885,6 +904,29 @@ body.light {
   letter-spacing: 4px;
   margin-top: 4px;
   text-align: right;
+}
+
+/* 히어로 카드 라벨 점: error 톤을 빨강 → 주황(C등급)으로 오버라이드 */
+/* 섹션 03 카드는 영향 없음 */
+.hero-cards-overlay .terminal-dot.error {
+  background: #e87d3e;
+  box-shadow: 0 0 8px rgba(232, 125, 62, 0.6);
+}
+
+/* 히어로 이슈 리스트 fail 마크/숫자도 동일하게 주황 톤으로 */
+.hero-cards-overlay .hero-card-issues .t-check.fail,
+.hero-cards-overlay .hero-card-issues .t-val.err {
+  color: #e87d3e;
+}
+
+/* pass 마크/0 카운트는 기본 ok 톤(초록) 유지하되 dim하게 표현 가능 */
+.hero-cards-overlay .hero-card-issues .t-check.pass {
+  color: var(--ok);
+  opacity: 0.6;
+}
+.hero-cards-overlay .hero-card-issues .t-val.ok {
+  color: var(--faint);
+  font-weight: 400;
 }
 
 @media (max-width: 1600px) {
