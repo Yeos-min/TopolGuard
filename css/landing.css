@@ -732,7 +732,7 @@ body.light {
 
 .hero-cards-overlay .terminal-card {
   position: relative;
-  width: 600px;
+  width: 640px;
   background: rgba(
     var(--hero-card-bg-r),
     var(--hero-card-bg-g),
@@ -753,6 +753,18 @@ body.light {
 
 .hero-cards-overlay .terminal-body {
   background: transparent;
+  padding: 0;
+}
+
+.hero-cards-overlay .terminal-header {
+  padding: 24px 32px 0;
+  border-bottom: none;
+  background: transparent;
+}
+
+.hero-cards-overlay .hero-card-screenshot {
+  aspect-ratio: 16 / 9;
+  width: 100%;
 }
 
 .hero-cards-overlay .terminal-card:hover {
@@ -806,11 +818,23 @@ body.light {
   border-color: var(--accent);
 }
 
-.hero-cards-overlay .hero-score-row {
+.hero-cards-overlay .hero-card-body-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 24px 32px;
+}
+
+.hero-cards-overlay .hero-card-score-area {
+  flex: 0 0 auto;
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 8px;
+}
+
+.hero-cards-overlay .hero-card-issues-area {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .hero-cards-overlay .hero-score-num {
@@ -839,17 +863,42 @@ body.light {
   color: var(--text, #fff);
 }
 
-.hero-cards-overlay .hero-more-row {
-  color: var(--faint);
+.hero-cards-overlay .hero-card-issues {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hero-cards-overlay .hero-card-issues li {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  gap: 8px;
+  align-items: center;
   font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.hero-cards-overlay .hero-card-issues .more {
+  grid-template-columns: 1fr !important;
+  color: var(--faint);
   letter-spacing: 4px;
-  text-align: center;
-  padding-top: 6px;
+  margin-top: 4px;
+  text-align: right;
+}
+
+@media (max-width: 1600px) {
+  .hero-cards-overlay { right: 24px; }
+  .hero-cards-overlay .terminal-card { width: 560px; }
+}
+
+@media (max-width: 1440px) {
+  .hero-cards-overlay { gap: 12px; }
+  .hero-cards-overlay .terminal-card { width: 480px; }
 }
 
 @media (max-width: 1280px) {
-  .hero-cards-overlay { right: 24px; gap: 12px; }
-  .hero-cards-overlay .terminal-card { width: 320px; }
+  .hero-cards-overlay .terminal-card { width: 400px; }
 }
 
 @media (max-width: 1024px) {

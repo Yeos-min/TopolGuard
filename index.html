@@ -72,12 +72,12 @@
       </div>
 
       <div class="hero-cards-overlay" aria-label="AI Output and Human Revised scan comparison">
-        <div class="terminal-card clean">
+        <div class="terminal-card hero-card clean">
           <span class="hero-card-corner hero-card-corner--tl" aria-hidden="true"></span>
           <span class="hero-card-corner hero-card-corner--tr" aria-hidden="true"></span>
           <span class="hero-card-corner hero-card-corner--bl" aria-hidden="true"></span>
           <span class="hero-card-corner hero-card-corner--br" aria-hidden="true"></span>
-          <div class="compare-img-placeholder">
+          <div class="compare-img-placeholder hero-card-screenshot">
             <span class="placeholder-icon">&#11041;</span>
             <span class="placeholder-title">SCREENSHOT PENDING</span>
             <span class="placeholder-desc">Inspector 화면이 여기에 표시됩니다</span>
@@ -87,23 +87,29 @@
             <span>SCAN RESULT &mdash; AI OUTPUT</span>
           </div>
           <div class="terminal-body">
-            <div class="hero-score-row">
-              <span class="hero-score-num hero-score-c">68</span>
-              <span class="hero-score-grade hero-score-c">C</span>
+            <div class="hero-card-body-row">
+              <div class="hero-card-score-area">
+                <span class="hero-score-num hero-score-b">72</span>
+                <span class="hero-score-grade hero-score-b">B</span>
+              </div>
+              <div class="hero-card-issues-area">
+                <ul class="hero-card-issues">
+                  <li><span class="t-check fail">&#10005;</span><span class="t-label">Non-Manifold</span><span class="t-val err">176</span></li>
+                  <li><span class="t-check fail">&#10005;</span><span class="t-label">Boundary Edge</span><span class="t-val err">135</span></li>
+                  <li><span class="t-check fail">&#10005;</span><span class="t-label">Skinny Tri</span><span class="t-val err">180</span></li>
+                  <li class="more">&middot;&middot;&middot;</li>
+                </ul>
+              </div>
             </div>
-            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">Non-Manifold</span><span class="t-val err">12</span></div>
-            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">Skinny Tri</span><span class="t-val err">8</span></div>
-            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">N-Gons</span><span class="t-val err">6</span></div>
-            <div class="hero-more-row">&middot;&middot;&middot;</div>
           </div>
         </div>
 
-        <div class="terminal-card defective">
+        <div class="terminal-card hero-card defective">
           <span class="hero-card-corner hero-card-corner--tl" aria-hidden="true"></span>
           <span class="hero-card-corner hero-card-corner--tr" aria-hidden="true"></span>
           <span class="hero-card-corner hero-card-corner--bl" aria-hidden="true"></span>
           <span class="hero-card-corner hero-card-corner--br" aria-hidden="true"></span>
-          <div class="compare-img-placeholder">
+          <div class="compare-img-placeholder hero-card-screenshot">
             <span class="placeholder-icon">&#11041;</span>
             <span class="placeholder-title">SCREENSHOT PENDING</span>
             <span class="placeholder-desc">Inspector 화면이 여기에 표시됩니다</span>
@@ -113,14 +119,20 @@
             <span>SCAN RESULT &mdash; HUMAN REVISED</span>
           </div>
           <div class="terminal-body">
-            <div class="hero-score-row">
-              <span class="hero-score-num hero-score-a">92</span>
-              <span class="hero-score-grade hero-score-a">A</span>
+            <div class="hero-card-body-row">
+              <div class="hero-card-score-area">
+                <span class="hero-score-num hero-score-a">94</span>
+                <span class="hero-score-grade hero-score-a">A</span>
+              </div>
+              <div class="hero-card-issues-area">
+                <ul class="hero-card-issues">
+                  <li><span class="t-check pass">&#10003;</span><span class="t-label">Non-Manifold</span><span class="t-val ok">0</span></li>
+                  <li><span class="t-check pass">&#10003;</span><span class="t-label">Boundary Edge</span><span class="t-val ok">0</span></li>
+                  <li><span class="t-check pass">&#10003;</span><span class="t-label">Skinny Tri</span><span class="t-val ok">0</span></li>
+                  <li class="more">&middot;&middot;&middot;</li>
+                </ul>
+              </div>
             </div>
-            <div class="t-row"><span class="t-check pass">&#10003;</span><span class="t-label">Non-Manifold</span><span class="t-val ok">0</span></div>
-            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">Skinny Tri</span><span class="t-val err">1</span></div>
-            <div class="t-row"><span class="t-check pass">&#10003;</span><span class="t-label">N-Gons</span><span class="t-val ok">0</span></div>
-            <div class="hero-more-row">&middot;&middot;&middot;</div>
           </div>
         </div>
       </div>
