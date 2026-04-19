@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
   applyAnimToggleUI();
   initViewportTabs();
   initHistoryDrawer();
+  initHistoryResize();
 });
 
 function initHistoryDrawer() {
@@ -109,6 +110,64 @@ function initHistoryDrawer() {
   });
 }
 
+function initHistoryResize() {
+  var drawer = document.getElementById('history-drawer');
+  if (!drawer) return;
+  var handleRight = drawer.querySelector('.history-resize-handle-right');
+  var handleBottom = drawer.querySelector('.history-resize-handle-bottom');
+  var body = drawer.querySelector('.history-drawer-body');
+  if (!handleRight || !handleBottom || !body) return;
+
+  var MIN_WIDTH = 160;
+  var MAX_WIDTH = 500;
+  var MIN_HEIGHT = 80;
+  var MAX_HEIGHT = window.innerHeight * 0.85;
+
+  var savedWidth = localStorage.getItem('topolguard-history-width');
+  var savedHeight = localStorage.getItem('topolguard-history-height');
+  if (savedWidth) drawer.style.width = savedWidth;
+  if (savedHeight) drawer.style.setProperty('--history-drawer-height', savedHeight);
+
+  handleRight.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    var startX = e.clientX;
+    var startWidth = drawer.offsetWidth;
+
+    function onMouseMove(e) {
+      var newWidth = startWidth + (e.clientX - startX);
+      newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
+      drawer.style.width = newWidth + 'px';
+    }
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      localStorage.setItem('topolguard-history-width', drawer.style.width);
+    }
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+
+  handleBottom.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    var startY = e.clientY;
+    var startHeight = body.offsetHeight;
+    MAX_HEIGHT = window.innerHeight * 0.85;
+
+    function onMouseMove(e) {
+      var newHeight = startHeight + (e.clientY - startY);
+      newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
+      drawer.style.setProperty('--history-drawer-height', newHeight + 'px');
+    }
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      localStorage.setItem('topolguard-history-height', drawer.style.getPropertyValue('--history-drawer-height'));
+    }
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
 // ════════════════════════════════════════════════════════
 // HISTORY SYSTEM (메모리 방식 — localStorage 미사용)
 // ════════════════════════════════════════════════════════
@@ -116,6 +175,16 @@ var historyEntries = [];
 var MAX_HISTORY = 5;
 var currentLoadedFile = null;
 var _pendingLoad = null; // 로드 중인 파일 정보 임시 저장
+
+function captureHistoryThumbnail() {
+  try {
+    renderer.render(scene, camera);
+    return renderer.domElement.toDataURL('image/png');
+  } catch (e) {
+    console.warn('히스토리 썸네일 캡처 실패:', e);
+    return '';
+  }
+}
 
 function addToHistory(info, analysisData) {
   // 같은 파일명 중복 방지: 기존 항목 제거 후 맨 위에 재추가
@@ -125,6 +194,7 @@ function addToHistory(info, analysisData) {
     name: info.name,
     verts: analysisData.verts,
     health: analysisData.health,
+    thumbnail: captureHistoryThumbnail(),
     loadedAt: Date.now(),
     isSample: info.isSample,
     samplePath: info.samplePath || null,
@@ -148,7 +218,7 @@ function renderHistory() {
   if (historyEntries.length === 0) {
     if (emptyEl) emptyEl.style.display = '';
     // 기존 엔트리 제거
-    var entries = container.querySelectorAll('.history-entry');
+    var entries = container.querySelectorAll('.history-entry, .history-item');
     entries.forEach(function(e) { e.remove(); });
     return;
   }
@@ -156,21 +226,19 @@ function renderHistory() {
   if (emptyEl) emptyEl.style.display = 'none';
 
   // 기존 엔트리 제거 후 재렌더
-  var oldEntries = container.querySelectorAll('.history-entry');
+  var oldEntries = container.querySelectorAll('.history-entry, .history-item');
   oldEntries.forEach(function(e) { e.remove(); });
 
   historyEntries.forEach(function(entry, idx) {
-    var el = document.createElement('div');
-    el.className = 'history-entry';
+    var el = document.createElement('li');
+    el.className = 'history-item';
     el.onclick = function() { reloadFromHistory(idx); };
 
-    var isCurrent = (entry.name === currentLoadedFile);
-    var dotClass = isCurrent ? 'history-dot current' : 'history-dot past';
-    var dotChar = isCurrent ? '●' : '○';
-
     el.innerHTML =
-      '<div class="history-name"><span class="' + dotClass + '">' + dotChar + '</span>' + escapeHtml(entry.name) + '</div>' +
-      '<div class="history-meta">' + formatVerts(entry.verts) + ' 정점 · 점수 ' + entry.health + ' · <span class="history-time" data-time="' + entry.loadedAt + '">' + relativeTime(entry.loadedAt) + '</span></div>';
+      '<div class="history-thumb">' +
+        (entry.thumbnail ? '<img src="' + entry.thumbnail + '" alt="thumbnail">' : '') +
+      '</div>' +
+      '<span class="history-name">' + escapeHtml(entry.name) + '</span>';
 
     container.appendChild(el);
   });
