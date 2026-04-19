@@ -85,170 +85,73 @@ function countUpTo(el, targetVal, duration, suffix) {
 document.addEventListener('DOMContentLoaded', function() {
   applyAnimToggleUI();
   initViewportTabs();
-  initHistoryDrawer();
-  initSamplesDrawer();
+  initSidePanel();
   initSampleButtons();
-  initHistoryResize();
+  initSidePanelResize();
   initHistoryPreview();
-  updateSamplesPosition();
 });
 
-function initHistoryDrawer() {
-  var drawer = document.getElementById('history-drawer');
-  if (!drawer) return;
-  var header = drawer.querySelector('.history-drawer-header');
-  if (!header) return;
-  var STORAGE_KEY = 'topolguard-history-drawer-state';
+function initSidePanel() {
+  var panel = document.getElementById('side-panel');
+  if (!panel) return;
+  var tab = document.getElementById('side-panel-tab');
+  if (!tab) return;
+  var STORAGE_KEY = 'topolguard-sidepanel-state';
 
   var savedState = localStorage.getItem(STORAGE_KEY);
   if (savedState === 'expanded') {
-    drawer.classList.remove('collapsed');
-    drawer.classList.add('expanded');
+    panel.classList.remove('collapsed');
+    panel.classList.add('expanded');
   }
 
-  header.addEventListener('click', function() {
-    var isExpanded = drawer.classList.contains('expanded');
-    drawer.classList.toggle('expanded');
-    drawer.classList.toggle('collapsed');
+  tab.addEventListener('click', function() {
+    var isExpanded = panel.classList.contains('expanded');
+    panel.classList.toggle('expanded');
+    panel.classList.toggle('collapsed');
     localStorage.setItem(STORAGE_KEY, isExpanded ? 'collapsed' : 'expanded');
-    updateSamplesPosition();
-  });
-
-  var body = drawer.querySelector('.history-drawer-body');
-  if (body) {
-    body.addEventListener('transitionend', updateSamplesPosition);
-  }
-}
-
-function updateSamplesPosition() {
-  var historyDrawer = document.getElementById('history-drawer');
-  var samplesDrawer = document.getElementById('samples-drawer');
-  if (!historyDrawer || !samplesDrawer) return;
-  samplesDrawer.style.top = (historyDrawer.offsetTop + historyDrawer.offsetHeight) + 'px';
-}
-
-function initSamplesDrawer() {
-  var drawer = document.getElementById('samples-drawer');
-  if (!drawer) return;
-  var header = drawer.querySelector('.samples-drawer-header');
-  if (!header) return;
-  var STORAGE_KEY = 'topolguard-samples-drawer-state';
-
-  var savedState = localStorage.getItem(STORAGE_KEY);
-  if (savedState === 'expanded') {
-    drawer.classList.remove('collapsed');
-    drawer.classList.add('expanded');
-  }
-
-  header.addEventListener('click', function() {
-    drawer.classList.toggle('expanded');
-    drawer.classList.toggle('collapsed');
-    var isNowExpanded = drawer.classList.contains('expanded');
-    localStorage.setItem(STORAGE_KEY, isNowExpanded ? 'expanded' : 'collapsed');
   });
 }
 
-function initHistoryResize() {
-  var drawer = document.getElementById('history-drawer');
-  if (!drawer) return;
-  var handleRight = drawer.querySelector('.history-resize-handle-right');
-  var handleBottom = drawer.querySelector('.history-resize-handle-bottom');
-  var handleCorner = drawer.querySelector('.history-resize-handle-corner');
-  var body = drawer.querySelector('.history-drawer-body');
-  if (!handleRight || !handleBottom || !body) return;
+function initSidePanelResize() {
+  var panel = document.getElementById('side-panel');
+  if (!panel) return;
+  var handle = panel.querySelector('.side-panel-resize-handle');
+  var body = panel.querySelector('.side-panel-body');
+  if (!handle || !body) return;
 
-  var MIN_WIDTH = 160;
+  var MIN_WIDTH = 220;
   var MAX_WIDTH = 500;
-  var MIN_HEIGHT = 80;
-  var MAX_HEIGHT = window.innerHeight * 0.85;
+  var WIDTH_KEY = 'topolguard-sidepanel-width';
 
-  var savedWidth = localStorage.getItem('topolguard-history-width');
-  var savedHeight = localStorage.getItem('topolguard-history-height');
-  if (savedWidth) drawer.style.width = savedWidth;
-  if (savedHeight) drawer.style.setProperty('--history-drawer-height', savedHeight);
-  updateSamplesPosition();
+  var savedWidth = localStorage.getItem(WIDTH_KEY);
+  if (savedWidth) body.style.setProperty('--side-panel-width', savedWidth);
 
-  handleRight.addEventListener('mousedown', function(e) {
+  handle.addEventListener('mousedown', function(e) {
     e.preventDefault();
     var startX = e.clientX;
-    var startWidth = drawer.offsetWidth;
+    var startWidth = body.offsetWidth || MIN_WIDTH;
 
     function onMouseMove(e) {
       var newWidth = startWidth + (e.clientX - startX);
       newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
-      drawer.style.width = newWidth + 'px';
-      updateSamplesPosition();
+      body.style.setProperty('--side-panel-width', newWidth + 'px');
     }
     function onMouseUp() {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-      localStorage.setItem('topolguard-history-width', drawer.style.width);
-      updateSamplesPosition();
+      localStorage.setItem(WIDTH_KEY, body.style.getPropertyValue('--side-panel-width'));
     }
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
-
-  handleBottom.addEventListener('mousedown', function(e) {
-    e.preventDefault();
-    var startY = e.clientY;
-    var startHeight = body.offsetHeight;
-    MAX_HEIGHT = window.innerHeight * 0.85;
-
-    function onMouseMove(e) {
-      var newHeight = startHeight + (e.clientY - startY);
-      newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
-      drawer.style.setProperty('--history-drawer-height', newHeight + 'px');
-      updateSamplesPosition();
-    }
-    function onMouseUp() {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      localStorage.setItem('topolguard-history-height', drawer.style.getPropertyValue('--history-drawer-height'));
-      updateSamplesPosition();
-    }
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  });
-
-  if (handleCorner) {
-    handleCorner.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      var startX = e.clientX;
-      var startY = e.clientY;
-      var startWidth = drawer.offsetWidth;
-      var startHeight = body.offsetHeight;
-      MAX_HEIGHT = window.innerHeight * 0.85;
-
-      function onMouseMove(e) {
-        var newWidth = startWidth + (e.clientX - startX);
-        newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
-        drawer.style.width = newWidth + 'px';
-
-        var newHeight = startHeight + (e.clientY - startY);
-        newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
-        drawer.style.setProperty('--history-drawer-height', newHeight + 'px');
-        updateSamplesPosition();
-      }
-      function onMouseUp() {
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-        localStorage.setItem('topolguard-history-width', drawer.style.width);
-        localStorage.setItem('topolguard-history-height', drawer.style.getPropertyValue('--history-drawer-height'));
-        updateSamplesPosition();
-      }
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    });
-  }
 }
 
 function initHistoryPreview() {
   var list = document.getElementById('history-list');
   var preview = document.getElementById('history-preview');
   var previewImg = document.getElementById('history-preview-img');
-  var drawer = document.getElementById('history-drawer');
-  if (!list || !preview || !previewImg || !drawer) return;
+  var panel = document.getElementById('side-panel');
+  if (!list || !preview || !previewImg || !panel) return;
 
   list.addEventListener('mouseover', function(e) {
     var item = e.target.closest('.history-item');
@@ -258,14 +161,14 @@ function initHistoryPreview() {
 
     previewImg.src = img.src;
 
-    var drawerRect = drawer.getBoundingClientRect();
+    var panelRect = panel.getBoundingClientRect();
     var itemRect = item.getBoundingClientRect();
     var topPos = itemRect.top;
     if (topPos + 230 > window.innerHeight) {
       topPos = window.innerHeight - 240;
     }
 
-    preview.style.left = (drawerRect.right + 8) + 'px';
+    preview.style.left = (panelRect.right + 8) + 'px';
     preview.style.top = topPos + 'px';
     preview.classList.remove('hidden');
   });

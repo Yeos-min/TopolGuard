@@ -53,32 +53,37 @@
 
 <div id="app-body">
 
-<!-- HISTORY DRAWER -->
-<div id="history-drawer" class="history-drawer collapsed">
-  <div class="history-drawer-header">
-    <span class="history-drawer-title">HISTORY</span>
-    <span class="history-drawer-arrow">▸</span>
+<!-- SIDE PANEL — HISTORY + SAMPLES -->
+<div id="side-panel" class="side-panel collapsed">
+  <div class="side-panel-tab" id="side-panel-tab">
+    <span class="tab-label tab-label-text">HISTORY</span>
+    <span class="tab-label tab-label-icon">☰</span>
   </div>
-  <div class="history-drawer-body">
-    <div class="section-title">HISTORY</div>
-    <ul id="history-list">
-      <li id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px; font-family:var(--mono); list-style:none;">아직 로드된 파일이 없어요</li>
-    </ul>
-  </div>
-  <div class="history-resize-handle-right"></div>
-  <div class="history-resize-handle-bottom"></div>
-  <div class="history-resize-handle-corner"></div>
-</div>
 
-<div id="samples-drawer" class="samples-drawer collapsed">
-  <div class="samples-drawer-header">
-    <span class="samples-drawer-title">SAMPLES</span>
-    <span class="samples-drawer-arrow">▸</span>
+  <div class="side-panel-body">
+    <div class="side-panel-section history-section">
+      <div class="section-header">
+        <span class="section-title">HISTORY</span>
+      </div>
+      <div class="section-content">
+        <ul id="history-list">
+          <li id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 10px 6px; font-family:var(--mono); list-style:none;">아직 로드된 파일이 없어요</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="side-panel-section samples-section">
+      <div class="section-header">
+        <span class="section-title">SAMPLES</span>
+      </div>
+      <div class="section-content">
+        <button class="sample-btn" id="sample-good-btn" data-file="Good_Low_Poly_Male_body_AI.obj">AI ORIGIN</button>
+        <button class="sample-btn" id="sample-bad-btn" data-file="Bad_Low_Poly_Male_body_AI.obj">HUMAN TOUCHED</button>
+      </div>
+    </div>
   </div>
-  <div class="samples-drawer-body">
-    <button class="sample-btn" id="sample-good-btn" data-file="Good_Low_Poly_Male_body_AI.obj">AI ORIGIN</button>
-    <button class="sample-btn" id="sample-bad-btn" data-file="Bad_Low_Poly_Male_body_AI.obj">HUMAN TOUCHED</button>
-  </div>
+
+  <div class="side-panel-resize-handle"></div>
 </div>
 
 <div id="history-preview" class="history-preview hidden">
