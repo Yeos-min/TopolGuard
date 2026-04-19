@@ -77,8 +77,8 @@
         <span class="section-title">SAMPLES</span>
       </div>
       <div class="section-content">
-        <button class="sample-btn" id="sample-good-btn" data-file="Good_Low_Poly_Male_body_AI.obj">AI ORIGIN</button>
-        <button class="sample-btn" id="sample-bad-btn" data-file="Bad_Low_Poly_Male_body_AI.obj">HUMAN TOUCHED</button>
+        <button class="sample-btn" id="sample-good-btn" data-file="Humanoid_AI.obj">AI ORIGIN</button>
+        <button class="sample-btn" id="sample-bad-btn" data-file="Humanoid_Human_Modified.obj">HUMAN TOUCHED</button>
       </div>
     </div>
   </div>
@@ -119,20 +119,20 @@
   <div id="quick-start" class="visible">
     <div class="qs-title">QUICK START — AI 모델 비교하기</div>
     <div class="qs-grid qs-grid-2">
-      <button class="qs-btn qs-good" onclick="loadSample('samples/Good_Low_Poly_Male_body_AI.obj','Good Sample','✓')">
+      <button class="qs-btn qs-good" onclick="loadSample('samples/Humanoid_AI.obj','Humanoid AI Origin','✓')">
         <span class="qs-btn-icon">✓</span>
-        <span class="qs-btn-name">✓ CLEAN</span>
+        <span class="qs-btn-name">AI ORIGIN</span>
         <span class="qs-btn-desc">
-          <span>Tripo AI · 깔끔한 저폴리</span><br>
-          <span class="qs-btn-meta">2.5k verts · 350KB</span>
+          <span>Tripo AI · Humanoid 순정 출력</span><br>
+          <span class="qs-btn-meta">4,853 verts · 9,445 faces · 72 B</span>
         </span>
       </button>
-      <button class="qs-btn qs-bad" onclick="loadSample('samples/Bad_Low_Poly_Male_body_AI.obj','Bad Sample','⚠')">
+      <button class="qs-btn qs-bad" onclick="loadSample('samples/Humanoid_Human_Modified.obj','Humanoid Human Touched','⚠')">
         <span class="qs-btn-icon">⚠</span>
-        <span class="qs-btn-name">⚠ DEFECTIVE</span>
+        <span class="qs-btn-name">HUMAN TOUCHED</span>
         <span class="qs-btn-desc">
-          <span>Tripo AI · 덴스하고 위상 이상</span><br>
-          <span class="qs-btn-meta">11k verts · 1.2MB · decimated</span>
+          <span>Human retopology · Humanoid revised</span><br>
+          <span class="qs-btn-meta">4,455 verts · 8,438 faces · 94 A</span>
         </span>
       </button>
     </div>

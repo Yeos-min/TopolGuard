@@ -291,7 +291,7 @@ function reloadFromHistory(idx) {
   if (!entry) return;
 
   if (entry.isSample && entry.samplePath) {
-    loadSample(entry.samplePath, entry.name, entry.name.indexOf('Good') >= 0 ? '✓' : '⚠');
+    loadSample(entry.samplePath, entry.name, entry.name.indexOf('Humanoid_AI') >= 0 ? '✓' : '⚠');
   } else if (entry.objText) {
     _pendingLoad = { isSample: false, name: entry.name, objText: entry.objText };
     var blob = new Blob([entry.objText], { type: 'text/plain' });
@@ -333,8 +333,8 @@ setInterval(function() {
 // SIDEBAR SAMPLE BUTTONS
 // ════════════════════════════════════════════════════════
 var SAMPLE_PATHS = {
-  good: 'samples/Good_Low_Poly_Male_body_AI.obj',
-  bad:  'samples/Bad_Low_Poly_Male_body_AI.obj'
+  good: 'samples/Humanoid_AI.obj',
+  bad:  'samples/Humanoid_Human_Modified.obj'
 };
 
 function loadSampleFromSidebar(which) {

@@ -57,8 +57,8 @@ topolguard/
 │  ├─ manual.js            # Scroll-spy for TOC
 │  └─ app.js               # Inspector logic (Three.js + OBJ analysis)
 ├─ samples/
-│  ├─ Good_Low_Poly_Male_body_AI.obj   # Clean AI-generated sample
-│  ├─ Bad_Low_Poly_Male_body_AI.obj    # Problematic AI sample (decimated)
+│  ├─ Humanoid_AI.obj   # AI-origin Humanoid sample
+│  ├─ Humanoid_Human_Modified.obj    # Human-retopologized Humanoid sample
 │  └─ CREDITS.md                        # Sample provenance & licensing
 └─ README.md
 ```
