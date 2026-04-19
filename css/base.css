@@ -32,7 +32,7 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   padding: 0 16px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 16px;
   letter-spacing: 0.05em;
   color: var(--dim);
   z-index: 100;
@@ -61,7 +61,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .tg-topnav .links a {
   color: var(--dim);
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
   transition: color 0.15s var(--ease);
