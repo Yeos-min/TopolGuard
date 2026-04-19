@@ -26,7 +26,7 @@ body[data-page="app"] * { margin: 0; padding: 0; }
 }
 
 /* 모드 전환 부드럽게 */
-body, #left-sidebar, #sidebar, #sidebar-body, #sidebar-footer,
+body, .history-drawer, #sidebar, #sidebar-body, #sidebar-footer,
 .stat-card, #health-card, .issue-item, .issue-card, .tog-btn, .qs-btn, #hud, #skip-btn,
 .tg-topnav, .tg-topnav .inspector-ctrl .icon-btn, .tg-topnav .menu-dropdown {
   transition: background 0.25s, color 0.25s, border-color 0.25s;
@@ -56,11 +56,17 @@ body, #left-sidebar, #sidebar, #sidebar-body, #sidebar-footer,
   #sidebar-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
   #sidebar-body { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 
-  /* ── LEFT SIDEBAR ── */
-  #left-sidebar { width: 220px; min-width: 220px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); padding: 10px 12px; overflow-y: auto; z-index: 10; }
-  #left-sidebar::-webkit-scrollbar { width: 3px; }
-  #left-sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-  #left-sidebar { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+/* ── History Drawer ── */
+  .history-drawer { position: absolute; top: 44px; left: 0; width: 220px; z-index: 16; background: var(--panel); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0 0 6px 0; overflow: hidden; }
+  .history-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--dim); }
+  .history-drawer-header:hover { background: var(--panel2); }
+  .history-drawer-arrow { transition: transform 0.2s ease; font-size: 10px; }
+  .history-drawer.expanded .history-drawer-arrow { transform: rotate(90deg); }
+  .history-drawer-body { max-height: 0; overflow-y: auto; transition: max-height 0.25s ease; padding: 0 12px; }
+  .history-drawer.expanded .history-drawer-body { max-height: 60vh; padding-bottom: 10px; }
+  .history-drawer-body::-webkit-scrollbar { width: 3px; }
+  .history-drawer-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .history-drawer-body { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 
   /* ── SECTIONS ── */
   .section-title { font-size: 9px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; line-height: 1.4; margin: 14px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); font-family: var(--mono); display: flex; align-items: center; gap: 6px; }

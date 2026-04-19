@@ -47,21 +47,27 @@
 
 <div id="app-body">
 
-<!-- LEFT SIDEBAR — SAMPLES + HISTORY -->
-<div id="left-sidebar">
-  <div class="section-title">QUICK START</div>
-  <div class="sample-btns">
-    <button class="sample-btn" id="sample-good-btn" onclick="loadSampleFromSidebar('good')">
-      <span class="sample-icon">✓</span> <span>CLEAN</span>
-    </button>
-    <button class="sample-btn" id="sample-bad-btn" onclick="loadSampleFromSidebar('bad')">
-      <span class="sample-icon">⚠</span> <span>DEFECTIVE</span>
-    </button>
+<!-- HISTORY DRAWER — SAMPLES + HISTORY -->
+<div id="history-drawer" class="history-drawer collapsed">
+  <div class="history-drawer-header">
+    <span class="history-drawer-title">HISTORY</span>
+    <span class="history-drawer-arrow">▸</span>
   </div>
+  <div class="history-drawer-body">
+    <div class="section-title">QUICK START</div>
+    <div class="sample-btns">
+      <button class="sample-btn" id="sample-good-btn" onclick="loadSampleFromSidebar('good')">
+        <span class="sample-icon">✓</span> <span>CLEAN</span>
+      </button>
+      <button class="sample-btn" id="sample-bad-btn" onclick="loadSampleFromSidebar('bad')">
+        <span class="sample-icon">⚠</span> <span>DEFECTIVE</span>
+      </button>
+    </div>
 
-  <div class="section-title">HISTORY</div>
-  <div id="history-list">
-    <div id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px; font-family:var(--mono);">아직 로드된 파일이 없어요</div>
+    <div class="section-title">HISTORY</div>
+    <div id="history-list">
+      <div id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 0 6px; font-family:var(--mono);">아직 로드된 파일이 없어요</div>
+    </div>
   </div>
 </div>
 
