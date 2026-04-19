@@ -85,7 +85,29 @@ function countUpTo(el, targetVal, duration, suffix) {
 document.addEventListener('DOMContentLoaded', function() {
   applyAnimToggleUI();
   initViewportTabs();
+  initHistoryDrawer();
 });
+
+function initHistoryDrawer() {
+  var drawer = document.getElementById('history-drawer');
+  if (!drawer) return;
+  var header = drawer.querySelector('.history-drawer-header');
+  if (!header) return;
+  var STORAGE_KEY = 'topolguard-history-drawer-state';
+
+  var savedState = localStorage.getItem(STORAGE_KEY);
+  if (savedState === 'expanded') {
+    drawer.classList.remove('collapsed');
+    drawer.classList.add('expanded');
+  }
+
+  header.addEventListener('click', function() {
+    var isExpanded = drawer.classList.contains('expanded');
+    drawer.classList.toggle('expanded');
+    drawer.classList.toggle('collapsed');
+    localStorage.setItem(STORAGE_KEY, isExpanded ? 'collapsed' : 'expanded');
+  });
+}
 
 // ════════════════════════════════════════════════════════
 // HISTORY SYSTEM (메모리 방식 — localStorage 미사용)
