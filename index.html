@@ -71,6 +71,46 @@
         </div>
       </div>
 
+      <div class="hero-cards-overlay" aria-label="AI Output and Human Revised scan comparison">
+        <div class="terminal-card clean">
+          <div class="terminal-header">
+            <span class="terminal-dot ok"></span>
+            <span>SCAN RESULT &mdash; AI OUTPUT</span>
+          </div>
+          <div class="terminal-body">
+            <div class="t-row"><span class="t-label">Model</span><span class="t-val">Good_Low_Poly_Male_body_AI</span></div>
+            <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">1,842</span></div>
+            <div class="t-row"><span class="t-label">Faces</span><span class="t-val">3,640</span></div>
+            <div class="t-divider"></div>
+            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">Non-Manifold</span><span class="t-val err">12</span></div>
+            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">Skinny Tri</span><span class="t-val err">8</span></div>
+            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">N-Gons</span><span class="t-val err">6</span></div>
+            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">Flipped Normals</span><span class="t-val err">4</span></div>
+            <div class="t-divider"></div>
+            <div class="t-row t-score"><span class="t-label">MODELING SCORE</span><span class="t-val hero-score-c">68 / 100</span></div>
+          </div>
+        </div>
+
+        <div class="terminal-card defective">
+          <div class="terminal-header">
+            <span class="terminal-dot error"></span>
+            <span>SCAN RESULT &mdash; HUMAN REVISED</span>
+          </div>
+          <div class="terminal-body">
+            <div class="t-row"><span class="t-label">Model</span><span class="t-val">Bad_Low_Poly_Male_body_AI</span></div>
+            <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">1,956</span></div>
+            <div class="t-row"><span class="t-label">Faces</span><span class="t-val">3,824</span></div>
+            <div class="t-divider"></div>
+            <div class="t-row"><span class="t-check pass">&#10003;</span><span class="t-label">Non-Manifold</span><span class="t-val ok">0</span></div>
+            <div class="t-row"><span class="t-check fail">&#10005;</span><span class="t-label">Skinny Tri</span><span class="t-val err">1</span></div>
+            <div class="t-row"><span class="t-check pass">&#10003;</span><span class="t-label">N-Gons</span><span class="t-val ok">0</span></div>
+            <div class="t-row"><span class="t-check pass">&#10003;</span><span class="t-label">Flipped Normals</span><span class="t-val ok">0</span></div>
+            <div class="t-divider"></div>
+            <div class="t-row t-score"><span class="t-label">MODELING SCORE</span><span class="t-val hero-score-a">92 / 100</span></div>
+          </div>
+        </div>
+      </div>
+
       <div class="landing-status">
         <span>VERSION<b>2.1.0</b></span>
         <span>ENGINE<b>THREE.JS r128</b></span>
