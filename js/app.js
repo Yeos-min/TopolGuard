@@ -238,7 +238,7 @@ function initHistoryPreview() {
 // HISTORY SYSTEM (메모리 방식 — localStorage 미사용)
 // ════════════════════════════════════════════════════════
 var historyEntries = [];
-var MAX_HISTORY = 5;
+var MAX_HISTORY = 15;
 var currentLoadedFile = null;
 var _pendingLoad = null; // 로드 중인 파일 정보 임시 저장
 
