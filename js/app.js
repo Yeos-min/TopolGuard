@@ -244,9 +244,38 @@ var _pendingLoad = null; // 로드 중인 파일 정보 임시 저장
 
 function captureHistoryThumbnail() {
   try {
+    if (!modelGroup) return '';
+    var savedPos = camera.position.clone();
+    var savedTarget = controls.target.clone();
+
+    var box = new THREE.Box3().setFromObject(modelGroup);
+    var center = box.getCenter(new THREE.Vector3());
+    var size = box.getSize(new THREE.Vector3());
+    var maxDim = Math.max(size.x, size.y, size.z);
+    var fov = camera.fov * (Math.PI / 180);
+    var dist = (maxDim / 2) / Math.tan(fov / 2) * 1.3;
+
+    camera.position.set(center.x, center.y, center.z + dist);
+    controls.target.copy(center);
+    camera.lookAt(center);
+    camera.updateProjectionMatrix();
+
     renderer.render(scene, camera);
-    return renderer.domElement.toDataURL('image/png');
+    var thumbnailDataURL = renderer.domElement.toDataURL('image/png');
+
+    camera.position.copy(savedPos);
+    controls.target.copy(savedTarget);
+    camera.lookAt(controls.target);
+    camera.updateProjectionMatrix();
+
+    return thumbnailDataURL;
   } catch (e) {
+    if (savedPos && savedTarget) {
+      camera.position.copy(savedPos);
+      controls.target.copy(savedTarget);
+      camera.lookAt(controls.target);
+      camera.updateProjectionMatrix();
+    }
     console.warn('히스토리 썸네일 캡처 실패:', e);
     return '';
   }
