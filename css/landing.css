@@ -13,7 +13,7 @@
 
 .hero {
   position: relative;
-  min-height: calc(100vh - 36px);
+  min-height: calc(85vh - 36px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -702,8 +702,7 @@
 .hero-cards-overlay {
   position: absolute;
   right: 48px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 120px;
   display: flex;
   gap: 16px;
   z-index: 3;
