@@ -33,3 +33,35 @@
   var active = nav.querySelector('[data-link="' + current + '"]');
   if (active) active.classList.add('active');
 })();
+
+(function () {
+  var KEY = 'tg_theme';
+
+  function syncThemeState() {
+    var isLight = localStorage.getItem(KEY) === 'light';
+    document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+    document.body.classList.toggle('light', isLight);
+    document.querySelectorAll('.theme-btn').forEach(function(btn) {
+      btn.textContent = isLight ? '○' : '◐';
+    });
+  }
+
+  var existingToggle = window.tgToggleTheme;
+  window.tgToggleTheme = function() {
+    if (typeof existingToggle === 'function') {
+      existingToggle();
+    } else {
+      var nextIsLight = !document.body.classList.contains('light');
+      document.body.classList.toggle('light', nextIsLight);
+      localStorage.setItem(KEY, nextIsLight ? 'light' : 'dark');
+    }
+    localStorage.setItem(KEY, document.body.classList.contains('light') ? 'light' : 'dark');
+    syncThemeState();
+  };
+  window.toggleTheme = window.tgToggleTheme;
+
+  document.querySelectorAll('.theme-btn').forEach(function(btn) {
+    btn.onclick = window.tgToggleTheme;
+  });
+  syncThemeState();
+})();

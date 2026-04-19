@@ -57,7 +57,7 @@ body, .history-drawer, .samples-drawer, #sidebar, #sidebar-body, #sidebar-footer
   #sidebar-body { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 
 /* ── History Drawer ── */
-  .history-drawer { position: absolute; top: 64px; left: 0; width: 220px; z-index: 16; background: var(--panel); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0 0 6px 0; overflow: hidden; }
+  .history-drawer { position: absolute; top: var(--topnav-h); left: 0; width: 220px; z-index: 16; background: var(--panel); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0 0 6px 0; overflow: hidden; }
   .history-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 16px; letter-spacing: 0.05em; color: var(--dim); }
   .history-drawer-header:hover { background: var(--panel2); }
   .history-drawer-arrow { transition: transform 0.2s ease; font-size: 16px; }
@@ -477,6 +477,8 @@ body, .history-drawer, .samples-drawer, #sidebar, #sidebar-body, #sidebar-footer
 body[data-page="app"] .tg-topnav {
   position: static;
   flex-shrink: 0;
+  height: var(--topnav-h);
+  padding: 0 16px;
 }
 
 .tg-topnav .inspector-ctrl {

@@ -25,12 +25,12 @@ button { font-family: inherit; cursor: pointer; }
 .tg-topnav {
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 64px;
+  height: var(--topnav-h);
   background: var(--bg);
   border-bottom: 1px solid var(--border2);
   display: flex;
   align-items: center;
-  padding: 0 14px;
+  padding: 0 16px;
   font-family: var(--mono);
   font-size: 16px;
   letter-spacing: 0.05em;
@@ -61,7 +61,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .tg-topnav .links a {
   color: var(--dim);
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 1px;
   transition: color 0.15s var(--ease);
@@ -88,7 +88,7 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   gap: 10px;
   color: var(--dim);
-  font-size: 10px;
+  font-size: 16px;
   letter-spacing: 0.5px;
 }
 .tg-topnav .sys .dot {
@@ -109,7 +109,7 @@ button { font-family: inherit; cursor: pointer; }
   color: var(--dim);
   width: 26px; height: 26px;
   border-radius: 3px;
-  font-size: 12px;
+  font-size: 16px;
   margin-left: 12px;
   padding: 0;
   display: inline-flex;
@@ -123,7 +123,7 @@ button { font-family: inherit; cursor: pointer; }
   border-color: var(--accent);
 }
 
-body.has-topnav { padding-top: 64px; }
+body.has-topnav { padding-top: var(--topnav-h); }
 
 /* 인스펙터에서는 has-topnav 대신 app-topbar가 자체적으로 위치 — padding 불필요 */
 body[data-page="app"] { padding-top: 0; }
