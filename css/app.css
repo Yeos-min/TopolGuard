@@ -70,8 +70,10 @@ body, .history-drawer, #sidebar, #sidebar-body, #sidebar-footer,
 
   .history-resize-handle-right { position: absolute; top: 0; right: -3px; width: 6px; height: 100%; cursor: col-resize; z-index: 17; }
   .history-resize-handle-bottom { position: absolute; bottom: -3px; left: 0; width: 100%; height: 6px; cursor: row-resize; z-index: 17; }
+  .history-resize-handle-corner { position: absolute; bottom: -3px; right: -3px; width: 12px; height: 12px; cursor: nwse-resize; z-index: 18; }
   .history-resize-handle-right:hover,
   .history-resize-handle-bottom:hover { background: var(--accent); opacity: 0.4; }
+  .history-resize-handle-corner:hover { background: var(--accent); opacity: 0.4; border-radius: 2px; }
 
   /* ── SECTIONS ── */
   .section-title { font-size: 9px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; line-height: 1.4; margin: 14px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); font-family: var(--mono); display: flex; align-items: center; gap: 6px; }
@@ -277,7 +279,7 @@ body, .history-drawer, #sidebar, #sidebar-body, #sidebar-footer,
 #history-list { margin-bottom: 4px; }
 .history-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; color: var(--text); list-style: none; }
 .history-item:hover { background: var(--panel2); }
-.history-thumb { width: 40px; height: 40px; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: var(--panel2); }
+.history-thumb { width: clamp(32px, 25%, 80px); aspect-ratio: 1 / 1; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: var(--panel2); }
 .history-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .history-item .history-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .history-entry { display: flex; flex-direction: column; gap: 1px; padding: 6px 9px; background: var(--panel2); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 2px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
