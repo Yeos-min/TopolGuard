@@ -832,11 +832,11 @@ body.light {
 }
 
 .hero-cards-overlay .hero-score-c {
-  color: #e87d3e;
+  color: var(--text, #fff);
 }
 
 .hero-cards-overlay .hero-score-a {
-  color: #62a353;
+  color: var(--text, #fff);
 }
 
 .hero-cards-overlay .hero-more-row {
