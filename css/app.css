@@ -282,6 +282,9 @@ body, .history-drawer, #sidebar, #sidebar-body, #sidebar-footer,
 .history-thumb { width: clamp(32px, 25%, 80px); aspect-ratio: 1 / 1; flex-shrink: 0; border-radius: 4px; overflow: hidden; background: var(--panel2); }
 .history-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .history-item .history-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.history-preview { position: absolute; z-index: 19; pointer-events: none; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); padding: 4px; transition: opacity 0.15s ease; }
+.history-preview.hidden { opacity: 0; visibility: hidden; }
+.history-preview img { width: 220px; height: 220px; object-fit: cover; border-radius: 4px; display: block; }
 .history-entry { display: flex; flex-direction: column; gap: 1px; padding: 6px 9px; background: var(--panel2); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 2px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
 .history-entry:hover { border-color: var(--border2); background: var(--header); }
 .history-name { font-family: var(--mono); font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
