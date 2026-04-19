@@ -3,6 +3,23 @@
    Hero + [01] WHY + [02] WHAT WE CHECK + [03] HOW IT LOOKS + INITIATE SCAN
    ════════════════════════════════════════════════════════ */
 
+:root {
+  /* Hero card color variables (Yeos tuning zone) */
+  --hero-card-bg-r: 12;
+  --hero-card-bg-g: 14;
+  --hero-card-bg-b: 22;
+  --hero-card-bg-alpha: 0.78;
+  --hero-card-blur: 2px;
+}
+
+:root[data-theme="light"],
+body.light {
+  --hero-card-bg-r: 240;
+  --hero-card-bg-g: 240;
+  --hero-card-bg-b: 245;
+  --hero-card-bg-alpha: 0.85;
+}
+
 .landing {
   background: var(--bg);
 }
@@ -714,14 +731,79 @@
 }
 
 .hero-cards-overlay .terminal-card {
+  position: relative;
   width: 600px;
-  background: var(--panel);
+  background: rgba(
+    var(--hero-card-bg-r),
+    var(--hero-card-bg-g),
+    var(--hero-card-bg-b),
+    var(--hero-card-bg-alpha)
+  );
+  backdrop-filter: blur(var(--hero-card-blur));
+  -webkit-backdrop-filter: blur(var(--hero-card-blur));
+  border: 1px solid transparent;
+  cursor: pointer;
   opacity: 1;
   transform: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .hero-cards-overlay .terminal-body {
-  background: var(--panel);
+  background: transparent;
+}
+
+.hero-cards-overlay .terminal-card:hover {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 8px 32px rgba(62, 179, 137, 0.18);
+  transform: translateY(-2px);
+}
+
+.hero-cards-overlay .hero-card-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--accent);
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.hero-cards-overlay .hero-card-corner--tl {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.hero-cards-overlay .hero-card-corner--tr {
+  top: -1px;
+  right: -1px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.hero-cards-overlay .hero-card-corner--bl {
+  bottom: -1px;
+  left: -1px;
+  border-right: none;
+  border-top: none;
+}
+
+.hero-cards-overlay .hero-card-corner--br {
+  right: -1px;
+  bottom: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+.hero-cards-overlay .terminal-card:hover .hero-card-corner {
+  opacity: 1;
+  border-color: var(--accent);
 }
 
 .hero-cards-overlay .hero-score-row {
@@ -732,18 +814,21 @@
 }
 
 .hero-cards-overlay .hero-score-num {
-  font-family: var(--mono);
+  font-family: var(--display);
   font-size: 80px;
   line-height: 1;
-  letter-spacing: -1.5px;
-  font-weight: 700;
+  letter-spacing: 0;
+  font-weight: 400;
 }
 
 .hero-cards-overlay .hero-score-grade {
-  font-family: var(--mono);
+  display: inline-block;
+  font-family: var(--display);
   font-size: 40px;
   line-height: 1;
-  font-weight: 600;
+  letter-spacing: 0;
+  font-weight: 400;
+  transform: translateY(-2px);
 }
 
 .hero-cards-overlay .hero-score-c {
