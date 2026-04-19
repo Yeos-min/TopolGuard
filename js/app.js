@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initViewportTabs();
   initHistoryDrawer();
   initHistoryResize();
+  initHistoryPreview();
 });
 
 function initHistoryDrawer() {
@@ -196,6 +197,41 @@ function initHistoryResize() {
       document.addEventListener('mouseup', onMouseUp);
     });
   }
+}
+
+function initHistoryPreview() {
+  var list = document.getElementById('history-list');
+  var preview = document.getElementById('history-preview');
+  var previewImg = document.getElementById('history-preview-img');
+  var drawer = document.getElementById('history-drawer');
+  if (!list || !preview || !previewImg || !drawer) return;
+
+  list.addEventListener('mouseover', function(e) {
+    var item = e.target.closest('.history-item');
+    if (!item) return;
+    var img = item.querySelector('.history-thumb img');
+    if (!img || !img.src) return;
+
+    previewImg.src = img.src;
+
+    var drawerRect = drawer.getBoundingClientRect();
+    var itemRect = item.getBoundingClientRect();
+    var topPos = itemRect.top;
+    if (topPos + 230 > window.innerHeight) {
+      topPos = window.innerHeight - 240;
+    }
+
+    preview.style.left = (drawerRect.right + 8) + 'px';
+    preview.style.top = topPos + 'px';
+    preview.classList.remove('hidden');
+  });
+
+  list.addEventListener('mouseout', function(e) {
+    var item = e.target.closest('.history-item');
+    if (!item) return;
+    if (item.contains(e.relatedTarget)) return;
+    preview.classList.add('hidden');
+  });
 }
 
 // ════════════════════════════════════════════════════════
