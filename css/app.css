@@ -57,10 +57,10 @@ body, .history-drawer, .samples-drawer, #sidebar, #sidebar-body, #sidebar-footer
   #sidebar-body { scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 
 /* ── History Drawer ── */
-  .history-drawer { position: absolute; top: 44px; left: 0; width: 220px; z-index: 16; background: var(--panel); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0 0 6px 0; overflow: hidden; }
-  .history-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--dim); }
+  .history-drawer { position: absolute; top: 64px; left: 0; width: 220px; z-index: 16; background: var(--panel); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0 0 6px 0; overflow: hidden; }
+  .history-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 16px; letter-spacing: 0.05em; color: var(--dim); }
   .history-drawer-header:hover { background: var(--panel2); }
-  .history-drawer-arrow { transition: transform 0.2s ease; font-size: 10px; }
+  .history-drawer-arrow { transition: transform 0.2s ease; font-size: 16px; }
   .history-drawer.expanded .history-drawer-arrow { transform: rotate(90deg); }
   .history-drawer-body { max-height: 0; overflow-y: auto; transition: max-height 0.25s ease; padding: 0 12px; }
   .history-drawer.expanded .history-drawer-body { max-height: var(--history-drawer-height, 60vh); padding-bottom: 10px; }
@@ -77,9 +77,9 @@ body, .history-drawer, .samples-drawer, #sidebar, #sidebar-body, #sidebar-footer
 
   /* ── Samples Drawer ── */
   .samples-drawer { position: absolute; left: 0; width: 220px; z-index: 15; background: var(--panel); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 0 0 6px 0; overflow: hidden; }
-  .samples-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: var(--dim); }
+  .samples-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 16px; letter-spacing: 0.05em; color: var(--dim); }
   .samples-drawer-header:hover { background: var(--panel2); }
-  .samples-drawer-arrow { transition: transform 0.2s ease; font-size: 10px; }
+  .samples-drawer-arrow { transition: transform 0.2s ease; font-size: 16px; }
   .samples-drawer.expanded .samples-drawer-arrow { transform: rotate(90deg); }
   .samples-drawer-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease, padding 0.25s ease; padding: 0 10px; }
   .samples-drawer.expanded .samples-drawer-body { max-height: 120px; padding: 8px 10px; }
@@ -93,7 +93,7 @@ body, .history-drawer, .samples-drawer, #sidebar, #sidebar-body, #sidebar-footer
   #health-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(98,163,83,0.03) 0%, transparent 60%); pointer-events: none; }
   .health-label { font-size: 9px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; font-family: var(--mono); margin-bottom: 8px; }
   .health-score-row { display: flex; align-items: flex-end; gap: 10px; }
-  #health-score-val { font-family: var(--mono); font-size: 44px; font-weight: 700; line-height: 1; }
+  #health-score-val { font-family: var(--mono); font-size: 64px; font-weight: 700; line-height: 1; }
   .health-score-meta { flex: 1; }
   #health-grade { font-family: var(--mono); font-size: 14px; font-weight: 700; margin-bottom: 2px; }
   #health-desc { font-size: 10px; color: var(--dim); line-height: 1.5; }
@@ -496,7 +496,7 @@ body[data-page="app"] .tg-topnav {
   border: 1px solid transparent;
   border-radius: 4px;
   color: var(--dim);
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
