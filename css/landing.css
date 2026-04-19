@@ -763,8 +763,17 @@ body.light {
 }
 
 .hero-cards-overlay .hero-card-screenshot {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 5 / 4;
   width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-cards-overlay .hero-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* 공통 호버: 떠오름만 */
