@@ -184,122 +184,170 @@
         </div>
       </div>
     </section>
-
-    <!-- ═══ [02] WHAT WE CHECK ═══ -->
-    <section class="sect sect-alt" id="checks">
+    <!-- ═══ [02] PIPELINE ═══ -->
+    <section class="sect sect-alt" id="pipeline">
       <div class="sect-inner">
         <div class="sect-head">
           <span class="sect-num">[02]</span>
-          <h2 class="sect-title">WHAT WE CHECK</h2>
+          <h2 class="sect-title">PIPELINE</h2>
         </div>
-        <div class="card-grid card-grid-4">
-          <div class="section-card">
-            <div class="card-num">01</div>
-            <h3 class="card-title">NON-MANIFOLD EDGES</h3>
-            <p class="card-desc">0개 또는 3개 이상의 페이스가 공유하는 엣지입니다. 불리언, 3D 프린팅 슬라이서, UV 언래핑을 깨뜨립니다.</p>
+        <p class="sect-desc">
+          토폴로지 결함은 한 번 뒤 단계로 넘어가면 되돌아와서 고쳐야 합니다.
+          UV · 리깅 · 애니메이션 · 렌더 — 어느 단계에서 문제가 드러나든
+          해결은 언제나 모델링 단계로의 회귀입니다.
+          TopolGuard는 그 루프가 시작되기 전에 결함을 잡아냅니다.
+        </p>
+
+        <!-- 파이프라인 다이어그램 -->
+        <div class="pipeline-diagram" role="img" aria-label="3D 모델링 파이프라인과 토폴로지 결함 발생 시 되돌아가는 루프">
+          <div class="pipeline-track">
+            <div class="pipeline-stage pipeline-stage--modeling" data-stage="1">
+              <span class="stage-num">01</span>
+              <span class="stage-label">MODELING</span>
+              <span class="stage-desc">메시 생성</span>
+            </div>
+
+            <div class="pipeline-guard" data-stage="guard">
+              <span class="guard-mark">✓</span>
+              <span class="guard-label">TopolGuard</span>
+              <span class="guard-desc">토폴로지 검사</span>
+            </div>
+
+            <div class="pipeline-stage" data-stage="2">
+              <span class="stage-num">02</span>
+              <span class="stage-label">UV</span>
+              <span class="stage-desc">언래핑</span>
+            </div>
+
+            <div class="pipeline-stage" data-stage="3">
+              <span class="stage-num">03</span>
+              <span class="stage-label">RIGGING</span>
+              <span class="stage-desc">본 설정</span>
+            </div>
+
+            <div class="pipeline-stage" data-stage="4">
+              <span class="stage-num">04</span>
+              <span class="stage-label">ANIMATION</span>
+              <span class="stage-desc">움직임</span>
+            </div>
+
+            <div class="pipeline-stage" data-stage="5">
+              <span class="stage-num">05</span>
+              <span class="stage-label">RENDER</span>
+              <span class="stage-desc">최종 출력</span>
+            </div>
           </div>
-          <div class="section-card">
-            <div class="card-num">02</div>
-            <h3 class="card-title">SKINNY TRIANGLES</h3>
-            <p class="card-desc">면적이 0에 가깝거나 극단적인 가로세로 비율을 가진 삼각형입니다. 셰이딩 문제와 시뮬레이션 불안정을 유발합니다.</p>
-          </div>
-          <div class="section-card">
-            <div class="card-num">03</div>
-            <h3 class="card-title">N-GONS</h3>
-            <p class="card-desc">5개 이상의 버텍스로 이루어진 페이스입니다. 렌더러와 게임 엔진마다 삼각형으로 분할되는 방식이 다릅니다.</p>
-          </div>
-          <div class="section-card">
-            <div class="card-num">04</div>
-            <h3 class="card-title">FLIPPED NORMALS</h3>
-            <p class="card-desc">바깥이 아닌 안쪽을 향하는 페이스입니다. 실시간 엔진에서 보이지 않거나 반전되어 렌더링됩니다.</p>
+
+          <svg class="pipeline-loops" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+            <!-- SVG 좌표는 viewBox 기준 초기값입니다. Yeos가 Dreamweaver에서 M/Q 값을 미세 조정할 수 있게 path를 분리해 둡니다. -->
+            <path class="loop-path loop-path--uv" d="M 430,20 Q 430,-80 170,-80 Q 50,-80 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
+            <path class="loop-path loop-path--rig" d="M 620,20 Q 620,-110 170,-110 Q 50,-110 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
+            <path class="loop-path loop-path--anim" d="M 810,20 Q 810,-140 170,-140 Q 50,-140 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
+            <path class="loop-path loop-path--render" d="M 1000,20 Q 1000,-170 170,-170 Q 50,-170 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
+            <path class="loop-path loop-path--guard" d="M 260,20 Q 260,-40 130,-40 Q 50,-40 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-guard)" />
+
+            <defs>
+              <marker id="loop-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0,0 L 10,5 L 0,10 z" fill="currentColor" />
+              </marker>
+              <marker id="loop-arrow-guard" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0,0 L 10,5 L 0,10 z" fill="currentColor" />
+              </marker>
+            </defs>
+          </svg>
+
+          <div class="pipeline-legend">
+            <span class="legend-item legend-item--guard">
+              <span class="legend-line legend-line--guard"></span>
+              TopolGuard로 즉시 복귀 (저렴)
+            </span>
+            <span class="legend-item legend-item--late">
+              <span class="legend-line legend-line--late"></span>
+              후속 단계에서 발견 시 강제 회귀 (비쌈)
+            </span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ [03] HOW IT LOOKS ═══ -->
-    <!-- TODO: 실제 Inspector 측정값으로 교체 -->
-    <section class="sect" id="compare">
+    <!-- ═══ [03] WHAT WE CHECK ═══ -->
+    <section class="sect" id="checks">
       <div class="sect-inner">
         <div class="sect-head">
           <span class="sect-num">[03]</span>
-          <h2 class="sect-title">HOW IT LOOKS</h2>
+          <h2 class="sect-title">WHAT WE CHECK</h2>
         </div>
         <p class="sect-desc">
-          AI는 메시를 빠르게 만들어냅니다. 하지만 복잡한 디테일에는 여전히 사람의 손이 필요합니다.
-          아래는 Tripo AI로 생성한 동일 메시의 두 상태입니다 — 생성 직후의 AI Output과,
-          수동으로 결함을 수정한 Human Revised입니다.
-          TopolGuard는 이 수정 단계에서 가장 중요한 것, 즉 어디를 고쳐야 하는지를 알려줍니다.
+          TopolGuard는 Wavefront .obj 메시에서 여덟 가지 토폴로지 결함을 검사합니다.
+          심각도 순으로 정렬되며, 각 항목은 매뉴얼에서 자세한 설명을 볼 수 있습니다.
         </p>
 
-        <!-- 이미지 영역: Good (좌) / Bad (우) -->
-        <div class="compare-row">
-          <div class="compare-img-placeholder">
-            <span class="placeholder-icon">⬡</span>
-            <span class="placeholder-title">SCREENSHOT PENDING</span>
-            <span class="placeholder-desc">Inspector 화면이 여기에 표시됩니다</span>
+        <div class="issues-rotator" data-rotator>
+          <div class="issues-group is-active" data-group="a">
+            <div class="card-grid card-grid-4">
+              <div class="section-card issue-card" data-severity="critical">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-non-manifold);"></span>01</div>
+                <h3 class="card-title">NON-MANIFOLD</h3>
+                <p class="card-desc">3개 이상의 페이스가 한 엣지를 공유하는 상태. 불리언, UV 언래핑, 슬라이서가 모호해집니다.</p>
+                <a href="manual.html#non-manifold" class="card-more">자세히 →</a>
+              </div>
+              <div class="section-card issue-card" data-severity="critical">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-degenerate);"></span>02</div>
+                <h3 class="card-title">DEGENERATE</h3>
+                <p class="card-desc">면적이 0에 수렴하는 페이스. 법선이 정의되지 않아 렌더러가 검은 픽셀이나 NaN을 만듭니다.</p>
+                <a href="manual.html#degenerate" class="card-more">자세히 →</a>
+              </div>
+              <div class="section-card issue-card" data-severity="error">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-boundary);"></span>03</div>
+                <h3 class="card-title">BOUNDARY EDGE</h3>
+                <p class="card-desc">한 개의 페이스만 공유하는 엣지. 메시가 뚫려있다는 뜻. 3D 프린팅과 시뮬레이션에서 문제.</p>
+                <a href="manual.html#boundary" class="card-more">자세히 →</a>
+              </div>
+              <div class="section-card issue-card" data-severity="error">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-flipped);"></span>04</div>
+                <h3 class="card-title">FLIPPED NORMAL</h3>
+                <p class="card-desc">법선이 이웃과 반대 방향을 가리키는 페이스. 실시간 엔진에서 사라지거나 어둡게 보입니다.</p>
+                <a href="manual.html#flipped" class="card-more">자세히 →</a>
+              </div>
+            </div>
           </div>
-          <div class="compare-img-placeholder">
-            <span class="placeholder-icon">⬡</span>
-            <span class="placeholder-title">SCREENSHOT PENDING</span>
-            <span class="placeholder-desc">Inspector 화면이 여기에 표시됩니다</span>
+
+          <div class="issues-group" data-group="b">
+            <div class="card-grid card-grid-4">
+              <div class="section-card issue-card" data-severity="warning">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-skinny);"></span>05</div>
+                <h3 class="card-title">SKINNY TRIANGLE</h3>
+                <p class="card-desc">한 각이 극단적으로 좁은 삼각형. 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
+                <a href="manual.html#skinny" class="card-more">자세히 →</a>
+              </div>
+              <div class="section-card issue-card" data-severity="warning">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-ngon);"></span>06</div>
+                <h3 class="card-title">N-GON</h3>
+                <p class="card-desc">5변 이상의 페이스. DCC에선 허용되지만 엔진에서 자동 삼각화되며 결과가 예측 불가.</p>
+                <a href="manual.html#ngon" class="card-more">자세히 →</a>
+              </div>
+              <div class="section-card issue-card" data-severity="info">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-isolated);"></span>07</div>
+                <h3 class="card-title">ISOLATED VERTEX</h3>
+                <p class="card-desc">어떤 페이스에도 속하지 않는 떠다니는 버텍스. 파일 용량만 차지하는 정리 대상.</p>
+                <a href="manual.html#isolated" class="card-more">자세히 →</a>
+              </div>
+              <div class="section-card issue-card" data-severity="info">
+                <div class="card-num"><span class="severity-dot" style="background:var(--issue-duplicate);"></span>08</div>
+                <h3 class="card-title">DUPLICATE VERTEX</h3>
+                <p class="card-desc">동일 좌표에 여러 버텍스가 겹친 상태. UV/노멀 분리 등 정당한 경우도 있어 정보성 경고.</p>
+                <a href="manual.html#duplicate" class="card-more">자세히 →</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="rotator-dots" role="tablist" aria-label="이슈 그룹 전환">
+            <button class="rotator-dot is-active" data-dot="a" role="tab" aria-label="critical / error 그룹"></button>
+            <button class="rotator-dot" data-dot="b" role="tab" aria-label="warning / info 그룹"></button>
           </div>
         </div>
-
-        <!-- 터미널 카드: Good / Bad -->
-        <div class="compare-row">
-
-          <!-- CLEAN -->
-          <div class="terminal-card clean">
-            <div class="terminal-header">
-              <span class="terminal-dot ok"></span>
-              <span>SCAN RESULT — AI OUTPUT</span>
-            </div>
-            <div class="terminal-body">
-              <!-- TODO: 실제 Inspector 측정값으로 교체 -->
-              <div class="t-row"><span class="t-label">Model</span><span class="t-val">Good_Low_Poly_Male_body_AI</span></div>
-              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">—</span></div>
-              <div class="t-divider"></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Non-Manifold</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Skinny Tri</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Flipped Normals</span><span class="t-val">—</span></div>
-              <div class="t-divider"></div>
-              <div class="t-row t-score"><span class="t-label">MODELING SCORE</span><span class="t-val">— / 100</span></div>
-            </div>
-          </div>
-
-          <!-- DEFECTIVE -->
-          <div class="terminal-card defective">
-            <div class="terminal-header">
-              <span class="terminal-dot error"></span>
-              <span>SCAN RESULT — HUMAN REVISED</span>
-            </div>
-            <div class="terminal-body">
-              <!-- TODO: 실제 Inspector 측정값으로 교체 -->
-              <div class="t-row"><span class="t-label">Model</span><span class="t-val">Bad_Low_Poly_Male_body_AI</span></div>
-              <div class="t-row"><span class="t-label">Vertices</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-label">Faces</span><span class="t-val">—</span></div>
-              <div class="t-divider"></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Non-Manifold</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Skinny Tri</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">N-Gons</span><span class="t-val">—</span></div>
-              <div class="t-row"><span class="t-check pass">✓</span><span class="t-label">Flipped Normals</span><span class="t-val">—</span></div>
-              <div class="t-divider"></div>
-              <div class="t-row t-score"><span class="t-label">MODELING SCORE</span><span class="t-val">— / 100</span></div>
-            </div>
-          </div>
-
-        </div>
-        <p class="sample-note">
-          모든 샘플 메시는 Tripo AI로 생성되었습니다.
-          사람이 제작한 3D 자산은 재배포되지 않습니다.
-        </p>
       </div>
     </section>
-
-    <!-- ═══ INITIATE SCAN ═══ -->
     <section class="sect sect-cta" id="scan">
       <div class="sect-inner">
         <h2 class="cta-headline">INITIATE<br>SCAN<span class="dot">.</span></h2>

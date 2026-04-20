@@ -150,6 +150,116 @@
 
 })();
 
+// ════════════════════════════════════════════════════════
+// PIPELINE DIAGRAM — IntersectionObserver (L-2)
+// 섹션 02가 뷰포트에 들어올 때 애니메이션 발동
+// ════════════════════════════════════════════════════════
+(function initPipelineInView() {
+  var diagram = document.querySelector('.pipeline-diagram');
+  if (!diagram) return;
+
+  if (!('IntersectionObserver' in window)) {
+    diagram.classList.add('in-view');
+    return;
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        diagram.classList.add('in-view');
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.25 });
+
+  observer.observe(diagram);
+})();
+
+// ════════════════════════════════════════════════════════
+// ISSUE ROTATOR (L-5) — 8개 이슈 2그룹 자동 회전
+// 5초 주기, 호버 정지, 점 클릭 수동 전환, reduced-motion 대응
+// ════════════════════════════════════════════════════════
+(function initIssueRotator() {
+  var rotator = document.querySelector('[data-rotator]');
+  if (!rotator) return;
+
+  var groups = rotator.querySelectorAll('.issues-group');
+  var dots = rotator.querySelectorAll('.rotator-dot');
+  if (groups.length < 2 || dots.length < 2) return;
+
+  var mq = window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : { matches: false };
+  var INTERVAL_MS = 5000;
+  var currentIdx = 0;
+  var timer = null;
+  var isPaused = false;
+
+  function showGroup(idx) {
+    groups.forEach(function(group, i) {
+      group.classList.toggle('is-active', i === idx);
+    });
+    dots.forEach(function(dot, i) {
+      dot.classList.toggle('is-active', i === idx);
+      dot.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+    });
+    currentIdx = idx;
+  }
+
+  function nextGroup() {
+    showGroup((currentIdx + 1) % groups.length);
+  }
+
+  function startTimer() {
+    if (mq.matches) return;
+    if (timer) clearInterval(timer);
+    timer = setInterval(function() {
+      if (!isPaused) nextGroup();
+    }, INTERVAL_MS);
+  }
+
+  function stopTimer() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  rotator.addEventListener('mouseenter', function() { isPaused = true; });
+  rotator.addEventListener('mouseleave', function() { isPaused = false; });
+  rotator.addEventListener('focusin', function() { isPaused = true; });
+  rotator.addEventListener('focusout', function() {
+    if (!rotator.contains(document.activeElement)) isPaused = false;
+  });
+
+  dots.forEach(function(dot, i) {
+    dot.addEventListener('click', function() {
+      showGroup(i);
+      startTimer();
+    });
+  });
+
+  if (mq.addEventListener) {
+    mq.addEventListener('change', function(e) {
+      if (e.matches) stopTimer();
+      else startTimer();
+    });
+  } else if (mq.addListener) {
+    mq.addListener(function(e) {
+      if (e.matches) stopTimer();
+      else startTimer();
+    });
+  }
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) stopTimer();
+    else startTimer();
+  });
+
+  showGroup(0);
+  startTimer();
+})();
+
 // Hero comparison cards: independent Three.js turntables.
 (function () {
   if (typeof THREE === 'undefined') return;
