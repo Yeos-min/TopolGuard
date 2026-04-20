@@ -56,6 +56,7 @@
           <li><a href="#ngon">N-Gons</a></li>
           <li><a href="#degenerate">Degenerate Faces</a></li>
           <li><a href="#flipped">Flipped Normals</a></li>
+          <li><a href="#duplicate">Duplicate Vertex</a></li>
           <li><a href="#isolated">Isolated Vertices</a></li>
         </ul>
       </div>
@@ -203,6 +204,20 @@
         법선 일관성을 기준으로 outlier를 찾아냅니다.
       </p>
 
+      <h2 id="duplicate">Duplicate Vertex</h2>
+      <div class="metric-card">
+        <div class="glyph">◉</div>
+        <div class="body">
+          <h4>Duplicate Vertex</h4>
+          <p class="why">동일 좌표에 여러 버텍스가 겹쳐 존재하는 상태.</p>
+        </div>
+      </div>
+      <p>
+        같은 xyz에 둘 이상의 버텍스가 있으면 edge/face 그래프가 분리되어 매니폴드 구조를 유지하기 어려워요.
+        단, UV 심(seam) 또는 노멀 분리를 위해 <strong>의도적으로</strong> 겹친 경우도 흔하므로, TopolGuard는
+        Health Score 계산에서 제외하고 정보성 이슈로만 표시해요. Weld / Merge by Distance로 정리해요.
+      </p>
+
       <h2 id="isolated">Isolated Vertices</h2>
       <div class="metric-card">
         <div class="glyph">·</div>
@@ -303,6 +318,7 @@
         <li><a href="#ngon">N-Gons</a></li>
         <li><a href="#degenerate">Degenerate</a></li>
         <li><a href="#flipped">Flipped</a></li>
+        <li><a href="#duplicate">Duplicate Vertex</a></li>
         <li><a href="#isolated">Isolated Verts</a></li>
         <li><a href="#health">Modeling Score</a></li>
         <li><a href="#views">View Modes</a></li>
