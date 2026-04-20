@@ -730,6 +730,19 @@ body.light {
   pointer-events: auto;
 }
 
+.hero-cards-overlay a,
+.hero-cards-overlay a:link,
+.hero-cards-overlay a:visited {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+.hero-cards-overlay a:focus-visible .terminal-card {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .hero-cards-overlay .terminal-card {
   position: relative;
   width: 640px;
