@@ -89,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
   initSampleButtons();
   initSidePanelResize();
   initHistoryPreview();
-  autoLoadSampleFromURL();
 });
 
 function initSidePanel() {
@@ -292,7 +291,8 @@ function reloadFromHistory(idx) {
   if (!entry) return;
 
   if (entry.isSample && entry.samplePath) {
-    loadSample(entry.samplePath, entry.name, entry.name.indexOf('Humanoid_AI') >= 0 ? '✓' : '⚠');
+    // Humanoid_AI (AI Output, 결함 있음) → ⚠ / Humanoid_Human_Modified (깨끗함) → ✓
+    loadSample(entry.samplePath, entry.name, entry.name.indexOf('Humanoid_AI') >= 0 ? '⚠' : '✓');
   } else if (entry.objText) {
     _pendingLoad = { isSample: false, name: entry.name, objText: entry.objText };
     var blob = new Blob([entry.objText], { type: 'text/plain' });
@@ -341,7 +341,9 @@ var SAMPLE_PATHS = {
 function loadSampleFromSidebar(which) {
   var path = SAMPLE_PATHS[which];
   var name = path.split('/').pop();
-  var icon = which === 'good' ? '✓' : '⚠';
+  // good = Humanoid_AI (AI Output, 결함 있음) → ⚠
+  // bad  = Humanoid_Human_Modified (Human Revised, 깨끗함) → ✓
+  var icon = which === 'good' ? '⚠' : '✓';
   loadSample(path, name, icon);
 }
 
@@ -356,33 +358,6 @@ function initSampleButtons() {
       }
     });
   });
-}
-
-// ════════════════════════════════════════════════════════
-// URL PARAMETER AUTOLOAD (PART L-1-A)
-// 히어로 카드 클릭 → Inspector로 이동 시 샘플 자동 로드
-// ════════════════════════════════════════════════════════
-var URL_SAMPLE_MAP = {
-  'humanoid_ai':    'good',  // Humanoid_AI.obj
-  'humanoid_human': 'bad'    // Humanoid_Human_Modified.obj
-};
-
-function autoLoadSampleFromURL() {
-  try {
-    var params = new URLSearchParams(window.location.search);
-    var sampleParam = params.get('sample');
-    if (!sampleParam) return;
-
-    var internalKey = URL_SAMPLE_MAP[sampleParam];
-    if (!internalKey) {
-      console.warn('[TopolGuard] Unknown sample parameter:', sampleParam);
-      return;
-    }
-
-    loadSampleFromSidebar(internalKey);
-  } catch (err) {
-    console.error('[TopolGuard] autoLoadSampleFromURL failed:', err);
-  }
 }
 
 function renderSampleButtons() {
