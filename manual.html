@@ -239,9 +239,13 @@
       <ul>
         <li><b>Error</b>(non-manifold, degenerate, flipped) — 페널티 큼. 고치지 않으면 파이프라인이 깨짐.</li>
         <li><b>Warning</b>(skinny, n-gon, boundary) — 페널티 중간. 상황에 따라 허용 가능.</li>
-        <li><b>Info</b>(isolated) — 페널티 작음. 정리 대상.</li>
+        <li><b>Info</b>(duplicate, isolated) — 페널티 작음. 정리 대상.</li>
       </ul>
       <p>점수는 등급으로도 표시됩니다: <code>A+</code> · <code>A</code> · <code>B</code> · <code>C</code> · <code>D</code> · <code>F</code>.</p>
+      <p><strong>NOTE —</strong> 점수는 이슈 카운트의 가중 합만 반영하며,
+        정점 밀도 분포는 계산에 포함되지 않습니다. 디테일이 많은 부위(얼굴·손·관절)에
+        정점을 더 쓰는 것은 리토폴로지의 당연한 관행이기 때문입니다.
+        밀도 분포가 궁금하면 Inspector의 <strong>DENSITY</strong> 히트맵 뷰를 사용하세요.</p>
 
       <h2 id="views">View Modes</h2>
       <h3>WIRE</h3>

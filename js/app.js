@@ -1043,12 +1043,21 @@ function computeHealthScore(faceCount, stats) {
     }
   });
 
-  // Density uniformity bonus/penalty: if heatmap data available
-  if (stats.densityCV != null) {
-    // CV (coefficient of variation): 0 = perfectly uniform
-    const cvPenalty = Math.min(stats.densityCV * 10, 10);
-    score -= cvPenalty;
-  }
+  // ───────────────────────────────────────────────────────
+  // Density CV penalty 제거 (PART S-1, 2026-04-20)
+  // 결정: 정점 밀도 균일성은 품질 지표가 아님.
+  //       디테일이 필요한 부위(얼굴·손·관절)에 폴리를 많이 쓰는 건
+  //       리토폴로지의 당연한 관행. 균일 격자가 곧 좋은 메시라는
+  //       전제가 잘못된 것.
+  // 영향: 완벽한 이슈 0 메시도 90점대 초반에 머물던 현상 해소 →
+  //       이슈 없으면 100점 도달 가능.
+  // 정책 1 재해석: 검출 로직은 보호 대상이지만, 점수 체계 구성은
+  //       정책적 판단 영역. Yeos의 명시적 결정.
+  // ───────────────────────────────────────────────────────
+  // if (stats.densityCV != null) {
+  //   const cvPenalty = Math.min(stats.densityCV * 10, 10);
+  //   score -= cvPenalty;
+  // }
 
   score = Math.max(0, Math.min(100, Math.round(score)));
 

@@ -176,90 +176,21 @@
 })();
 
 // ════════════════════════════════════════════════════════
-// ISSUE ROTATOR (L-5) — 8개 이슈 2그룹 자동 회전
-// 5초 주기, 호버 정지, 점 클릭 수동 전환, reduced-motion 대응
+// MARQUEE — 탭 비활성 시 일시정지 (L-5)
+// CSS로 호버 정지 + reduced-motion 처리는 이미 완료.
+// 여기서는 visibilitychange만 추가 (CPU 절약).
 // ════════════════════════════════════════════════════════
-(function initIssueRotator() {
-  var rotator = document.querySelector('[data-rotator]');
-  if (!rotator) return;
+(function initMarqueeVisibility() {
+  var marquee = document.querySelector('.issues-marquee');
+  if (!marquee) return;
 
-  var groups = rotator.querySelectorAll('.issues-group');
-  var dots = rotator.querySelectorAll('.rotator-dot');
-  if (groups.length < 2 || dots.length < 2) return;
-
-  var mq = window.matchMedia
-    ? window.matchMedia('(prefers-reduced-motion: reduce)')
-    : { matches: false };
-  var INTERVAL_MS = 5000;
-  var currentIdx = 0;
-  var timer = null;
-  var isPaused = false;
-
-  function showGroup(idx) {
-    groups.forEach(function(group, i) {
-      group.classList.toggle('is-active', i === idx);
-    });
-    dots.forEach(function(dot, i) {
-      dot.classList.toggle('is-active', i === idx);
-      dot.setAttribute('aria-selected', i === idx ? 'true' : 'false');
-    });
-    currentIdx = idx;
-  }
-
-  function nextGroup() {
-    showGroup((currentIdx + 1) % groups.length);
-  }
-
-  function startTimer() {
-    if (mq.matches) return;
-    if (timer) clearInterval(timer);
-    timer = setInterval(function() {
-      if (!isPaused) nextGroup();
-    }, INTERVAL_MS);
-  }
-
-  function stopTimer() {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
-  }
-
-  rotator.addEventListener('mouseenter', function() { isPaused = true; });
-  rotator.addEventListener('mouseleave', function() { isPaused = false; });
-  rotator.addEventListener('focusin', function() { isPaused = true; });
-  rotator.addEventListener('focusout', function() {
-    if (!rotator.contains(document.activeElement)) isPaused = false;
-  });
-
-  dots.forEach(function(dot, i) {
-    dot.addEventListener('click', function() {
-      showGroup(i);
-      startTimer();
-    });
-  });
-
-  if (mq.addEventListener) {
-    mq.addEventListener('change', function(e) {
-      if (e.matches) stopTimer();
-      else startTimer();
-    });
-  } else if (mq.addListener) {
-    mq.addListener(function(e) {
-      if (e.matches) stopTimer();
-      else startTimer();
-    });
-  }
+  var track = marquee.querySelector('.marquee-track');
+  if (!track) return;
 
   document.addEventListener('visibilitychange', function() {
-    if (document.hidden) stopTimer();
-    else startTimer();
+    track.style.animationPlayState = document.hidden ? 'paused' : '';
   });
-
-  showGroup(0);
-  startTimer();
 })();
-
 // Hero comparison cards: independent Three.js turntables.
 (function () {
   if (typeof THREE === 'undefined') return;

@@ -446,38 +446,38 @@ body.light {
 .loop-path {
   opacity: 0.55;
   transition: opacity 0.3s ease;
-  color: inherit;
 }
 
 .loop-path--uv {
-  stroke: var(--issue-boundary);
-  color: var(--issue-boundary);
+  stroke: var(--issue-boundary, #e87d3e);
 }
 .loop-path--rig {
-  stroke: var(--issue-flipped);
-  color: var(--issue-flipped);
+  stroke: var(--issue-flipped, #d65a2e);
 }
 .loop-path--anim {
-  stroke: var(--issue-degenerate);
-  color: var(--issue-degenerate);
+  stroke: var(--issue-degenerate, #e85b7a);
 }
 .loop-path--render {
-  stroke: var(--issue-non-manifold);
-  color: var(--issue-non-manifold);
+  stroke: var(--issue-non-manifold, #cf4b4b);
 }
 .loop-path--guard {
   stroke: var(--accent);
-  color: var(--accent);
   opacity: 0.75;
 }
 
+.arrow-head--uv     { fill: var(--issue-boundary, #e87d3e); }
+.arrow-head--rig    { fill: var(--issue-flipped, #d65a2e); }
+.arrow-head--anim   { fill: var(--issue-degenerate, #e85b7a); }
+.arrow-head--render { fill: var(--issue-non-manifold, #cf4b4b); }
+.arrow-head--guard  { fill: var(--accent); }
+
 .pipeline-diagram:not(.in-view) .loop-path {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
 }
 
 .pipeline-diagram.in-view .loop-path {
-  stroke-dasharray: 1000;
+  stroke-dasharray: 1200;
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
@@ -532,40 +532,125 @@ body.light {
 }
 
 .legend-line--guard { background: var(--accent); }
-.legend-line--late  { background: var(--issue-non-manifold); }
+.legend-line--late  { background: var(--issue-non-manifold, #cf4b4b); }
 
 /* ════════════════════════════════════════════════════════
-   ISSUE ROTATOR (L-5) — 8개 이슈 2그룹 자동 회전
+   ISSUES MARQUEE (L-5) — 8개 이슈 infinite rail
    ════════════════════════════════════════════════════════ */
 
-.issues-rotator {
+.issues-marquee {
+  --marquee-duration: 40s;
+  --marquee-gap: 20px;
+  --card-width: 280px;
+  --fade-width: 8%;
+
   position: relative;
-  margin-top: 32px;
+  margin-top: 40px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--fade-width),
+    black calc(100% - var(--fade-width)),
+    transparent 100%
+  );
+          mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--fade-width),
+    black calc(100% - var(--fade-width)),
+    transparent 100%
+  );
 }
 
-.issues-group {
-  position: relative;
-  opacity: 0;
-  transform: translateX(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-  pointer-events: none;
+.marquee-track {
+  display: flex;
+  gap: var(--marquee-gap);
+  width: max-content;
+  animation: marquee-scroll var(--marquee-duration) linear infinite;
 }
 
-.issues-group.is-active {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-  position: relative;
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-1 * (var(--card-width) + var(--marquee-gap)) * 8)); }
 }
 
-.issues-group:not(.is-active) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  transform: translateX(-20px);
+.issues-marquee:hover .marquee-track,
+.issues-marquee:focus-within .marquee-track {
+  animation-play-state: paused;
 }
 
+.issue-card {
+  flex-shrink: 0;
+  width: var(--card-width);
+  padding: 24px 22px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.issue-card:hover,
+.issue-card:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.issue-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.issue-glyph {
+  display: block;
+  font-family: var(--mono);
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.issue-title {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.issue-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--dim);
+}
+
+@media (max-width: 1024px) {
+  .issues-marquee { --card-width: 240px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .issues-marquee {
+    overflow: visible;
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+  .marquee-track {
+    animation: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    width: auto;
+    gap: 16px;
+  }
+  .marquee-track .issue-card[aria-hidden="true"] {
+    display: none;
+  }
+}
 .issue-card .card-num {
   display: inline-flex;
   align-items: center;
@@ -593,34 +678,6 @@ body.light {
 .card-more:hover,
 .card-more:focus-visible {
   color: var(--accent);
-}
-
-.rotator-dots {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 40px;
-}
-
-.rotator-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 1px solid var(--dim);
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.rotator-dot:hover {
-  border-color: var(--text);
-  transform: scale(1.15);
-}
-
-.rotator-dot.is-active {
-  background: var(--accent);
-  border-color: var(--accent);
 }
 
 .card-num {
@@ -1276,8 +1333,7 @@ body.light {
 @media (prefers-reduced-motion: reduce) {
   .pipeline-diagram.in-view .loop-path,
   .pipeline-diagram.in-view .pipeline-stage,
-  .pipeline-diagram.in-view .pipeline-guard,
-  .issues-group {
+  .pipeline-diagram.in-view .pipeline-guard {
     transition: none !important;
     transition-delay: 0s !important;
   }
@@ -1288,8 +1344,5 @@ body.light {
   .pipeline-diagram .pipeline-guard {
     opacity: 1;
     transform: none;
-  }
-  .issues-group {
-    transform: none !important;
   }
 }

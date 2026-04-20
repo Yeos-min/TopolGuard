@@ -240,18 +240,27 @@
 
           <svg class="pipeline-loops" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
             <!-- SVG 좌표는 viewBox 기준 초기값입니다. Yeos가 Dreamweaver에서 M/Q 값을 미세 조정할 수 있게 path를 분리해 둡니다. -->
-            <path class="loop-path loop-path--uv" d="M 430,20 Q 430,-80 170,-80 Q 50,-80 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
-            <path class="loop-path loop-path--rig" d="M 620,20 Q 620,-110 170,-110 Q 50,-110 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
-            <path class="loop-path loop-path--anim" d="M 810,20 Q 810,-140 170,-140 Q 50,-140 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
-            <path class="loop-path loop-path--render" d="M 1000,20 Q 1000,-170 170,-170 Q 50,-170 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow)" />
+            <path class="loop-path loop-path--uv" d="M 430,20 Q 430,-80 170,-80 Q 50,-80 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-uv)" />
+            <path class="loop-path loop-path--rig" d="M 620,20 Q 620,-110 170,-110 Q 50,-110 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-rig)" />
+            <path class="loop-path loop-path--anim" d="M 810,20 Q 810,-140 170,-140 Q 50,-140 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-anim)" />
+            <path class="loop-path loop-path--render" d="M 1000,20 Q 1000,-170 170,-170 Q 50,-170 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-render)" />
             <path class="loop-path loop-path--guard" d="M 260,20 Q 260,-40 130,-40 Q 50,-40 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-guard)" />
 
             <defs>
-              <marker id="loop-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0,0 L 10,5 L 0,10 z" fill="currentColor" />
+              <marker id="loop-arrow-uv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--uv" />
+              </marker>
+              <marker id="loop-arrow-rig" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--rig" />
+              </marker>
+              <marker id="loop-arrow-anim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--anim" />
+              </marker>
+              <marker id="loop-arrow-render" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--render" />
               </marker>
               <marker id="loop-arrow-guard" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0,0 L 10,5 L 0,10 z" fill="currentColor" />
+                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--guard" />
               </marker>
             </defs>
           </svg>
@@ -279,71 +288,107 @@
         </div>
         <p class="sect-desc">
           TopolGuard는 Wavefront .obj 메시에서 여덟 가지 토폴로지 결함을 검사합니다.
-          심각도 순으로 정렬되며, 각 항목은 매뉴얼에서 자세한 설명을 볼 수 있습니다.
+          심각도 순으로 표시되며, 각 항목은 매뉴얼에서 자세한 설명을 볼 수 있습니다.
         </p>
 
-        <div class="issues-rotator" data-rotator>
-          <div class="issues-group is-active" data-group="a">
-            <div class="card-grid card-grid-4">
-              <div class="section-card issue-card" data-severity="critical">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-non-manifold);"></span>01</div>
-                <h3 class="card-title">NON-MANIFOLD</h3>
-                <p class="card-desc">3개 이상의 페이스가 한 엣지를 공유하는 상태. 불리언, UV 언래핑, 슬라이서가 모호해집니다.</p>
-                <a href="manual.html#non-manifold" class="card-more">자세히 →</a>
-              </div>
-              <div class="section-card issue-card" data-severity="critical">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-degenerate);"></span>02</div>
-                <h3 class="card-title">DEGENERATE</h3>
-                <p class="card-desc">면적이 0에 수렴하는 페이스. 법선이 정의되지 않아 렌더러가 검은 픽셀이나 NaN을 만듭니다.</p>
-                <a href="manual.html#degenerate" class="card-more">자세히 →</a>
-              </div>
-              <div class="section-card issue-card" data-severity="error">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-boundary);"></span>03</div>
-                <h3 class="card-title">BOUNDARY EDGE</h3>
-                <p class="card-desc">한 개의 페이스만 공유하는 엣지. 메시가 뚫려있다는 뜻. 3D 프린팅과 시뮬레이션에서 문제.</p>
-                <a href="manual.html#boundary" class="card-more">자세히 →</a>
-              </div>
-              <div class="section-card issue-card" data-severity="error">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-flipped);"></span>04</div>
-                <h3 class="card-title">FLIPPED NORMAL</h3>
-                <p class="card-desc">법선이 이웃과 반대 방향을 가리키는 페이스. 실시간 엔진에서 사라지거나 어둡게 보입니다.</p>
-                <a href="manual.html#flipped" class="card-more">자세히 →</a>
-              </div>
-            </div>
-          </div>
+        <!-- Infinite marquee: 원본 8 + 복제 8 = 16 카드 -->
+        <div class="issues-marquee" data-marquee>
+          <div class="marquee-track">
+            <a href="manual.html#non-manifold" class="issue-card" data-severity="critical" aria-label="Non-manifold edges 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-non-manifold);">✕</span>
+              <h3 class="issue-title">NON-MANIFOLD</h3>
+              <p class="issue-desc">3개 이상의 페이스가 한 엣지를 공유하는 상태. 불리언, UV 언래핑, 슬라이서가 모호해집니다.</p>
+            </a>
 
-          <div class="issues-group" data-group="b">
-            <div class="card-grid card-grid-4">
-              <div class="section-card issue-card" data-severity="warning">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-skinny);"></span>05</div>
-                <h3 class="card-title">SKINNY TRIANGLE</h3>
-                <p class="card-desc">한 각이 극단적으로 좁은 삼각형. 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
-                <a href="manual.html#skinny" class="card-more">자세히 →</a>
-              </div>
-              <div class="section-card issue-card" data-severity="warning">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-ngon);"></span>06</div>
-                <h3 class="card-title">N-GON</h3>
-                <p class="card-desc">5변 이상의 페이스. DCC에선 허용되지만 엔진에서 자동 삼각화되며 결과가 예측 불가.</p>
-                <a href="manual.html#ngon" class="card-more">자세히 →</a>
-              </div>
-              <div class="section-card issue-card" data-severity="info">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-isolated);"></span>07</div>
-                <h3 class="card-title">ISOLATED VERTEX</h3>
-                <p class="card-desc">어떤 페이스에도 속하지 않는 떠다니는 버텍스. 파일 용량만 차지하는 정리 대상.</p>
-                <a href="manual.html#isolated" class="card-more">자세히 →</a>
-              </div>
-              <div class="section-card issue-card" data-severity="info">
-                <div class="card-num"><span class="severity-dot" style="background:var(--issue-duplicate);"></span>08</div>
-                <h3 class="card-title">DUPLICATE VERTEX</h3>
-                <p class="card-desc">동일 좌표에 여러 버텍스가 겹친 상태. UV/노멀 분리 등 정당한 경우도 있어 정보성 경고.</p>
-                <a href="manual.html#duplicate" class="card-more">자세히 →</a>
-              </div>
-            </div>
-          </div>
+            <a href="manual.html#degenerate" class="issue-card" data-severity="critical" aria-label="Degenerate faces 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-degenerate);">○</span>
+              <h3 class="issue-title">DEGENERATE</h3>
+              <p class="issue-desc">면적이 0에 수렴하는 페이스. 법선이 정의되지 않아 렌더러가 검은 픽셀이나 NaN을 만듭니다.</p>
+            </a>
 
-          <div class="rotator-dots" role="tablist" aria-label="이슈 그룹 전환">
-            <button class="rotator-dot is-active" data-dot="a" role="tab" aria-label="critical / error 그룹"></button>
-            <button class="rotator-dot" data-dot="b" role="tab" aria-label="warning / info 그룹"></button>
+            <a href="manual.html#boundary" class="issue-card" data-severity="error" aria-label="Boundary edges 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-boundary);">◠</span>
+              <h3 class="issue-title">BOUNDARY EDGE</h3>
+              <p class="issue-desc">한 개의 페이스만 공유하는 엣지. 메시가 뚫려있다는 뜻. 3D 프린팅과 시뮬레이션에서 문제.</p>
+            </a>
+
+            <a href="manual.html#flipped" class="issue-card" data-severity="error" aria-label="Flipped normals 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-flipped);">⇄</span>
+              <h3 class="issue-title">FLIPPED NORMAL</h3>
+              <p class="issue-desc">법선이 이웃과 반대 방향을 가리키는 페이스. 실시간 엔진에서 사라지거나 어둡게 보입니다.</p>
+            </a>
+
+            <a href="manual.html#skinny" class="issue-card" data-severity="warning" aria-label="Skinny triangles 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-skinny);">△</span>
+              <h3 class="issue-title">SKINNY TRIANGLE</h3>
+              <p class="issue-desc">한 각이 극단적으로 좁은 삼각형. 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
+            </a>
+
+            <a href="manual.html#ngon" class="issue-card" data-severity="warning" aria-label="N-gons 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-ngon);">⬡</span>
+              <h3 class="issue-title">N-GON</h3>
+              <p class="issue-desc">5변 이상의 페이스. DCC에선 허용되지만 엔진에서 자동 삼각화되며 결과가 예측 불가.</p>
+            </a>
+
+            <a href="manual.html#isolated" class="issue-card" data-severity="info" aria-label="Isolated vertices 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-isolated);">·</span>
+              <h3 class="issue-title">ISOLATED VERTEX</h3>
+              <p class="issue-desc">어떤 페이스에도 속하지 않는 떠다니는 버텍스. 파일 용량만 차지하는 정리 대상.</p>
+            </a>
+
+            <a href="manual.html#duplicate" class="issue-card" data-severity="info" aria-label="Duplicate vertices 자세히 보기">
+              <span class="issue-glyph" style="color:var(--issue-duplicate);">◉</span>
+              <h3 class="issue-title">DUPLICATE VERTEX</h3>
+              <p class="issue-desc">동일 좌표에 여러 버텍스가 겹친 상태. UV/노멀 분리 등 정당한 경우도 있어 정보성 경고.</p>
+            </a>
+
+            <a href="manual.html#non-manifold" class="issue-card" data-severity="critical" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-non-manifold);">✕</span>
+              <h3 class="issue-title">NON-MANIFOLD</h3>
+              <p class="issue-desc">3개 이상의 페이스가 한 엣지를 공유하는 상태. 불리언, UV 언래핑, 슬라이서가 모호해집니다.</p>
+            </a>
+
+            <a href="manual.html#degenerate" class="issue-card" data-severity="critical" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-degenerate);">○</span>
+              <h3 class="issue-title">DEGENERATE</h3>
+              <p class="issue-desc">면적이 0에 수렴하는 페이스. 법선이 정의되지 않아 렌더러가 검은 픽셀이나 NaN을 만듭니다.</p>
+            </a>
+
+            <a href="manual.html#boundary" class="issue-card" data-severity="error" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-boundary);">◠</span>
+              <h3 class="issue-title">BOUNDARY EDGE</h3>
+              <p class="issue-desc">한 개의 페이스만 공유하는 엣지. 메시가 뚫려있다는 뜻. 3D 프린팅과 시뮬레이션에서 문제.</p>
+            </a>
+
+            <a href="manual.html#flipped" class="issue-card" data-severity="error" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-flipped);">⇄</span>
+              <h3 class="issue-title">FLIPPED NORMAL</h3>
+              <p class="issue-desc">법선이 이웃과 반대 방향을 가리키는 페이스. 실시간 엔진에서 사라지거나 어둡게 보입니다.</p>
+            </a>
+
+            <a href="manual.html#skinny" class="issue-card" data-severity="warning" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-skinny);">△</span>
+              <h3 class="issue-title">SKINNY TRIANGLE</h3>
+              <p class="issue-desc">한 각이 극단적으로 좁은 삼각형. 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
+            </a>
+
+            <a href="manual.html#ngon" class="issue-card" data-severity="warning" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-ngon);">⬡</span>
+              <h3 class="issue-title">N-GON</h3>
+              <p class="issue-desc">5변 이상의 페이스. DCC에선 허용되지만 엔진에서 자동 삼각화되며 결과가 예측 불가.</p>
+            </a>
+
+            <a href="manual.html#isolated" class="issue-card" data-severity="info" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-isolated);">·</span>
+              <h3 class="issue-title">ISOLATED VERTEX</h3>
+              <p class="issue-desc">어떤 페이스에도 속하지 않는 떠다니는 버텍스. 파일 용량만 차지하는 정리 대상.</p>
+            </a>
+
+            <a href="manual.html#duplicate" class="issue-card" data-severity="info" aria-hidden="true" tabindex="-1">
+              <span class="issue-glyph" style="color:var(--issue-duplicate);">◉</span>
+              <h3 class="issue-title">DUPLICATE VERTEX</h3>
+              <p class="issue-desc">동일 좌표에 여러 버텍스가 겹친 상태. UV/노멀 분리 등 정당한 경우도 있어 정보성 경고.</p>
+            </a>
           </div>
         </div>
       </div>
