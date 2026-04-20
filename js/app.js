@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initSampleButtons();
   initSidePanelResize();
   initHistoryPreview();
+  autoLoadSampleFromURL();
 });
 
 function initSidePanel() {
@@ -358,6 +359,33 @@ function initSampleButtons() {
       }
     });
   });
+}
+
+// ════════════════════════════════════════════════════════
+// URL PARAMETER AUTOLOAD (PART L-1-A)
+// 히어로 카드 클릭 → Inspector로 이동 시 샘플 자동 로드
+// ════════════════════════════════════════════════════════
+var URL_SAMPLE_MAP = {
+  'humanoid_ai':    'good',
+  'humanoid_human': 'bad'
+};
+
+function autoLoadSampleFromURL() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var sampleParam = params.get('sample');
+    if (!sampleParam) return;
+
+    var internalKey = URL_SAMPLE_MAP[sampleParam];
+    if (!internalKey) {
+      console.warn('[TopolGuard] Unknown sample parameter:', sampleParam);
+      return;
+    }
+
+    loadSampleFromSidebar(internalKey);
+  } catch (err) {
+    console.error('[TopolGuard] autoLoadSampleFromURL failed:', err);
+  }
 }
 
 function renderSampleButtons() {
