@@ -171,6 +171,12 @@
 
   var cards = [];
   var running = !document.hidden;
+  var lastTimestamp = null;
+  var sharedRotation = 0;
+  var currentSpeed = 0.3;
+  var DEFAULT_SPEED = 0.3;
+  var HOVER_SPEED = 0.45;
+  var CAMERA_ZOOM_RATIO = 0.75;
 
   function parseObjTextForHero(text) {
     var vertices = [];
@@ -331,14 +337,16 @@
 
   function resizeCard(card) {
     var rect = card.canvas.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) return false;
     var w = Math.max(1, Math.floor(rect.width));
     var h = Math.max(1, Math.floor(rect.height));
-    if (card.width === w && card.height === h) return;
+    if (card.width === w && card.height === h) return true;
     card.width = w;
     card.height = h;
     card.renderer.setSize(w, h, false);
     card.camera.aspect = w / h;
     card.camera.updateProjectionMatrix();
+    return true;
   }
 
   function applyTheme(card) {
@@ -370,6 +378,9 @@
     var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
     camera.position.set(0, 0.48, 4.2);
     camera.lookAt(0, 0.05, 0);
+    var cameraDirection = camera.position.clone().normalize();
+    var lookTarget = new THREE.Vector3(0, 0.05, 0);
+    var baseCameraDistance = camera.position.length();
 
     var root = new THREE.Group();
     scene.add(root);
@@ -390,16 +401,26 @@
       lineMaterial: lineMaterial,
       visible: true,
       hover: false,
+      cameraDirection: cameraDirection,
+      lookTarget: lookTarget,
+      baseCameraDistance: baseCameraDistance,
+      currentCameraDistance: baseCameraDistance,
+      targetCameraDistance: baseCameraDistance,
       width: 0,
       height: 0
     };
 
-    canvas.closest('.terminal-card').addEventListener('mouseenter', function () {
-      card.hover = true;
-    });
-    canvas.closest('.terminal-card').addEventListener('mouseleave', function () {
-      card.hover = false;
-    });
+    var cardElement = canvas.closest('.terminal-card');
+    if (cardElement) {
+      cardElement.addEventListener('mouseenter', function () {
+        card.hover = true;
+        card.targetCameraDistance = card.baseCameraDistance * CAMERA_ZOOM_RATIO;
+      });
+      cardElement.addEventListener('mouseleave', function () {
+        card.hover = false;
+        card.targetCameraDistance = card.baseCameraDistance;
+      });
+    }
 
     resizeCard(card);
     applyTheme(card);
@@ -435,15 +456,37 @@
       });
   }
 
-  function renderLoop() {
+  function lerp(a, b, t) {
+    return a + (b - a) * Math.min(1, Math.max(0, t));
+  }
+
+  function renderLoop(timestamp) {
     if (running) {
+      if (lastTimestamp === null) lastTimestamp = timestamp;
+      var delta = Math.min(0.05, (timestamp - lastTimestamp) / 1000);
+      lastTimestamp = timestamp;
+      var anyHover = cards.some(function (card) { return card.hover; });
+      var targetSpeed = anyHover ? HOVER_SPEED : DEFAULT_SPEED;
+      currentSpeed = lerp(currentSpeed, targetSpeed, delta * 5);
+      sharedRotation += currentSpeed * delta;
+
       cards.forEach(function (card) {
         if (!card.visible) return;
-        resizeCard(card);
-        var speed = card.hover ? 0.0075 : 0.005;
-        card.root.rotation.y += speed;
+        if (!resizeCard(card)) return;
+        card.root.rotation.y = sharedRotation;
+        card.currentCameraDistance = lerp(
+          card.currentCameraDistance,
+          card.targetCameraDistance,
+          delta * 4
+        );
+        card.camera.position.copy(
+          card.cameraDirection.clone().multiplyScalar(card.currentCameraDistance)
+        );
+        card.camera.lookAt(card.lookTarget);
         card.renderer.render(card.scene, card.camera);
       });
+    } else {
+      lastTimestamp = null;
     }
     requestAnimationFrame(renderLoop);
   }
@@ -469,6 +512,7 @@
 
     document.addEventListener('visibilitychange', function () {
       running = !document.hidden;
+      lastTimestamp = null;
     });
 
     var themeObserver = new MutationObserver(function () {
@@ -487,7 +531,7 @@
       cards.forEach(resizeCard);
     });
 
-    renderLoop();
+    requestAnimationFrame(renderLoop);
   }
 
   if (document.readyState === 'loading') {
