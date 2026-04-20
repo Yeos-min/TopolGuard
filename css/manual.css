@@ -180,12 +180,30 @@
   line-height: 1.6;
   margin: 0;
 }
-.metric-card.error { border-left-color: var(--error); }
-.metric-card.error .glyph { color: var(--error); }
-.metric-card.warn  { border-left-color: var(--warn); }
-.metric-card.warn  .glyph { color: var(--warn); }
-.metric-card.ok    { border-left-color: var(--ok); }
-.metric-card.ok    .glyph { color: var(--ok); }
+/* ── issue-specific glyph colors (정책 11, PART M-1) ── */
+.metric-card.non-manifold { border-left-color: var(--issue-non-manifold); }
+.metric-card.non-manifold .glyph { color: var(--issue-non-manifold); }
+
+.metric-card.degenerate { border-left-color: var(--issue-degenerate); }
+.metric-card.degenerate .glyph { color: var(--issue-degenerate); }
+
+.metric-card.boundary { border-left-color: var(--issue-boundary); }
+.metric-card.boundary .glyph { color: var(--issue-boundary); }
+
+.metric-card.flipped { border-left-color: var(--issue-flipped); }
+.metric-card.flipped .glyph { color: var(--issue-flipped); }
+
+.metric-card.ngon { border-left-color: var(--issue-ngon); }
+.metric-card.ngon .glyph { color: var(--issue-ngon); }
+
+.metric-card.skinny { border-left-color: var(--issue-skinny); }
+.metric-card.skinny .glyph { color: var(--issue-skinny); }
+
+.metric-card.duplicate { border-left-color: var(--issue-duplicate); }
+.metric-card.duplicate .glyph { color: var(--issue-duplicate); }
+
+.metric-card.isolated { border-left-color: var(--issue-isolated); }
+.metric-card.isolated .glyph { color: var(--issue-isolated); }
 
 /* 콜아웃 */
 .callout {
