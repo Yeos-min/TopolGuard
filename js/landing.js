@@ -51,7 +51,7 @@
   function updateColor() {
     var isLight = document.body.classList.contains('light');
     wireMat.color.setHex(isLight ? 0x3eb389 : 0x3eb389);
-    wireMat.opacity = isLight ? 0.35 : 0.55;
+    wireMat.opacity = isLight ? 0.35 : 0.35;
     scene.fog.color.setHex(isLight ? 0xf0f0f4 : 0x0d0d11);
   }
   updateColor();
@@ -84,9 +84,9 @@
       var z = basePositions[i + 2];
       var dist = Math.sqrt(x * x + z * z);
       pos[i + 1] =
-        Math.sin(x * 0.25 + t * 0.6) * 1.2 +
-        Math.cos(z * 0.22 + t * 0.5) * 1.0 +
-        Math.sin(dist * 0.3 - t * 0.8) * 0.6;
+        Math.sin(x * 0.25 + t * 0.3) * 1.2 +
+        Math.cos(z * 0.22 + t * 0.25) * 1.0 +
+        Math.sin(dist * 0.3 - t * 0.4) * 0.6;
     }
     geometry.attributes.position.needsUpdate = true;
 

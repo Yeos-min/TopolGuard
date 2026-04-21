@@ -1099,7 +1099,7 @@ body.light {
 
 .hero-cards-overlay .terminal-card {
   position: relative;
-  width: 340px;
+  width: 540px;
   background: rgba(
     var(--hero-card-bg-r),
     var(--hero-card-bg-g),
@@ -1311,11 +1311,11 @@ body.light {
 
 @media (max-width: 1600px) {
   .hero-cards-overlay { padding-right: 24px; }
-  .hero-cards-overlay .terminal-card { width: 300px; }
+  .hero-cards-overlay .terminal-card { width: 440px; }
 }
 
 @media (max-width: 1400px) {
-  .hero-cards-overlay .terminal-card { width: 260px; }
+  .hero-cards-overlay .terminal-card { width: 340px; }
   .hero-cards-overlay .hero-score-num { font-size: 44px; }
   .hero-cards-overlay .hero-score-grade { font-size: 22px; }
 }
