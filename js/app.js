@@ -445,6 +445,8 @@ function showToast(type, title, msg, duration) {
   const el = document.createElement('div');
   el.className = 'toast ' + type;
   el.innerHTML =
+    '<span class="toast-corner-bl"></span>' +
+    '<span class="toast-corner-br"></span>' +
     '<span class="toast-icon">' + TOAST_ICONS[type] + '</span>' +
     '<div class="toast-body"><div class="toast-title">' + title + '</div>' +
     (msg ? '<div class="toast-msg">' + msg + '</div>' : '') + '</div>' +
