@@ -136,6 +136,12 @@ function initSidePanelResize() {
       var newWidth = startWidth + (e.clientX - startX);
       newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
       body.style.setProperty('--side-panel-width', newWidth + 'px');
+
+      // 샘플 버튼 가로/세로 전환 (PART UI-3)
+      var samplesContent = panel.querySelector('.samples-section .section-content');
+      if (samplesContent) {
+        samplesContent.style.flexDirection = newWidth >= 320 ? 'row' : 'column';
+      }
     }
     function onMouseUp() {
       document.removeEventListener('mousemove', onMouseMove);
@@ -145,6 +151,13 @@ function initSidePanelResize() {
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
+
+  // 초기 로드 시 너비 기준 샘플 버튼 방향 설정 (PART UI-3)
+  var samplesContent = panel.querySelector('.samples-section .section-content');
+  if (samplesContent) {
+    var initWidth = body.offsetWidth || MIN_WIDTH;
+    samplesContent.style.flexDirection = initWidth >= 320 ? 'row' : 'column';
+  }
 }
 
 function initHistoryPreview() {
