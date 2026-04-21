@@ -519,7 +519,10 @@ const W = () => viewport.clientWidth;
 const H = () => viewport.clientHeight;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x1a1a1f);
+// 뷰포트 배경색을 CSS 변수에서 읽어옴 (PART UI-2, 하드코딩 제거)
+const bgColor = getComputedStyle(document.documentElement)
+  .getPropertyValue('--bg-app').trim();
+scene.background = new THREE.Color(bgColor || '#1a1a1f');
 
 const camera = new THREE.PerspectiveCamera(55, W() / H(), 0.001, 100000);
 camera.position.set(0, 0, 5);
@@ -965,7 +968,7 @@ function createIssueCard(issueKey, meta, count) {
           '<input type="color" class="color-input-hidden" id="colorpick-' + overlayKey + '" value="' + color + '">' +
         '</div>' +
       '</div>' +
-      '<button class="focus-btn"' + (canFocus ? '' : ' disabled') + '>🎯 해당 위치로 이동</button>' +
+      '<button class="focus-btn"' + (canFocus ? '' : ' disabled') + '>GO TO ISSUE</button>' +
     '</div>';
 
   var header = card.querySelector('.issue-card-header');
@@ -2009,7 +2012,9 @@ function applyTheme() {
 
   // Three.js 씬 배경색도 동기화
   if (scene) {
-    scene.background = new THREE.Color(isLight ? 0xf0f0f4 : 0x1a1a1f);
+    var bgColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--bg-app').trim();
+    if (bgColor) scene.background = new THREE.Color(bgColor);
   }
   // 그리드 색상도 모드에 맞게
   if (grid) {
@@ -2027,6 +2032,23 @@ function toggleTheme() {
   localStorage.setItem('tg_theme', isLight ? 'light' : 'dark');
   applyTheme();
 }
+
+// 테마 변경 시 뷰포트 배경 동기화 (PART UI-2)
+(function() {
+  function syncSceneBg() {
+    if (!scene) return;
+    var bgColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--bg-app').trim();
+    if (bgColor) scene.background = new THREE.Color(bgColor);
+  }
+  var themeObserver = new MutationObserver(syncSceneBg);
+  themeObserver.observe(document.documentElement, {
+    attributes: true, attributeFilter: ['data-theme']
+  });
+  themeObserver.observe(document.body, {
+    attributes: true, attributeFilter: ['class']
+  });
+})();
 
 // ════════════════════════════════════════════════════════
 // INIT

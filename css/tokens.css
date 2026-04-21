@@ -8,7 +8,7 @@
   --topnav-h: 64px;
 
   --bg:      #0d0d11;
-  --bg-app:  #1a1a1f;
+  --bg-app:  #1a1a1f;  /* 뷰포트 3D 배경 — js/app.js scene.background 참조 (PART UI-2) */
   --panel:   #22222a;
   --panel2:  #171720;
   --header:  #2a2a35;
@@ -57,7 +57,7 @@
 :root[data-theme="light"],
 body.light {
   --bg:      #f0f0f4;
-  --bg-app:  #f0f0f4;
+  --bg-app:  #f0f0f4;  /* 뷰포트 3D 배경 라이트 모드 (PART UI-2) */
   --panel:   #ffffff;
   --panel2:  #f5f5fa;
   --header:  #e8e8f0;
