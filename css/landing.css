@@ -90,12 +90,23 @@ body.light {
 .landing-frames .frame.tall  { height: 140px; }
 .landing-frames .frame.stair { height: 120px; clip-path: polygon(0 40%, 30% 40%, 30% 0, 100% 0, 100% 100%, 0 100%); }
 
+/* ── Hero body: content + cards side by side ── */
+.hero-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+  width: 100%;
+}
+
 /* ── Hero content ── */
 .hero-content {
   position: relative;
   z-index: 2;
   padding: 80px 64px 100px;
-  max-width: 900px;
+  flex: 1 1 auto;
+  min-width: 0;
   will-change: transform;
 }
 
@@ -1058,13 +1069,13 @@ body.light {
   .landing-footer { padding: 20px; }
 }
 
-/* ====== L-1 retry: hero cards overlay ====== */
+/* ====== L-6: hero cards overlay — fluid layout ====== */
 .hero-cards-overlay {
-  position: absolute;
-  right: 48px;
-  bottom: 120px;
+  flex: 0 0 auto;
   display: flex;
   gap: 16px;
+  align-items: flex-end;
+  padding: 0 48px 100px 0;
   z-index: 3;
   pointer-events: none;
 }
@@ -1088,7 +1099,7 @@ body.light {
 
 .hero-cards-overlay .terminal-card {
   position: relative;
-  width: 640px;
+  width: 340px;
   background: rgba(
     var(--hero-card-bg-r),
     var(--hero-card-bg-g),
@@ -1113,7 +1124,7 @@ body.light {
 }
 
 .hero-cards-overlay .terminal-header {
-  padding: 24px 32px 0;
+  padding: 16px 20px 0;
   border-bottom: none;
   background: transparent;
 }
@@ -1204,15 +1215,15 @@ body.light {
 .hero-cards-overlay .hero-card-body-row {
   display: flex;
   align-items: flex-start;
-  gap: 32px;
-  padding: 24px 32px;
+  gap: 16px;
+  padding: 16px 20px;
 }
 
 .hero-cards-overlay .hero-card-score-area {
   flex: 0 0 auto;
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 4px;
   margin-top: -8px;   /* VT323 픽셀 폰트의 위 여백 시각 보정 */
 }
 
@@ -1223,7 +1234,7 @@ body.light {
 
 .hero-cards-overlay .hero-score-num {
   font-family: var(--display);
-  font-size: 80px;
+  font-size: 56px;
   line-height: 1;
   letter-spacing: 0;
   font-weight: 400;
@@ -1232,7 +1243,7 @@ body.light {
 .hero-cards-overlay .hero-score-grade {
   display: inline-block;
   font-family: var(--display);
-  font-size: 40px;
+  font-size: 28px;
   line-height: 1;
   letter-spacing: 0;
   font-weight: 400;
@@ -1247,6 +1258,10 @@ body.light {
   color: var(--text, #fff);
 }
 
+.hero-cards-overlay .hero-score-b {
+  color: var(--text, #fff);
+}
+
 .hero-cards-overlay .hero-card-issues {
   list-style: none;
   margin: 0;
@@ -1255,11 +1270,11 @@ body.light {
 
 .hero-cards-overlay .hero-card-issues li {
   display: grid;
-  grid-template-columns: 16px 1fr auto;
-  gap: 8px;
+  grid-template-columns: 14px 1fr auto;
+  gap: 6px;
   align-items: center;
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -1295,20 +1310,17 @@ body.light {
 }
 
 @media (max-width: 1600px) {
-  .hero-cards-overlay { right: 24px; }
-  .hero-cards-overlay .terminal-card { width: 560px; }
+  .hero-cards-overlay { padding-right: 24px; }
+  .hero-cards-overlay .terminal-card { width: 300px; }
 }
 
-@media (max-width: 1440px) {
-  .hero-cards-overlay { gap: 12px; }
-  .hero-cards-overlay .terminal-card { width: 480px; }
+@media (max-width: 1400px) {
+  .hero-cards-overlay .terminal-card { width: 260px; }
+  .hero-cards-overlay .hero-score-num { font-size: 44px; }
+  .hero-cards-overlay .hero-score-grade { font-size: 22px; }
 }
 
-@media (max-width: 1280px) {
-  .hero-cards-overlay .terminal-card { width: 400px; }
-}
-
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .hero-cards-overlay { display: none; }
 }
 
