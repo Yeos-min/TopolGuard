@@ -88,17 +88,29 @@ body, .side-panel, #sidebar, #sidebar-body, #sidebar-footer,
 .side-panel-resize-handle {
   position: absolute;
   top: 0;
-  right: 0;
-  width: 4px;
+  right: -5px;
+  width: 10px;
   height: 100%;
   cursor: col-resize;
-  z-index: 17;
-  background: var(--panel2);
-  transition: background 0.15s;
+  z-index: 30;
+  background: transparent;
+}
+.side-panel-resize-handle::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 100%;
+  margin: 0 auto;
+  background: var(--accent);
+  opacity: 0.55;
+  transition: opacity 0.15s, width 0.15s;
 }
 .side-panel-resize-handle:hover {
-  background: var(--accent);
-  opacity: 0.6;
+  background: rgba(62, 179, 137, 0.12);
+}
+.side-panel-resize-handle:hover::before {
+  width: 4px;
+  opacity: 1;
 }
 .side-panel.collapsed .side-panel-resize-handle { display: none; }
 
