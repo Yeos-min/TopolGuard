@@ -557,19 +557,25 @@ body.light {
 
   position: relative;
   margin-top: 40px;
-  overflow: visible;  /* scale 호버 시 카드 잘림 방지 (PART L-7) */
+  overflow: visible;
+}
+
+.issues-marquee-fade {
+  position: relative;
+  overflow: hidden;
+  padding: 8px 0;  /* scale 시 상하 잘림 방지 여유 공간 */
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
-    black var(--fade-width),
-    black calc(100% - var(--fade-width)),
+    black var(--fade-width, 8%),
+    black calc(100% - var(--fade-width, 8%)),
     transparent 100%
   );
           mask-image: linear-gradient(
     to right,
     transparent 0,
-    black var(--fade-width),
-    black calc(100% - var(--fade-width)),
+    black var(--fade-width, 8%),
+    black calc(100% - var(--fade-width, 8%)),
     transparent 100%
   );
 }
@@ -646,7 +652,8 @@ body.light {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .issues-marquee {
+  .issues-marquee,
+  .issues-marquee-fade {
     overflow: visible;
     -webkit-mask-image: none;
             mask-image: none;
