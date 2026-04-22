@@ -615,7 +615,7 @@ body.light {
 .issue-card:hover,
 .issue-card:focus-visible {
   border-color: var(--accent);
-  transform: scale(1.02);
+  transform: scale(1.08);
 }
 
 .issue-card:focus-visible {
