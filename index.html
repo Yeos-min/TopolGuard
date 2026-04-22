@@ -295,8 +295,9 @@
         </p>
 
         <!-- Infinite marquee: 원본 8 + 복제 8 = 16 카드 -->
-        <div class="issues-marquee" data-marquee>
-          <div class="marquee-track">
+        <div class="issues-marquee-fade">
+          <div class="issues-marquee" data-marquee>
+            <div class="marquee-track">
             <a href="manual.html#non-manifold" class="issue-card" data-severity="critical" aria-label="Non-manifold edges 자세히 보기">
               <span class="issue-glyph" style="color:var(--issue-non-manifold);">✕</span>
               <h3 class="issue-title">NON-MANIFOLD</h3>
@@ -392,6 +393,7 @@
               <h3 class="issue-title">DUPLICATE VERTEX</h3>
               <p class="issue-desc">동일 좌표에 여러 버텍스가 겹친 상태. UV/노멀 분리 등 의도적인 경우도 있어 정보성 경고로만 표시합니다.</p>
             </a>
+            </div>
           </div>
         </div>
       </div>
