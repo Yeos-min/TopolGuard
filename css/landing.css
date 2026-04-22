@@ -557,7 +557,7 @@ body.light {
 
   position: relative;
   margin-top: 40px;
-  overflow: hidden;
+  overflow: visible;  /* scale 호버 시 카드 잘림 방지 (PART L-7) */
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
@@ -609,7 +609,7 @@ body.light {
 .issue-card:hover,
 .issue-card:focus-visible {
   border-color: var(--accent);
-  transform: translateY(-2px);
+  transform: scale(1.02);
 }
 
 .issue-card:focus-visible {
