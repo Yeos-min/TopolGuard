@@ -568,7 +568,7 @@ let lastBoundingBoxSize = 1;
 
 function setViewMode(mode, btn) {
   currentMode = mode;
-  document.querySelectorAll('#topbar-view-modes > button[data-mode]').forEach(function(b) {
+  document.querySelectorAll('#topnav-view-modes > button[data-mode]').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-mode') === mode);
   });
   applyViewMode();
@@ -596,9 +596,9 @@ function applyViewMode() {
 }
 
 function initViewportTabs() {
-  const viewModeBtns = document.querySelectorAll('#topbar-view-modes > button[data-mode]');
-  var menuBtn = document.getElementById('topbar-menu-btn');
-  var menuDropdown = document.getElementById('topbar-menu-dropdown');
+  const viewModeBtns = document.querySelectorAll('#topnav-view-modes > button[data-mode]');
+  var menuBtn = document.getElementById('topnav-menu-btn');
+  var menuDropdown = document.getElementById('topnav-menu-dropdown');
   var bboxToggleBtn = document.getElementById('bbox-toggle');
 
   viewModeBtns.forEach(function(btn) {
@@ -704,14 +704,14 @@ function getIssueTokenColor(varName, fallback) {
 }
 
 const overlays = {
-  degen:       { group: new THREE.Group(), color: getIssueTokenColor('--issue-degenerate',   '#e85b7a'), label: '면이 올바르지 않아요',     count: 0 },
-  ngon:        { group: new THREE.Group(), color: getIssueTokenColor('--issue-ngon',         '#d9a336'), label: '면에 꼭짓점이 너무 많아요', count: 0 },
-  dupvert:     { group: new THREE.Group(), color: getIssueTokenColor('--issue-duplicate',    '#4a9fd4'), label: '점이 겹쳐있어요',          count: 0 },
-  flipped:     { group: new THREE.Group(), color: getIssueTokenColor('--issue-flipped',      '#d65a2e'), label: '면 방향이 반대예요',       count: 0 },
-  nonmanifold: { group: new THREE.Group(), color: getIssueTokenColor('--issue-non-manifold', '#cf4b4b'), label: '면이 이상하게 붙어있어요', count: 0 },
-  boundary:    { group: new THREE.Group(), color: getIssueTokenColor('--issue-boundary',     '#e87d3e'), label: '모델이 닫혀있지 않아요',   count: 0 },
-  isolated:    { group: new THREE.Group(), color: getIssueTokenColor('--issue-isolated',     '#5fb8e8'), label: '혼자 떠있는 점이 있어요',  count: 0 },
-  skinny:      { group: new THREE.Group(), color: getIssueTokenColor('--issue-skinny',       '#c89020'), label: '삼각형이 너무 얇아요',     count: 0 },
+  'degenerate':   { group: new THREE.Group(), color: getIssueTokenColor('--issue-degenerate',   '#e85b7a'), label: '면이 올바르지 않아요',     count: 0 },
+  'ngon':         { group: new THREE.Group(), color: getIssueTokenColor('--issue-ngon',         '#d9a336'), label: '면에 꼭짓점이 너무 많아요', count: 0 },
+  'duplicate':    { group: new THREE.Group(), color: getIssueTokenColor('--issue-duplicate',    '#4a9fd4'), label: '점이 겹쳐있어요',          count: 0 },
+  'flipped':      { group: new THREE.Group(), color: getIssueTokenColor('--issue-flipped',      '#d65a2e'), label: '면 방향이 반대예요',       count: 0 },
+  'non-manifold': { group: new THREE.Group(), color: getIssueTokenColor('--issue-non-manifold', '#cf4b4b'), label: '면이 이상하게 붙어있어요', count: 0 },
+  'boundary':     { group: new THREE.Group(), color: getIssueTokenColor('--issue-boundary',     '#e87d3e'), label: '모델이 닫혀있지 않아요',   count: 0 },
+  'isolated':     { group: new THREE.Group(), color: getIssueTokenColor('--issue-isolated',     '#5fb8e8'), label: '혼자 떠있는 점이 있어요',  count: 0 },
+  'skinny':       { group: new THREE.Group(), color: getIssueTokenColor('--issue-skinny',       '#c89020'), label: '삼각형이 너무 얇아요',     count: 0 },
 };
 Object.values(overlays).forEach(o => { o.group.visible = true; overlayGroup.add(o.group); });
 
@@ -775,17 +775,6 @@ var ISSUE_SEVERITY = {
   'isolated':     'info'
 };
 var SEVERITY_RANK = { 'critical': 0, 'error': 1, 'warning': 2, 'info': 3 };
-var ISSUE_TO_OVERLAY_KEY = {
-  'non-manifold': 'nonmanifold',
-  'boundary': 'boundary',
-  'skinny': 'skinny',
-  'ngon': 'ngon',
-  'degenerate': 'degen',
-  'flipped': 'flipped',
-  'isolated': 'isolated',
-  'duplicate': 'dupvert'
-};
-
 function hexToInt(hex) { return parseInt(hex.replace('#',''), 16); }
 
 function applyOverlayColor(key, hex) {
@@ -797,17 +786,12 @@ function applyOverlayColor(key, hex) {
     }
   });
   // R-3-C: 카드 glyph + 숫자 색상 동기화
-  var issueKey = Object.keys(ISSUE_TO_OVERLAY_KEY).find(function(k) {
-    return ISSUE_TO_OVERLAY_KEY[k] === key;
-  });
-  if (issueKey) {
-    var card = document.querySelector('.issue-card[data-issue="' + issueKey + '"]');
-    if (card) {
-      var glyph = card.querySelector('.issue-glyph');
-      var countEl = card.querySelector('.issue-count');
-      if (glyph) glyph.style.color = hex;
-      if (countEl) countEl.style.color = hex;
-    }
+  var card = document.querySelector('.issue-card[data-issue="' + key + '"]');
+  if (card) {
+    var glyph = card.querySelector('.issue-glyph');
+    var countEl = card.querySelector('.issue-count');
+    if (glyph) glyph.style.color = hex;
+    if (countEl) countEl.style.color = hex;
   }
 }
 
@@ -871,9 +855,7 @@ function getCountForIssue(issueKey, stats) {
 }
 
 function getOverlayByIssueKey(issueKey) {
-  const overlayKey = ISSUE_TO_OVERLAY_KEY[issueKey];
-  if (!overlayKey) return null;
-  return overlays[overlayKey] || null;
+  return overlays[issueKey] || null;
 }
 
 function getFirstIssuePosition(issueType) {
@@ -950,7 +932,7 @@ function renderIssueCards(stats) {
 
 function createIssueCard(issueKey, meta, count) {
   var overlay = getOverlayByIssueKey(issueKey);
-  var overlayKey = ISSUE_TO_OVERLAY_KEY[issueKey];
+  var overlayKey = issueKey;
   var isOn = !overlay || overlay.group.visible;
   var color = overlay ? overlay.color : '#888888';
   var canFocus = !!getFirstIssuePosition(issueKey);
@@ -1561,12 +1543,12 @@ function runAnalysis(originalGeometry, allGeometries) {
     const cl=Math.sqrt(Math.pow(aby*acz-abz*acy,2)+Math.pow(abz*acx-abx*acz,2)+Math.pow(abx*acy-aby*acx,2));
     if (cl < 1e-10) degenVerts.push(ax,ay,az,bx,by,bz,cx,cy,cz);
   }
-  overlays.degen.count = degenVerts.length / 9;
+  overlays.degenerate.count = degenVerts.length / 9;
   if (degenVerts.length > 0) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(degenVerts, 3));
-    overlays.degen.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.degen.color), size: 1, sizeAttenuation: false, depthTest: false })));
+    overlays.degenerate.group.add(new THREE.Points(g,
+      new THREE.PointsMaterial({ color: hexToInt(overlays.degenerate.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   // ── Skinny triangles: OBJ 원문 직접 파싱 (쿼드/N-gon 완전 제외) ──
@@ -1584,12 +1566,12 @@ function runAnalysis(originalGeometry, allGeometries) {
       if (e.cnt > 2)      nmVerts.push(ax,ay,az,bx,by,bz);
       else if (e.cnt===1) bdVerts.push(ax,ay,az,bx,by,bz);
     });
-    overlays.nonmanifold.count = nmVerts.length / 6;
+    overlays['non-manifold'].count = nmVerts.length / 6;
     if (nmVerts.length > 0) {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute(nmVerts, 3));
-      overlays.nonmanifold.group.add(new THREE.LineSegments(g,
-        new THREE.LineBasicMaterial({ color: hexToInt(overlays.nonmanifold.color), linewidth: 2, depthTest: false })));
+      overlays['non-manifold'].group.add(new THREE.LineSegments(g,
+        new THREE.LineBasicMaterial({ color: hexToInt(overlays['non-manifold'].color), linewidth: 2, depthTest: false })));
     }
     overlays.boundary.count = bdVerts.length / 6;
     if (bdVerts.length > 0) {
@@ -1761,12 +1743,12 @@ function runAnalysis(originalGeometry, allGeometries) {
   overlays.ngon.count = ngonCount;
   if (ngonCount > 0) buildNgonOverlay(ngonFaces);
 
-  overlays.dupvert.count = dupVertCount;
+  overlays.duplicate.count = dupVertCount;
   if (dupVertPoints.length > 0) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(dupVertPoints, 3));
-    overlays.dupvert.group.add(new THREE.Points(g,
-      new THREE.PointsMaterial({ color: hexToInt(overlays.dupvert.color), size: 1, sizeAttenuation: false, depthTest: false })));
+    overlays.duplicate.group.add(new THREE.Points(g,
+      new THREE.PointsMaterial({ color: hexToInt(overlays.duplicate.color), size: 1, sizeAttenuation: false, depthTest: false })));
   }
 
   overlays.isolated.count = trueIsolatedCount;
@@ -1782,11 +1764,11 @@ function runAnalysis(originalGeometry, allGeometries) {
 
   // ── Collect stats for health score & inspector ──
   const stats = {
-    degenCount:       overlays.degen.count,
+    degenCount:       overlays.degenerate.count,
     ngonCount:        overlays.ngon.count,
-    dupVertCount:     overlays.dupvert.count,
+    dupVertCount:     overlays.duplicate.count,
     flippedCount:     overlays.flipped.count,
-    nonManifoldCount: overlays.nonmanifold.count,
+    nonManifoldCount: overlays['non-manifold'].count,
     boundaryCount:    overlays.boundary.count,
     isolatedCount:    trueIsolatedCount,
     skinnyCount:      overlays.skinny.count,
