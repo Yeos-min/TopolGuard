@@ -356,10 +356,9 @@ body.light {
   --pipeline-pass: var(--accent);
   --pipeline-fail: var(--issue-boundary, #d85a30);
   --pipeline-neutral: var(--border2);
-  --pipeline-corner-size: 8px;
   position: relative;
   margin-top: 48px;
-  padding: 28px 0 42px;
+  padding: 24px 0 56px;
 }
 
 .pipeline-track {
@@ -368,17 +367,15 @@ body.light {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr);
   grid-template-rows: auto auto;
-  column-gap: 40px;
-  row-gap: 60px;
+  column-gap: 56px;
+  row-gap: 54px;
   align-items: center;
 }
 
 .pipeline-stage,
 .pipeline-guard,
 .pipeline-fail-target {
-  --card-bg: var(--panel);
   --card-border: var(--border2);
-  --corner-color: var(--border2);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -386,16 +383,7 @@ body.light {
   gap: 6px;
   padding: 16px 24px;
   min-height: 88px;
-  background:
-    linear-gradient(var(--corner-color), var(--corner-color)) top 6px left 6px / var(--pipeline-corner-size) 1px no-repeat,
-    linear-gradient(var(--corner-color), var(--corner-color)) top 6px left 6px / 1px var(--pipeline-corner-size) no-repeat,
-    linear-gradient(var(--corner-color), var(--corner-color)) top 6px right 6px / var(--pipeline-corner-size) 1px no-repeat,
-    linear-gradient(var(--corner-color), var(--corner-color)) top 6px right 6px / 1px var(--pipeline-corner-size) no-repeat,
-    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px left 6px / var(--pipeline-corner-size) 1px no-repeat,
-    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px left 6px / 1px var(--pipeline-corner-size) no-repeat,
-    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px right 6px / var(--pipeline-corner-size) 1px no-repeat,
-    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px right 6px / 1px var(--pipeline-corner-size) no-repeat,
-    var(--card-bg);
+  background: var(--panel);
   border: 1px solid var(--card-border);
   border-radius: 4px;
   text-align: left;
@@ -418,7 +406,6 @@ body.light {
 
 .pipeline-guard {
   --card-border: var(--pipeline-pass);
-  --corner-color: var(--pipeline-pass);
   grid-column: 2;
   min-width: 176px;
   min-height: 98px;
@@ -434,6 +421,7 @@ body.light {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
+  padding-left: 108px;
   align-items: stretch;
 }
 
@@ -443,13 +431,13 @@ body.light {
 
 .pipeline-fail-target {
   --card-border: var(--pipeline-fail);
-  --corner-color: var(--pipeline-fail);
   grid-column: 3;
   grid-row: 2;
   justify-self: start;
   align-self: start;
   min-width: 220px;
   min-height: 0;
+  margin-left: 108px;
   padding: 14px 18px;
   border-style: dashed;
 }
@@ -531,10 +519,15 @@ body.light {
   marker-end: url(#pipeline-arrow-fail);
 }
 
+.connector-path--chain {
+  stroke: var(--pipeline-neutral);
+  marker-end: url(#pipeline-arrow-neutral);
+}
+
 .connector-path--loop {
   stroke: var(--pipeline-fail);
   stroke-dasharray: 4 4;
-  opacity: 0.7;
+  opacity: 0.65;
   marker-end: url(#pipeline-arrow-fail);
 }
 
@@ -583,41 +576,6 @@ body.light {
 .pipeline-diagram.in-view .pipeline-stage[data-stage="4"] { transition-delay: 0.32s; }
 .pipeline-diagram.in-view .pipeline-stage[data-stage="5"] { transition-delay: 0.4s; }
 .pipeline-diagram.in-view .pipeline-fail-target { transition-delay: 0.24s; }
-
-.pipeline-legend {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 48px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--dim);
-  letter-spacing: 0.5px;
-}
-
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.legend-divider {
-  color: var(--dim);
-}
-
-.legend-line {
-  width: 32px;
-  height: 2px;
-  border-radius: 1px;
-}
-
-.legend-line--pass { background: var(--pipeline-pass); }
-.legend-line--fail {
-  height: 0;
-  border-top: 2px dashed var(--pipeline-fail);
-  border-radius: 0;
-}
 
 /* ════════════════════════════════════════════════════════
    ISSUES MARQUEE (L-5) — 8개 이슈 infinite rail
@@ -1407,7 +1365,7 @@ body.light {
 
 @media (max-width: 1024px) {
   .pipeline-diagram {
-    padding: 20px 0 32px;
+    padding: 20px 0 40px;
   }
 
   .pipeline-track {
@@ -1433,11 +1391,13 @@ body.light {
   }
 
   .pipeline-pass-lane {
+    padding-left: 0;
     grid-template-columns: 1fr;
     gap: 14px;
   }
 
   .pipeline-fail-target {
+    margin-left: 0;
     min-width: 0;
   }
 }
