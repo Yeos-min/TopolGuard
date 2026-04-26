@@ -459,13 +459,13 @@ body, .side-panel, #sidebar, #sidebar-body, #sidebar-footer,
   letter-spacing: 0.5px;
 }
 
-/* Good: 녹색 악센트 */
-.qs-btn.qs-good .qs-btn-icon { color: var(--ok); }
-.qs-btn.qs-good:hover { border-color: var(--ok); }
+/* Human: 녹색 악센트 */
+.qs-btn.qs-human .qs-btn-icon { color: var(--ok); }
+.qs-btn.qs-human:hover { border-color: var(--ok); }
 
-/* Bad: 경고 악센트 */
-.qs-btn.qs-bad .qs-btn-icon { color: var(--warn); }
-.qs-btn.qs-bad:hover { border-color: var(--warn); }
+/* AI: 경고 악센트 */
+.qs-btn.qs-ai .qs-btn-icon { color: var(--warn); }
+.qs-btn.qs-ai:hover { border-color: var(--warn); }
 
 /* ── SIDE PANEL SAMPLE BUTTONS ── */
 .sample-btn {

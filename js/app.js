@@ -348,16 +348,14 @@ setInterval(function() {
 // SIDEBAR SAMPLE BUTTONS
 // ════════════════════════════════════════════════════════
 var SAMPLE_PATHS = {
-  good: 'samples/Humanoid_AI.obj',
-  bad:  'samples/Humanoid_Human_Modified.obj'
+  ai:    'samples/Humanoid_AI.obj',
+  human: 'samples/Humanoid_Human_Modified.obj'
 };
 
 function loadSampleFromSidebar(which) {
   var path = SAMPLE_PATHS[which];
   var name = path.split('/').pop();
-  // good = Humanoid_AI (AI Output, 결함 있음) → ⚠
-  // bad  = Humanoid_Human_Modified (Human Revised, 깨끗함) → ✓
-  var icon = which === 'good' ? '⚠' : '✓';
+  var icon = which === 'ai' ? '⚠' : '✓';
   loadSample(path, name, icon);
 }
 
@@ -365,10 +363,10 @@ function initSampleButtons() {
   document.querySelectorAll('.sample-btn[data-file]').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var file = btn.getAttribute('data-file');
-      if (file === SAMPLE_PATHS.good.split('/').pop()) {
-        loadSampleFromSidebar('good');
-      } else if (file === SAMPLE_PATHS.bad.split('/').pop()) {
-        loadSampleFromSidebar('bad');
+      if (file === SAMPLE_PATHS.ai.split('/').pop()) {
+        loadSampleFromSidebar('ai');
+      } else if (file === SAMPLE_PATHS.human.split('/').pop()) {
+        loadSampleFromSidebar('human');
       }
     });
   });
@@ -379,8 +377,8 @@ function initSampleButtons() {
 // 히어로 카드 클릭 → Inspector로 이동 시 샘플 자동 로드
 // ════════════════════════════════════════════════════════
 var URL_SAMPLE_MAP = {
-  'humanoid_ai':    'good',
-  'humanoid_human': 'bad'
+  'humanoid_ai':    'ai',
+  'humanoid_human': 'human'
 };
 
 function autoLoadSampleFromURL() {
@@ -402,26 +400,26 @@ function autoLoadSampleFromURL() {
 }
 
 function renderSampleButtons() {
-  var goodBtn = document.getElementById('sample-good-btn');
-  var badBtn  = document.getElementById('sample-bad-btn');
-  if (!goodBtn || !badBtn) return;
+  var aiBtn    = document.getElementById('sample-ai-btn');
+  var humanBtn = document.getElementById('sample-human-btn');
+  if (!aiBtn || !humanBtn) return;
 
-  var goodName = SAMPLE_PATHS.good.split('/').pop();
-  var badName  = SAMPLE_PATHS.bad.split('/').pop();
+  var aiName    = SAMPLE_PATHS.ai.split('/').pop();
+  var humanName = SAMPLE_PATHS.human.split('/').pop();
 
-  goodBtn.classList.toggle('active', currentLoadedFile === goodName);
-  badBtn.classList.toggle('active', currentLoadedFile === badName);
+  aiBtn.classList.toggle('active', currentLoadedFile === aiName);
+  humanBtn.classList.toggle('active', currentLoadedFile === humanName);
 }
 
-// 키보드 단축키: G(Good), B(Bad)
+// 키보드 단축키: A(AI Origin), H(Human Touched)
 document.addEventListener('keydown', function(e) {
   // 입력 필드에 포커스 있으면 무시
   var tag = document.activeElement && document.activeElement.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
   if (document.activeElement && document.activeElement.isContentEditable) return;
 
-  if (e.key === 'g' || e.key === 'G') { loadSampleFromSidebar('good'); }
-  if (e.key === 'b' || e.key === 'B') { loadSampleFromSidebar('bad'); }
+  if (e.key === 'a' || e.key === 'A') { loadSampleFromSidebar('ai'); }
+  if (e.key === 'h' || e.key === 'H') { loadSampleFromSidebar('human'); }
 });
 
 // ════════════════════════════════════════════════════════
