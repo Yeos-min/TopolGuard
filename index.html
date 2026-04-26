@@ -202,7 +202,7 @@
         </p>
 
         <!-- 파이프라인 다이어그램 -->
-        <div class="pipeline-diagram" role="img" aria-label="3D 모델링 파이프라인과 토폴로지 결함 발생 시 되돌아가는 루프">
+        <div class="pipeline-diagram" role="img" aria-label="MODELING 단계 후 TopolGuard 게이트가 토폴로지를 검증한다. 통과 시 UV·리깅·애니메이션·렌더로 진행. 실패 시 모델링으로 즉시 복귀한다.">
           <div class="pipeline-track">
             <div class="pipeline-stage pipeline-stage--modeling" data-stage="1">
               <span class="stage-num">01</span>
@@ -211,71 +211,69 @@
             </div>
 
             <div class="pipeline-guard" data-stage="guard">
-              <span class="guard-mark">✓</span>
+              <span class="guard-bracket">[ GATE ]</span>
               <span class="guard-label">TopolGuard</span>
               <span class="guard-desc">토폴로지 검사</span>
             </div>
 
-            <div class="pipeline-stage" data-stage="2">
-              <span class="stage-num">02</span>
-              <span class="stage-label">UV</span>
-              <span class="stage-desc">언래핑</span>
+            <div class="pipeline-pass-lane">
+              <div class="pipeline-stage" data-stage="2">
+                <span class="stage-num">02</span>
+                <span class="stage-label">UV</span>
+                <span class="stage-desc">언래핑</span>
+              </div>
+              <div class="pipeline-stage" data-stage="3">
+                <span class="stage-num">03</span>
+                <span class="stage-label">RIGGING</span>
+                <span class="stage-desc">본 설정</span>
+              </div>
+              <div class="pipeline-stage" data-stage="4">
+                <span class="stage-num">04</span>
+                <span class="stage-label">ANIMATION</span>
+                <span class="stage-desc">움직임</span>
+              </div>
+              <div class="pipeline-stage" data-stage="5">
+                <span class="stage-num">05</span>
+                <span class="stage-label">RENDER</span>
+                <span class="stage-desc">최종 출력</span>
+              </div>
             </div>
 
-            <div class="pipeline-stage" data-stage="3">
-              <span class="stage-num">03</span>
-              <span class="stage-label">RIGGING</span>
-              <span class="stage-desc">본 설정</span>
-            </div>
-
-            <div class="pipeline-stage" data-stage="4">
-              <span class="stage-num">04</span>
-              <span class="stage-label">ANIMATION</span>
-              <span class="stage-desc">움직임</span>
-            </div>
-
-            <div class="pipeline-stage" data-stage="5">
-              <span class="stage-num">05</span>
-              <span class="stage-label">RENDER</span>
-              <span class="stage-desc">최종 출력</span>
+            <div class="pipeline-fail-target">
+              <span class="fail-label">RETURN TO MODELING</span>
+              <span class="fail-desc">결함 수정 후 재검사</span>
             </div>
           </div>
 
-          <svg class="pipeline-loops" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
-            <!-- SVG 좌표는 viewBox 기준 초기값입니다. Yeos가 Dreamweaver에서 M/Q 값을 미세 조정할 수 있게 path를 분리해 둡니다. -->
-            <path class="loop-path loop-path--uv" d="M 430,20 Q 430,-80 170,-80 Q 50,-80 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-uv)" />
-            <path class="loop-path loop-path--rig" d="M 620,20 Q 620,-110 170,-110 Q 50,-110 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-rig)" />
-            <path class="loop-path loop-path--anim" d="M 810,20 Q 810,-140 170,-140 Q 50,-140 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-anim)" />
-            <path class="loop-path loop-path--render" d="M 1000,20 Q 1000,-170 170,-170 Q 50,-170 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-render)" />
-            <path class="loop-path loop-path--guard" d="M 260,20 Q 260,-40 130,-40 Q 50,-40 50,20" fill="none" stroke-width="2" stroke-linecap="round" marker-end="url(#loop-arrow-guard)" />
-
+          <svg class="pipeline-connectors" aria-hidden="true">
             <defs>
-              <marker id="loop-arrow-uv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--uv" />
+              <marker id="pipeline-arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0,0 L 10,5 L 0,10 z" class="pipeline-arrow pipeline-arrow--neutral" />
               </marker>
-              <marker id="loop-arrow-rig" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--rig" />
+              <marker id="pipeline-arrow-pass" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0,0 L 10,5 L 0,10 z" class="pipeline-arrow pipeline-arrow--pass" />
               </marker>
-              <marker id="loop-arrow-anim" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--anim" />
-              </marker>
-              <marker id="loop-arrow-render" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--render" />
-              </marker>
-              <marker id="loop-arrow-guard" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="arrow-head arrow-head--guard" />
+              <marker id="pipeline-arrow-fail" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0,0 L 10,5 L 0,10 z" class="pipeline-arrow pipeline-arrow--fail" />
               </marker>
             </defs>
+            <path class="connector-path connector-path--neutral" />
+            <path class="connector-path connector-path--pass" />
+            <path class="connector-path connector-path--fail" />
+            <path class="connector-path connector-path--loop" />
+            <text class="connector-label connector-label--pass">PASS ✓</text>
+            <text class="connector-label connector-label--fail">FAIL ✕</text>
           </svg>
 
           <div class="pipeline-legend">
-            <span class="legend-item legend-item--guard">
-              <span class="legend-line legend-line--guard"></span>
-              TopolGuard로 즉시 복귀 (저렴)
+            <span class="legend-item legend-item--pass">
+              <span class="legend-line legend-line--pass"></span>
+              PASS — 다음 단계 진행
             </span>
-            <span class="legend-item legend-item--late">
-              <span class="legend-line legend-line--late"></span>
-              후속 단계에서 발견 시 강제 회귀 (비쌈)
+            <span class="legend-divider">|</span>
+            <span class="legend-item legend-item--fail">
+              <span class="legend-line legend-line--fail"></span>
+              FAIL — 모델링으로 즉시 복귀
             </span>
           </div>
         </div>
