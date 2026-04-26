@@ -220,11 +220,6 @@
     return 'M ' + start.x + ' ' + start.y + ' L ' + end.x + ' ' + end.y;
   }
 
-  function cubicPath(start, cp1, cp2, end) {
-    return 'M ' + start.x + ' ' + start.y +
-      ' C ' + cp1.x + ' ' + cp1.y + ', ' + cp2.x + ' ' + cp2.y + ', ' + end.x + ' ' + end.y;
-  }
-
   function polylinePath(points) {
     if (!points.length) return '';
     var d = 'M ' + points[0].x + ' ' + points[0].y;
@@ -237,16 +232,6 @@
   function setLabel(el, x, y) {
     el.setAttribute('x', Math.round(x * 10) / 10);
     el.setAttribute('y', Math.round(y * 10) / 10);
-  }
-
-  function cubicPoint(start, cp1, cp2, end, t) {
-    var mt = 1 - t;
-    var mt2 = mt * mt;
-    var t2 = t * t;
-    return point(
-      mt2 * mt * start.x + 3 * mt2 * t * cp1.x + 3 * mt * t2 * cp2.x + t2 * t * end.x,
-      mt2 * mt * start.y + 3 * mt2 * t * cp1.y + 3 * mt * t2 * cp2.y + t2 * t * end.y
-    );
   }
 
   function draw() {
@@ -272,21 +257,17 @@
       var neutralEnd = point(gateBox.cx, gateBox.top);
       var passStart = point(gateBox.cx, gateBox.bottom);
       var passEnd = point(passBox.cx, passBox.top);
-      var passCp1 = point(passStart.x, passStart.y + 30);
-      var passCp2 = point(passEnd.x, passEnd.y - 30);
-      var passLabelPoint = cubicPoint(passStart, passCp1, passCp2, passEnd, 0.5);
+      var passLabelPoint = point((passStart.x + passEnd.x) / 2, (passStart.y + passEnd.y) / 2);
       var failStart = point(gateBox.right, gateBox.cy);
       var failEnd = point(failBox.cx, failBox.top);
-      var failCp1 = point(Math.min(width - 24, failStart.x + 60), failStart.y + 10);
-      var failCp2 = point(Math.min(width - 24, failBox.right + 28), failEnd.y - 28);
-      var failLabelPoint = cubicPoint(failStart, failCp1, failCp2, failEnd, 0.46);
+      var failLabelPoint = point((failStart.x + failEnd.x) / 2, (failStart.y + failEnd.y) / 2);
       var loopStart = point(failBox.cx, failBox.bottom);
       var loopBottomY = Math.min(height - 16, Math.max(failBox.bottom, modelingBox.bottom) + 44);
       var loopEnd = point(modelingBox.cx, modelingBox.bottom);
 
       neutralPath.setAttribute('d', linePath(neutralStart, neutralEnd));
-      passPath.setAttribute('d', cubicPath(passStart, passCp1, passCp2, passEnd));
-      failPath.setAttribute('d', cubicPath(failStart, failCp1, failCp2, failEnd));
+      passPath.setAttribute('d', linePath(passStart, passEnd));
+      failPath.setAttribute('d', linePath(failStart, failEnd));
       loopPath.setAttribute('d', polylinePath([
         loopStart,
         point(loopStart.x, loopBottomY),
@@ -311,27 +292,23 @@
       return;
     }
 
-    var neutralStartDesktop = point(modelingBox.right, modelingBox.cy);
-    var neutralEndDesktop = point(gateBox.left, gateBox.cy);
-    var passStartDesktop = point(gateBox.right, gateBox.cy - 8);
+    var sharedCenterY = point(0, (modelingBox.cy + gateBox.cy) / 2).y;
+    var neutralStartDesktop = point(modelingBox.right, sharedCenterY);
+    var neutralEndDesktop = point(gateBox.left, sharedCenterY);
+    var branchStartDesktop = point(gateBox.right, gateBox.cy);
+    var passStartDesktop = branchStartDesktop;
     var passEndDesktop = point(passBox.left, passBox.cy);
-    var passDx = passEndDesktop.x - passStartDesktop.x;
-    var passCp1Desktop = point(passStartDesktop.x + passDx * 0.34, passStartDesktop.y - 20);
-    var passCp2Desktop = point(passEndDesktop.x - passDx * 0.34, passEndDesktop.y - 4);
-    var passLabelDesktop = cubicPoint(passStartDesktop, passCp1Desktop, passCp2Desktop, passEndDesktop, 0.5);
-    var failStartDesktop = point(gateBox.right, gateBox.cy + 8);
+    var passLabelDesktop = point((passStartDesktop.x + passEndDesktop.x) / 2, (passStartDesktop.y + passEndDesktop.y) / 2);
+    var failStartDesktop = branchStartDesktop;
     var failEndDesktop = point(failBox.left, failBox.cy);
-    var failDx = failEndDesktop.x - failStartDesktop.x;
-    var failCp1Desktop = point(failStartDesktop.x + failDx * 0.34, failStartDesktop.y + 18);
-    var failCp2Desktop = point(failEndDesktop.x - failDx * 0.34, failEndDesktop.y + 4);
-    var failLabelDesktop = cubicPoint(failStartDesktop, failCp1Desktop, failCp2Desktop, failEndDesktop, 0.5);
+    var failLabelDesktop = point((failStartDesktop.x + failEndDesktop.x) / 2, (failStartDesktop.y + failEndDesktop.y) / 2);
     var loopStartDesktop = point(failBox.cx, failBox.bottom);
     var loopBottomDesktop = Math.min(height - 18, Math.max(failBox.bottom, modelingBox.bottom) + 44);
     var loopEndDesktop = point(modelingBox.cx, modelingBox.bottom);
 
     neutralPath.setAttribute('d', linePath(neutralStartDesktop, neutralEndDesktop));
-    passPath.setAttribute('d', cubicPath(passStartDesktop, passCp1Desktop, passCp2Desktop, passEndDesktop));
-    failPath.setAttribute('d', cubicPath(failStartDesktop, failCp1Desktop, failCp2Desktop, failEndDesktop));
+    passPath.setAttribute('d', linePath(passStartDesktop, passEndDesktop));
+    failPath.setAttribute('d', linePath(failStartDesktop, failEndDesktop));
     loopPath.setAttribute('d', polylinePath([
       loopStartDesktop,
       point(loopStartDesktop.x, loopBottomDesktop),
