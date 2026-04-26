@@ -356,6 +356,7 @@ body.light {
   --pipeline-pass: var(--accent);
   --pipeline-fail: var(--issue-boundary, #d85a30);
   --pipeline-neutral: var(--border2);
+  --pipeline-label-bg: var(--panel2);
   position: relative;
   margin-top: 48px;
   padding: 24px 0 56px;
@@ -420,13 +421,14 @@ body.light {
   grid-row: 1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-  padding-left: 108px;
+  gap: 44px;
+  padding-left: 120px;
   align-items: stretch;
 }
 
 .pipeline-pass-lane .pipeline-stage {
   min-width: 0;
+  padding: 16px 20px;
 }
 
 .pipeline-fail-target {
@@ -437,7 +439,7 @@ body.light {
   align-self: start;
   min-width: 220px;
   min-height: 0;
-  margin-left: 108px;
+  margin-left: 120px;
   padding: 14px 18px;
   border-style: dashed;
 }
@@ -538,9 +540,15 @@ body.light {
 .connector-label {
   font-family: var(--mono);
   font-size: 11px;
+  font-weight: 500;
   letter-spacing: 1px;
   text-anchor: middle;
   dominant-baseline: middle;
+  paint-order: stroke fill;
+  stroke: var(--pipeline-label-bg);
+  stroke-width: 10px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .connector-label--pass { fill: var(--pipeline-pass); }
@@ -1393,7 +1401,7 @@ body.light {
   .pipeline-pass-lane {
     padding-left: 0;
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 18px;
   }
 
   .pipeline-fail-target {
