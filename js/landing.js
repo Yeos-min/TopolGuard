@@ -183,17 +183,19 @@
   var modeling = diagram.querySelector('.pipeline-stage--modeling');
   var gate = diagram.querySelector('.pipeline-guard');
   var passLane = diagram.querySelector('.pipeline-pass-lane');
-  var firstPassStage = passLane ? passLane.querySelector('.pipeline-stage[data-stage="2"]') : null;
+  var passStages = passLane ? Array.prototype.slice.call(passLane.querySelectorAll('.pipeline-stage')) : [];
+  var firstPassStage = passStages.length ? passStages[0] : null;
   var failTarget = diagram.querySelector('.pipeline-fail-target');
   if (!svg || !modeling || !gate || !passLane || !firstPassStage || !failTarget) return;
 
   var neutralPath = svg.querySelector('.connector-path--neutral');
   var passPath = svg.querySelector('.connector-path--pass');
   var failPath = svg.querySelector('.connector-path--fail');
+  var chainPaths = svg.querySelectorAll('.connector-path--chain');
   var loopPath = svg.querySelector('.connector-path--loop');
   var passLabel = svg.querySelector('.connector-label--pass');
   var failLabel = svg.querySelector('.connector-label--fail');
-  if (!neutralPath || !passPath || !failPath || !loopPath || !passLabel || !failLabel) return;
+  if (!neutralPath || !passPath || !failPath || !chainPaths.length || !loopPath || !passLabel || !failLabel) return;
 
   function point(x, y) {
     return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
@@ -218,11 +220,6 @@
     return 'M ' + start.x + ' ' + start.y + ' L ' + end.x + ' ' + end.y;
   }
 
-  function cubicPath(start, cp1, cp2, end) {
-    return 'M ' + start.x + ' ' + start.y +
-      ' C ' + cp1.x + ' ' + cp1.y + ', ' + cp2.x + ' ' + cp2.y + ', ' + end.x + ' ' + end.y;
-  }
-
   function polylinePath(points) {
     if (!points.length) return '';
     var d = 'M ' + points[0].x + ' ' + points[0].y;
@@ -237,6 +234,19 @@
     el.setAttribute('y', Math.round(y * 10) / 10);
   }
 
+  function multiSegmentPath(segments) {
+    var d = '';
+    for (var i = 0; i < segments.length; i++) {
+      var seg = segments[i];
+      if (!seg || !seg.length) continue;
+      d += (d ? ' ' : '') + 'M ' + seg[0].x + ' ' + seg[0].y;
+      for (var j = 1; j < seg.length; j++) {
+        d += ' L ' + seg[j].x + ' ' + seg[j].y;
+      }
+    }
+    return d;
+  }
+
   function draw() {
     var origin = diagram.getBoundingClientRect();
     var width = Math.max(1, Math.round(origin.width));
@@ -244,9 +254,14 @@
     var modelingBox = rectPoints(modeling.getBoundingClientRect(), origin);
     var gateBox = rectPoints(gate.getBoundingClientRect(), origin);
     var passBox = rectPoints(firstPassStage.getBoundingClientRect(), origin);
-    var passLaneBox = rectPoints(passLane.getBoundingClientRect(), origin);
+    var passStageBoxes = passStages.map(function(stage) {
+      return rectPoints(stage.getBoundingClientRect(), origin);
+    });
     var failBox = rectPoints(failTarget.getBoundingClientRect(), origin);
     var isStacked = window.innerWidth < 1024;
+    var labelHalfWidth = 34;
+    var labelClearance = 14;
+    var boxGap = 24;
 
     svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
     svg.setAttribute('width', width);
@@ -255,80 +270,142 @@
     if (isStacked) {
       var neutralStart = point(modelingBox.cx, modelingBox.bottom);
       var neutralEnd = point(gateBox.cx, gateBox.top);
-      var passStart = point(gateBox.cx, gateBox.bottom);
-      var passEnd = point(passBox.cx, passBox.top);
-      var failStart = point(gateBox.right, gateBox.cy);
-      var failEnd = point(failBox.cx, failBox.top);
-      var failRouteX = Math.min(width - 18, Math.max(gateBox.right, passLaneBox.right, failBox.right) + 24);
-      var loopStart = point(failBox.cx, failBox.bottom);
-      var loopBottomY = Math.min(height - 14, failBox.bottom + 24);
-      var loopReturnY = modelingBox.bottom + 18;
-      var loopEnd = point(modelingBox.cx, modelingBox.bottom);
+      var passLineY = gateBox.bottom + 26;
+      var passLabelX = Math.min(width - 68, gateBox.cx + 62);
+      var passBoxAnchor = point(passBox.cx, passBox.top);
+      var failLineY = failBox.top - 26;
+      var failLabelX = Math.min(width - 68, gateBox.cx + 62);
+      var failBoxAnchor = point(failBox.cx, failBox.top);
+      var failRouteX = Math.min(width - 18, Math.max(gateBox.right, failBox.right) + 30);
+      var loopStart = point(failBox.left, failBox.cy);
+      var loopBottomY = Math.min(height - 16, failBox.bottom + 28);
+      var loopEnd = point(modelingBox.left, modelingBox.bottom - 14);
 
       neutralPath.setAttribute('d', linePath(neutralStart, neutralEnd));
-      passPath.setAttribute('d', linePath(passStart, passEnd));
-      failPath.setAttribute('d', polylinePath([
-        failStart,
-        point(failRouteX, failStart.y),
-        point(failRouteX, failEnd.y),
-        failEnd
+      passPath.setAttribute('d', multiSegmentPath([
+        [
+          point(gateBox.cx, gateBox.bottom),
+          point(gateBox.cx, passLineY),
+          point(passLabelX - labelHalfWidth - labelClearance, passLineY)
+        ],
+        [
+          point(passLabelX + labelHalfWidth + labelClearance, passLineY),
+          point(passBoxAnchor.x, passLineY),
+          passBoxAnchor
+        ]
+      ]));
+      failPath.setAttribute('d', multiSegmentPath([
+        [
+          point(gateBox.right, gateBox.cy),
+          point(failRouteX, gateBox.cy),
+          point(failRouteX, failLineY),
+          point(failLabelX - labelHalfWidth - labelClearance, failLineY)
+        ],
+        [
+          point(failLabelX + labelHalfWidth + labelClearance, failLineY),
+          point(failBoxAnchor.x, failLineY),
+          failBoxAnchor
+        ]
       ]));
       loopPath.setAttribute('d', polylinePath([
         loopStart,
-        point(loopStart.x, loopBottomY),
-        point(loopEnd.x, loopBottomY),
-        point(loopEnd.x, loopReturnY),
+        point(loopStart.x - 28, loopStart.y),
+        point(loopStart.x - 28, loopBottomY),
+        point(loopEnd.x - 18, loopBottomY),
+        point(loopEnd.x - 18, loopEnd.y),
         loopEnd
       ]));
 
-      setLabel(passLabel, gateBox.cx + 52, (passStart.y + passEnd.y) / 2);
-      setLabel(failLabel, failRouteX - 28, gateBox.bottom + 18);
+      setLabel(passLabel, passLabelX, passLineY);
+      setLabel(failLabel, failLabelX, failLineY);
+      chainPaths.forEach(function(path, index) {
+        var from = passStageBoxes[index];
+        var to = passStageBoxes[index + 1];
+        if (!from || !to) {
+          path.setAttribute('d', '');
+          return;
+        }
+        path.setAttribute('d', linePath(
+          point(from.cx, from.bottom),
+          point(to.cx, to.top)
+        ));
+      });
       return;
     }
 
     var neutralStartDesktop = point(modelingBox.right, modelingBox.cy);
     var neutralEndDesktop = point(gateBox.left, gateBox.cy);
-    var passStartDesktop = point(gateBox.right, gateBox.cy - 10);
-    var passEndDesktop = point(passBox.left, passBox.cy);
-    var failStartDesktop = point(gateBox.right, gateBox.cy + 10);
-    var failEndDesktop = point(failBox.left, failBox.cy);
-    var loopStartDesktop = point(failBox.cx, failBox.bottom);
-    var loopBottomDesktop = Math.min(height - 16, Math.max(failBox.bottom, modelingBox.bottom) + 34);
-    var loopEndDesktop = point(modelingBox.cx, modelingBox.bottom);
-    var passCurve = Math.max(42, (passEndDesktop.x - passStartDesktop.x) * 0.32);
-    var failCurve = Math.max(42, (failEndDesktop.x - failStartDesktop.x) * 0.32);
+    var passLineYDesktop = passBox.cy;
+    var failLineYDesktop = failBox.cy;
+    var passLabelMin = gateBox.right + 48;
+    var passLabelMax = passBox.left - boxGap - labelHalfWidth - labelClearance;
+    var passLabelXDesktop = Math.max(passLabelMin, Math.min(passLabelMax, gateBox.right + (passBox.left - gateBox.right) * 0.48));
+    var failLabelMin = gateBox.right + 48;
+    var failLabelMax = failBox.left - boxGap - labelHalfWidth - labelClearance;
+    var failLabelXDesktop = Math.max(failLabelMin, Math.min(failLabelMax, gateBox.right + (failBox.left - gateBox.right) * 0.48));
+    var loopStartDesktop = point(failBox.left, failBox.cy);
+    var loopBottomDesktop = Math.min(height - 18, Math.max(failBox.bottom, modelingBox.bottom) + 34);
+    var loopEndDesktop = point(modelingBox.left, modelingBox.bottom - 14);
 
     neutralPath.setAttribute('d', linePath(neutralStartDesktop, neutralEndDesktop));
-    passPath.setAttribute('d', cubicPath(
-      passStartDesktop,
-      point(passStartDesktop.x + passCurve, passStartDesktop.y),
-      point(passEndDesktop.x - passCurve, passEndDesktop.y),
-      passEndDesktop
-    ));
-    failPath.setAttribute('d', cubicPath(
-      failStartDesktop,
-      point(failStartDesktop.x + failCurve, failStartDesktop.y),
-      point(failEndDesktop.x - failCurve, failEndDesktop.y),
-      failEndDesktop
-    ));
+    passPath.setAttribute('d', multiSegmentPath([
+      [
+        point(gateBox.right, gateBox.cy),
+        point(gateBox.right + 18, passLineYDesktop),
+        point(passLabelXDesktop - labelHalfWidth - labelClearance, passLineYDesktop)
+      ],
+      [
+        point(passLabelXDesktop + labelHalfWidth + labelClearance, passLineYDesktop),
+        point(passBox.left - boxGap, passLineYDesktop),
+        point(passBox.left, passBox.cy)
+      ]
+    ]));
+    failPath.setAttribute('d', multiSegmentPath([
+      [
+        point(gateBox.right, gateBox.cy),
+        point(gateBox.right + 18, failLineYDesktop),
+        point(failLabelXDesktop - labelHalfWidth - labelClearance, failLineYDesktop)
+      ],
+      [
+        point(failLabelXDesktop + labelHalfWidth + labelClearance, failLineYDesktop),
+        point(failBox.left - boxGap, failLineYDesktop),
+        point(failBox.left, failBox.cy)
+      ]
+    ]));
     loopPath.setAttribute('d', polylinePath([
       loopStartDesktop,
-      point(loopStartDesktop.x, loopBottomDesktop),
-      point(loopEndDesktop.x, loopBottomDesktop),
+      point(loopStartDesktop.x - 28, loopStartDesktop.y),
+      point(loopStartDesktop.x - 28, loopBottomDesktop),
+      point(loopEndDesktop.x - 18, loopBottomDesktop),
+      point(loopEndDesktop.x - 18, loopEndDesktop.y),
       loopEndDesktop
     ]));
 
-    setLabel(
-      passLabel,
-      passStartDesktop.x + (passEndDesktop.x - passStartDesktop.x) * 0.43,
-      Math.min(passStartDesktop.y, passEndDesktop.y) - 18
-    );
-    setLabel(
-      failLabel,
-      failStartDesktop.x + (failEndDesktop.x - failStartDesktop.x) * 0.43,
-      Math.max(failStartDesktop.y, failEndDesktop.y) + 18
-    );
+    chainPaths.forEach(function(path, index) {
+      var from = passStageBoxes[index];
+      var to = passStageBoxes[index + 1];
+      if (!from || !to) {
+        path.setAttribute('d', '');
+        return;
+      }
+      path.setAttribute('d', multiSegmentPath([
+        [
+          point(from.right, from.cy),
+          point(to.left - boxGap, from.cy)
+        ],
+        [
+          point(to.left - 10, from.cy),
+          point(to.left, to.cy)
+        ]
+      ]));
+    });
+
+    setLabel(passLabel, passLabelXDesktop, passLineYDesktop);
+    setLabel(failLabel, failLabelXDesktop, failLineYDesktop);
   }
+
+  passLabel.textContent = 'PASS ✓';
+  failLabel.textContent = 'FAIL ✕';
 
   var rafId = null;
   function requestDraw() {
