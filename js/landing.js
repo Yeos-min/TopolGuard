@@ -220,6 +220,11 @@
     return 'M ' + start.x + ' ' + start.y + ' L ' + end.x + ' ' + end.y;
   }
 
+  function cubicPath(start, cp1, cp2, end) {
+    return 'M ' + start.x + ' ' + start.y +
+      ' C ' + cp1.x + ' ' + cp1.y + ', ' + cp2.x + ' ' + cp2.y + ', ' + end.x + ' ' + end.y;
+  }
+
   function polylinePath(points) {
     if (!points.length) return '';
     var d = 'M ' + points[0].x + ' ' + points[0].y;
@@ -234,17 +239,14 @@
     el.setAttribute('y', Math.round(y * 10) / 10);
   }
 
-  function multiSegmentPath(segments) {
-    var d = '';
-    for (var i = 0; i < segments.length; i++) {
-      var seg = segments[i];
-      if (!seg || !seg.length) continue;
-      d += (d ? ' ' : '') + 'M ' + seg[0].x + ' ' + seg[0].y;
-      for (var j = 1; j < seg.length; j++) {
-        d += ' L ' + seg[j].x + ' ' + seg[j].y;
-      }
-    }
-    return d;
+  function cubicPoint(start, cp1, cp2, end, t) {
+    var mt = 1 - t;
+    var mt2 = mt * mt;
+    var t2 = t * t;
+    return point(
+      mt2 * mt * start.x + 3 * mt2 * t * cp1.x + 3 * mt * t2 * cp2.x + t2 * t * end.x,
+      mt2 * mt * start.y + 3 * mt2 * t * cp1.y + 3 * mt * t2 * cp2.y + t2 * t * end.y
+    );
   }
 
   function draw() {
@@ -259,9 +261,7 @@
     });
     var failBox = rectPoints(failTarget.getBoundingClientRect(), origin);
     var isStacked = window.innerWidth < 1024;
-    var labelHalfWidth = 34;
-    var labelClearance = 14;
-    var boxGap = 24;
+    var cardArrowInset = 8;
 
     svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
     svg.setAttribute('width', width);
@@ -270,54 +270,32 @@
     if (isStacked) {
       var neutralStart = point(modelingBox.cx, modelingBox.bottom);
       var neutralEnd = point(gateBox.cx, gateBox.top);
-      var passLineY = gateBox.bottom + 26;
-      var passLabelX = Math.min(width - 68, gateBox.cx + 62);
-      var passBoxAnchor = point(passBox.cx, passBox.top);
-      var failLineY = failBox.top - 26;
-      var failLabelX = Math.min(width - 68, gateBox.cx + 62);
-      var failBoxAnchor = point(failBox.cx, failBox.top);
-      var failRouteX = Math.min(width - 18, Math.max(gateBox.right, failBox.right) + 30);
-      var loopStart = point(failBox.left, failBox.cy);
-      var loopBottomY = Math.min(height - 16, failBox.bottom + 28);
-      var loopEnd = point(modelingBox.left, modelingBox.bottom - 14);
+      var passStart = point(gateBox.cx, gateBox.bottom);
+      var passEnd = point(passBox.cx, passBox.top);
+      var passCp1 = point(passStart.x, passStart.y + 30);
+      var passCp2 = point(passEnd.x, passEnd.y - 30);
+      var passLabelPoint = cubicPoint(passStart, passCp1, passCp2, passEnd, 0.5);
+      var failStart = point(gateBox.right, gateBox.cy);
+      var failEnd = point(failBox.cx, failBox.top);
+      var failCp1 = point(Math.min(width - 24, failStart.x + 60), failStart.y + 10);
+      var failCp2 = point(Math.min(width - 24, failBox.right + 28), failEnd.y - 28);
+      var failLabelPoint = cubicPoint(failStart, failCp1, failCp2, failEnd, 0.46);
+      var loopStart = point(failBox.cx, failBox.bottom);
+      var loopBottomY = Math.min(height - 16, Math.max(failBox.bottom, modelingBox.bottom) + 44);
+      var loopEnd = point(modelingBox.cx, modelingBox.bottom);
 
       neutralPath.setAttribute('d', linePath(neutralStart, neutralEnd));
-      passPath.setAttribute('d', multiSegmentPath([
-        [
-          point(gateBox.cx, gateBox.bottom),
-          point(gateBox.cx, passLineY),
-          point(passLabelX - labelHalfWidth - labelClearance, passLineY)
-        ],
-        [
-          point(passLabelX + labelHalfWidth + labelClearance, passLineY),
-          point(passBoxAnchor.x, passLineY),
-          passBoxAnchor
-        ]
-      ]));
-      failPath.setAttribute('d', multiSegmentPath([
-        [
-          point(gateBox.right, gateBox.cy),
-          point(failRouteX, gateBox.cy),
-          point(failRouteX, failLineY),
-          point(failLabelX - labelHalfWidth - labelClearance, failLineY)
-        ],
-        [
-          point(failLabelX + labelHalfWidth + labelClearance, failLineY),
-          point(failBoxAnchor.x, failLineY),
-          failBoxAnchor
-        ]
-      ]));
+      passPath.setAttribute('d', cubicPath(passStart, passCp1, passCp2, passEnd));
+      failPath.setAttribute('d', cubicPath(failStart, failCp1, failCp2, failEnd));
       loopPath.setAttribute('d', polylinePath([
         loopStart,
-        point(loopStart.x - 28, loopStart.y),
-        point(loopStart.x - 28, loopBottomY),
-        point(loopEnd.x - 18, loopBottomY),
-        point(loopEnd.x - 18, loopEnd.y),
+        point(loopStart.x, loopBottomY),
+        point(loopEnd.x, loopBottomY),
         loopEnd
       ]));
 
-      setLabel(passLabel, passLabelX, passLineY);
-      setLabel(failLabel, failLabelX, failLineY);
+      setLabel(passLabel, passLabelPoint.x, passLabelPoint.y);
+      setLabel(failLabel, failLabelPoint.x, failLabelPoint.y);
       chainPaths.forEach(function(path, index) {
         var from = passStageBoxes[index];
         var to = passStageBoxes[index + 1];
@@ -326,8 +304,8 @@
           return;
         }
         path.setAttribute('d', linePath(
-          point(from.cx, from.bottom),
-          point(to.cx, to.top)
+          point(from.cx, from.bottom + cardArrowInset),
+          point(to.cx, to.top - cardArrowInset)
         ));
       });
       return;
@@ -335,49 +313,29 @@
 
     var neutralStartDesktop = point(modelingBox.right, modelingBox.cy);
     var neutralEndDesktop = point(gateBox.left, gateBox.cy);
-    var passLineYDesktop = passBox.cy;
-    var failLineYDesktop = failBox.cy;
-    var passLabelMin = gateBox.right + 48;
-    var passLabelMax = passBox.left - boxGap - labelHalfWidth - labelClearance;
-    var passLabelXDesktop = Math.max(passLabelMin, Math.min(passLabelMax, gateBox.right + (passBox.left - gateBox.right) * 0.48));
-    var failLabelMin = gateBox.right + 48;
-    var failLabelMax = failBox.left - boxGap - labelHalfWidth - labelClearance;
-    var failLabelXDesktop = Math.max(failLabelMin, Math.min(failLabelMax, gateBox.right + (failBox.left - gateBox.right) * 0.48));
-    var loopStartDesktop = point(failBox.left, failBox.cy);
-    var loopBottomDesktop = Math.min(height - 18, Math.max(failBox.bottom, modelingBox.bottom) + 34);
-    var loopEndDesktop = point(modelingBox.left, modelingBox.bottom - 14);
+    var passStartDesktop = point(gateBox.right, gateBox.cy - 8);
+    var passEndDesktop = point(passBox.left, passBox.cy);
+    var passDx = passEndDesktop.x - passStartDesktop.x;
+    var passCp1Desktop = point(passStartDesktop.x + passDx * 0.34, passStartDesktop.y - 20);
+    var passCp2Desktop = point(passEndDesktop.x - passDx * 0.34, passEndDesktop.y - 4);
+    var passLabelDesktop = cubicPoint(passStartDesktop, passCp1Desktop, passCp2Desktop, passEndDesktop, 0.5);
+    var failStartDesktop = point(gateBox.right, gateBox.cy + 8);
+    var failEndDesktop = point(failBox.left, failBox.cy);
+    var failDx = failEndDesktop.x - failStartDesktop.x;
+    var failCp1Desktop = point(failStartDesktop.x + failDx * 0.34, failStartDesktop.y + 18);
+    var failCp2Desktop = point(failEndDesktop.x - failDx * 0.34, failEndDesktop.y + 4);
+    var failLabelDesktop = cubicPoint(failStartDesktop, failCp1Desktop, failCp2Desktop, failEndDesktop, 0.5);
+    var loopStartDesktop = point(failBox.cx, failBox.bottom);
+    var loopBottomDesktop = Math.min(height - 18, Math.max(failBox.bottom, modelingBox.bottom) + 44);
+    var loopEndDesktop = point(modelingBox.cx, modelingBox.bottom);
 
     neutralPath.setAttribute('d', linePath(neutralStartDesktop, neutralEndDesktop));
-    passPath.setAttribute('d', multiSegmentPath([
-      [
-        point(gateBox.right, gateBox.cy),
-        point(gateBox.right + 18, passLineYDesktop),
-        point(passLabelXDesktop - labelHalfWidth - labelClearance, passLineYDesktop)
-      ],
-      [
-        point(passLabelXDesktop + labelHalfWidth + labelClearance, passLineYDesktop),
-        point(passBox.left - boxGap, passLineYDesktop),
-        point(passBox.left, passBox.cy)
-      ]
-    ]));
-    failPath.setAttribute('d', multiSegmentPath([
-      [
-        point(gateBox.right, gateBox.cy),
-        point(gateBox.right + 18, failLineYDesktop),
-        point(failLabelXDesktop - labelHalfWidth - labelClearance, failLineYDesktop)
-      ],
-      [
-        point(failLabelXDesktop + labelHalfWidth + labelClearance, failLineYDesktop),
-        point(failBox.left - boxGap, failLineYDesktop),
-        point(failBox.left, failBox.cy)
-      ]
-    ]));
+    passPath.setAttribute('d', cubicPath(passStartDesktop, passCp1Desktop, passCp2Desktop, passEndDesktop));
+    failPath.setAttribute('d', cubicPath(failStartDesktop, failCp1Desktop, failCp2Desktop, failEndDesktop));
     loopPath.setAttribute('d', polylinePath([
       loopStartDesktop,
-      point(loopStartDesktop.x - 28, loopStartDesktop.y),
-      point(loopStartDesktop.x - 28, loopBottomDesktop),
-      point(loopEndDesktop.x - 18, loopBottomDesktop),
-      point(loopEndDesktop.x - 18, loopEndDesktop.y),
+      point(loopStartDesktop.x, loopBottomDesktop),
+      point(loopEndDesktop.x, loopBottomDesktop),
       loopEndDesktop
     ]));
 
@@ -385,23 +343,17 @@
       var from = passStageBoxes[index];
       var to = passStageBoxes[index + 1];
       if (!from || !to) {
-        path.setAttribute('d', '');
-        return;
-      }
-      path.setAttribute('d', multiSegmentPath([
-        [
-          point(from.right, from.cy),
-          point(to.left - boxGap, from.cy)
-        ],
-        [
-          point(to.left - 10, from.cy),
-          point(to.left, to.cy)
-        ]
-      ]));
+          path.setAttribute('d', '');
+          return;
+        }
+      path.setAttribute('d', linePath(
+        point(from.right + cardArrowInset, from.cy),
+        point(to.left - cardArrowInset, to.cy)
+      ));
     });
 
-    setLabel(passLabel, passLabelXDesktop, passLineYDesktop);
-    setLabel(failLabel, failLabelXDesktop, failLineYDesktop);
+    setLabel(passLabel, passLabelDesktop.x, passLabelDesktop.y);
+    setLabel(failLabel, failLabelDesktop.x, failLabelDesktop.y);
   }
 
   passLabel.textContent = 'PASS ✓';
