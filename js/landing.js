@@ -175,6 +175,175 @@
   observer.observe(diagram);
 })();
 
+(function initPipelineConnectors() {
+  var diagram = document.querySelector('.pipeline-diagram');
+  if (!diagram) return;
+
+  var svg = diagram.querySelector('.pipeline-connectors');
+  var modeling = diagram.querySelector('.pipeline-stage--modeling');
+  var gate = diagram.querySelector('.pipeline-guard');
+  var passLane = diagram.querySelector('.pipeline-pass-lane');
+  var firstPassStage = passLane ? passLane.querySelector('.pipeline-stage[data-stage="2"]') : null;
+  var failTarget = diagram.querySelector('.pipeline-fail-target');
+  if (!svg || !modeling || !gate || !passLane || !firstPassStage || !failTarget) return;
+
+  var neutralPath = svg.querySelector('.connector-path--neutral');
+  var passPath = svg.querySelector('.connector-path--pass');
+  var failPath = svg.querySelector('.connector-path--fail');
+  var loopPath = svg.querySelector('.connector-path--loop');
+  var passLabel = svg.querySelector('.connector-label--pass');
+  var failLabel = svg.querySelector('.connector-label--fail');
+  if (!neutralPath || !passPath || !failPath || !loopPath || !passLabel || !failLabel) return;
+
+  function point(x, y) {
+    return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+  }
+
+  function rectPoints(rect, origin) {
+    var left = rect.left - origin.left;
+    var top = rect.top - origin.top;
+    return {
+      left: left,
+      right: left + rect.width,
+      top: top,
+      bottom: top + rect.height,
+      width: rect.width,
+      height: rect.height,
+      cx: left + rect.width / 2,
+      cy: top + rect.height / 2
+    };
+  }
+
+  function linePath(start, end) {
+    return 'M ' + start.x + ' ' + start.y + ' L ' + end.x + ' ' + end.y;
+  }
+
+  function cubicPath(start, cp1, cp2, end) {
+    return 'M ' + start.x + ' ' + start.y +
+      ' C ' + cp1.x + ' ' + cp1.y + ', ' + cp2.x + ' ' + cp2.y + ', ' + end.x + ' ' + end.y;
+  }
+
+  function polylinePath(points) {
+    if (!points.length) return '';
+    var d = 'M ' + points[0].x + ' ' + points[0].y;
+    for (var i = 1; i < points.length; i++) {
+      d += ' L ' + points[i].x + ' ' + points[i].y;
+    }
+    return d;
+  }
+
+  function setLabel(el, x, y) {
+    el.setAttribute('x', Math.round(x * 10) / 10);
+    el.setAttribute('y', Math.round(y * 10) / 10);
+  }
+
+  function draw() {
+    var origin = diagram.getBoundingClientRect();
+    var width = Math.max(1, Math.round(origin.width));
+    var height = Math.max(1, Math.round(origin.height));
+    var modelingBox = rectPoints(modeling.getBoundingClientRect(), origin);
+    var gateBox = rectPoints(gate.getBoundingClientRect(), origin);
+    var passBox = rectPoints(firstPassStage.getBoundingClientRect(), origin);
+    var passLaneBox = rectPoints(passLane.getBoundingClientRect(), origin);
+    var failBox = rectPoints(failTarget.getBoundingClientRect(), origin);
+    var isStacked = window.innerWidth < 1024;
+
+    svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+    svg.setAttribute('width', width);
+    svg.setAttribute('height', height);
+
+    if (isStacked) {
+      var neutralStart = point(modelingBox.cx, modelingBox.bottom);
+      var neutralEnd = point(gateBox.cx, gateBox.top);
+      var passStart = point(gateBox.cx, gateBox.bottom);
+      var passEnd = point(passBox.cx, passBox.top);
+      var failStart = point(gateBox.right, gateBox.cy);
+      var failEnd = point(failBox.cx, failBox.top);
+      var failRouteX = Math.min(width - 18, Math.max(gateBox.right, passLaneBox.right, failBox.right) + 24);
+      var loopStart = point(failBox.cx, failBox.bottom);
+      var loopBottomY = Math.min(height - 14, failBox.bottom + 24);
+      var loopReturnY = modelingBox.bottom + 18;
+      var loopEnd = point(modelingBox.cx, modelingBox.bottom);
+
+      neutralPath.setAttribute('d', linePath(neutralStart, neutralEnd));
+      passPath.setAttribute('d', linePath(passStart, passEnd));
+      failPath.setAttribute('d', polylinePath([
+        failStart,
+        point(failRouteX, failStart.y),
+        point(failRouteX, failEnd.y),
+        failEnd
+      ]));
+      loopPath.setAttribute('d', polylinePath([
+        loopStart,
+        point(loopStart.x, loopBottomY),
+        point(loopEnd.x, loopBottomY),
+        point(loopEnd.x, loopReturnY),
+        loopEnd
+      ]));
+
+      setLabel(passLabel, gateBox.cx + 52, (passStart.y + passEnd.y) / 2);
+      setLabel(failLabel, failRouteX - 28, gateBox.bottom + 18);
+      return;
+    }
+
+    var neutralStartDesktop = point(modelingBox.right, modelingBox.cy);
+    var neutralEndDesktop = point(gateBox.left, gateBox.cy);
+    var passStartDesktop = point(gateBox.right, gateBox.cy - 10);
+    var passEndDesktop = point(passBox.left, passBox.cy);
+    var failStartDesktop = point(gateBox.right, gateBox.cy + 10);
+    var failEndDesktop = point(failBox.left, failBox.cy);
+    var loopStartDesktop = point(failBox.cx, failBox.bottom);
+    var loopBottomDesktop = Math.min(height - 16, Math.max(failBox.bottom, modelingBox.bottom) + 34);
+    var loopEndDesktop = point(modelingBox.cx, modelingBox.bottom);
+    var passCurve = Math.max(42, (passEndDesktop.x - passStartDesktop.x) * 0.32);
+    var failCurve = Math.max(42, (failEndDesktop.x - failStartDesktop.x) * 0.32);
+
+    neutralPath.setAttribute('d', linePath(neutralStartDesktop, neutralEndDesktop));
+    passPath.setAttribute('d', cubicPath(
+      passStartDesktop,
+      point(passStartDesktop.x + passCurve, passStartDesktop.y),
+      point(passEndDesktop.x - passCurve, passEndDesktop.y),
+      passEndDesktop
+    ));
+    failPath.setAttribute('d', cubicPath(
+      failStartDesktop,
+      point(failStartDesktop.x + failCurve, failStartDesktop.y),
+      point(failEndDesktop.x - failCurve, failEndDesktop.y),
+      failEndDesktop
+    ));
+    loopPath.setAttribute('d', polylinePath([
+      loopStartDesktop,
+      point(loopStartDesktop.x, loopBottomDesktop),
+      point(loopEndDesktop.x, loopBottomDesktop),
+      loopEndDesktop
+    ]));
+
+    setLabel(
+      passLabel,
+      passStartDesktop.x + (passEndDesktop.x - passStartDesktop.x) * 0.43,
+      Math.min(passStartDesktop.y, passEndDesktop.y) - 18
+    );
+    setLabel(
+      failLabel,
+      failStartDesktop.x + (failEndDesktop.x - failStartDesktop.x) * 0.43,
+      Math.max(failStartDesktop.y, failEndDesktop.y) + 18
+    );
+  }
+
+  var rafId = null;
+  function requestDraw() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(function() {
+      rafId = null;
+      draw();
+    });
+  }
+
+  window.addEventListener('resize', requestDraw);
+  window.addEventListener('load', requestDraw);
+  requestDraw();
+})();
+
 // ════════════════════════════════════════════════════════
 // MARQUEE — 탭 비활성 시 일시정지 (L-5)
 // CSS로 호버 정지 + reduced-motion 처리는 이미 완료.

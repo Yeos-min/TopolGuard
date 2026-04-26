@@ -353,175 +353,241 @@ body.light {
    ════════════════════════════════════════════════════════ */
 
 .pipeline-diagram {
+  --pipeline-pass: var(--accent);
+  --pipeline-fail: var(--issue-boundary, #d85a30);
+  --pipeline-neutral: var(--border2);
+  --pipeline-corner-size: 8px;
   position: relative;
   margin-top: 48px;
-  padding: 80px 20px 40px;
+  padding: 28px 0 42px;
 }
 
 .pipeline-track {
   position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: 1fr auto 1fr 1fr 1fr 1fr;
-  gap: 16px;
-  align-items: stretch;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 40px;
+  row-gap: 60px;
+  align-items: center;
 }
 
 .pipeline-stage,
-.pipeline-guard {
+.pipeline-guard,
+.pipeline-fail-target {
+  --card-bg: var(--panel);
+  --card-border: var(--border2);
+  --corner-color: var(--border2);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 18px 16px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 3px;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 24px;
+  min-height: 88px;
+  background:
+    linear-gradient(var(--corner-color), var(--corner-color)) top 6px left 6px / var(--pipeline-corner-size) 1px no-repeat,
+    linear-gradient(var(--corner-color), var(--corner-color)) top 6px left 6px / 1px var(--pipeline-corner-size) no-repeat,
+    linear-gradient(var(--corner-color), var(--corner-color)) top 6px right 6px / var(--pipeline-corner-size) 1px no-repeat,
+    linear-gradient(var(--corner-color), var(--corner-color)) top 6px right 6px / 1px var(--pipeline-corner-size) no-repeat,
+    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px left 6px / var(--pipeline-corner-size) 1px no-repeat,
+    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px left 6px / 1px var(--pipeline-corner-size) no-repeat,
+    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px right 6px / var(--pipeline-corner-size) 1px no-repeat,
+    linear-gradient(var(--corner-color), var(--corner-color)) bottom 6px right 6px / 1px var(--pipeline-corner-size) no-repeat,
+    var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
   text-align: left;
   font-family: var(--mono);
+}
+
+.pipeline-stage {
+  min-width: 132px;
+}
+
+.pipeline-stage--modeling,
+.pipeline-guard {
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.pipeline-stage--modeling {
+  grid-column: 1;
+}
+
+.pipeline-guard {
+  --card-border: var(--pipeline-pass);
+  --corner-color: var(--pipeline-pass);
+  grid-column: 2;
+  min-width: 176px;
+  min-height: 98px;
+  padding: 21px 34px;
+  border-width: 1.5px;
+  align-items: center;
+  text-align: center;
+}
+
+.pipeline-pass-lane {
+  grid-column: 3;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.pipeline-pass-lane .pipeline-stage {
+  min-width: 0;
+}
+
+.pipeline-fail-target {
+  --card-border: var(--pipeline-fail);
+  --corner-color: var(--pipeline-fail);
+  grid-column: 3;
+  grid-row: 2;
+  justify-self: start;
+  align-self: start;
+  min-width: 220px;
+  min-height: 0;
+  padding: 14px 18px;
+  border-style: dashed;
 }
 
 .stage-num {
   font-size: 10px;
   color: var(--dim);
   letter-spacing: 1px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .stage-label {
   font-size: 14px;
   color: var(--text);
-  letter-spacing: 1.5px;
-  font-weight: 700;
-  margin-top: 2px;
+  letter-spacing: 0;
+  font-weight: 500;
+  margin-top: 1px;
 }
 
-.stage-desc {
+.stage-desc,
+.guard-desc,
+.fail-desc {
   font-size: 11px;
-  color: var(--dim2, var(--dim));
-  margin-top: 4px;
+  color: var(--dim);
+  line-height: 1.5;
 }
 
-.pipeline-guard {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, var(--panel) 94%);
-  min-width: 140px;
-  align-items: center;
-  text-align: center;
-  box-shadow: 0 0 0 1px var(--accent) inset;
-}
-
-.guard-mark {
-  font-size: 22px;
-  color: var(--accent);
-  font-weight: 700;
-  line-height: 1;
+.guard-bracket {
+  font-size: 10px;
+  color: var(--pipeline-pass);
+  letter-spacing: 2px;
 }
 
 .guard-label {
-  font-family: var(--sans);
-  font-size: 13px;
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-top: 4px;
+  font-size: 14px;
+  color: var(--pipeline-pass);
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
-.guard-desc {
+.fail-label {
+  font-size: 11px;
+  color: var(--pipeline-fail);
+  letter-spacing: 1px;
+}
+
+.fail-desc {
   font-size: 10px;
-  color: var(--dim);
-  letter-spacing: 0.5px;
 }
 
-.pipeline-stage:not([data-stage="1"])::before,
-.pipeline-guard::before {
-  content: "";
+.pipeline-connectors {
   position: absolute;
-  left: -16px;
-  top: 50%;
-  width: 16px;
-  height: 1px;
-  background: var(--dim);
-  transform: translateY(-50%);
-}
-
-.pipeline-loops {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 80px;
-  overflow: visible;
+  inset: 0;
   pointer-events: none;
+  z-index: 0;
+  overflow: visible;
 }
 
-.loop-path {
-  opacity: 0.55;
-  transition: opacity 0.3s ease;
+.connector-path {
+  fill: none;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.loop-path--uv {
-  stroke: var(--issue-boundary, #e87d3e);
-}
-.loop-path--rig {
-  stroke: var(--issue-flipped, #d65a2e);
-}
-.loop-path--anim {
-  stroke: var(--issue-degenerate, #e85b7a);
-}
-.loop-path--render {
-  stroke: var(--issue-non-manifold, #cf4b4b);
-}
-.loop-path--guard {
-  stroke: var(--accent);
-  opacity: 0.75;
+.connector-path--neutral {
+  stroke: var(--pipeline-neutral);
+  marker-end: url(#pipeline-arrow-neutral);
 }
 
-.arrow-head--uv     { fill: var(--issue-boundary, #e87d3e); }
-.arrow-head--rig    { fill: var(--issue-flipped, #d65a2e); }
-.arrow-head--anim   { fill: var(--issue-degenerate, #e85b7a); }
-.arrow-head--render { fill: var(--issue-non-manifold, #cf4b4b); }
-.arrow-head--guard  { fill: var(--accent); }
-
-.pipeline-diagram:not(.in-view) .loop-path {
-  stroke-dasharray: 1200;
-  stroke-dashoffset: 1200;
+.connector-path--pass {
+  stroke: var(--pipeline-pass);
+  marker-end: url(#pipeline-arrow-pass);
 }
 
-.pipeline-diagram.in-view .loop-path {
-  stroke-dasharray: 1200;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+.connector-path--fail {
+  stroke: var(--pipeline-fail);
+  marker-end: url(#pipeline-arrow-fail);
 }
 
-.pipeline-diagram.in-view .loop-path--guard  { transition-delay: 0.2s; }
-.pipeline-diagram.in-view .loop-path--uv     { transition-delay: 0.5s; }
-.pipeline-diagram.in-view .loop-path--rig    { transition-delay: 0.8s; }
-.pipeline-diagram.in-view .loop-path--anim   { transition-delay: 1.1s; }
-.pipeline-diagram.in-view .loop-path--render { transition-delay: 1.4s; }
+.connector-path--loop {
+  stroke: var(--pipeline-fail);
+  stroke-dasharray: 4 4;
+  opacity: 0.7;
+  marker-end: url(#pipeline-arrow-fail);
+}
+
+.pipeline-arrow--neutral { fill: var(--pipeline-neutral); }
+.pipeline-arrow--pass    { fill: var(--pipeline-pass); }
+.pipeline-arrow--fail    { fill: var(--pipeline-fail); }
+
+.connector-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.connector-label--pass { fill: var(--pipeline-pass); }
+.connector-label--fail { fill: var(--pipeline-fail); }
+
+.pipeline-connectors,
+.pipeline-stage,
+.pipeline-guard,
+.pipeline-fail-target {
+  opacity: 0;
+}
 
 .pipeline-stage,
-.pipeline-guard {
-  opacity: 0;
+.pipeline-guard,
+.pipeline-fail-target {
   transform: translateY(12px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
+.pipeline-diagram.in-view .pipeline-connectors,
 .pipeline-diagram.in-view .pipeline-stage,
-.pipeline-diagram.in-view .pipeline-guard {
+.pipeline-diagram.in-view .pipeline-guard,
+.pipeline-diagram.in-view .pipeline-fail-target {
   opacity: 1;
   transform: translateY(0);
 }
 
-.pipeline-diagram.in-view .pipeline-stage[data-stage="1"] { transition-delay: 0s;   }
-.pipeline-diagram.in-view .pipeline-guard                 { transition-delay: 0.1s; }
-.pipeline-diagram.in-view .pipeline-stage[data-stage="2"] { transition-delay: 0.2s; }
-.pipeline-diagram.in-view .pipeline-stage[data-stage="3"] { transition-delay: 0.3s; }
-.pipeline-diagram.in-view .pipeline-stage[data-stage="4"] { transition-delay: 0.4s; }
-.pipeline-diagram.in-view .pipeline-stage[data-stage="5"] { transition-delay: 0.5s; }
+.pipeline-diagram.in-view .pipeline-connectors { transition: opacity 0.55s ease 0.18s; }
+.pipeline-diagram.in-view .pipeline-stage[data-stage="1"] { transition-delay: 0s; }
+.pipeline-diagram.in-view .pipeline-guard { transition-delay: 0.08s; }
+.pipeline-diagram.in-view .pipeline-stage[data-stage="2"] { transition-delay: 0.16s; }
+.pipeline-diagram.in-view .pipeline-stage[data-stage="3"] { transition-delay: 0.24s; }
+.pipeline-diagram.in-view .pipeline-stage[data-stage="4"] { transition-delay: 0.32s; }
+.pipeline-diagram.in-view .pipeline-stage[data-stage="5"] { transition-delay: 0.4s; }
+.pipeline-diagram.in-view .pipeline-fail-target { transition-delay: 0.24s; }
 
 .pipeline-legend {
   display: flex;
-  gap: 32px;
+  gap: 14px;
+  flex-wrap: wrap;
   justify-content: center;
   margin-top: 48px;
   font-family: var(--mono);
@@ -536,14 +602,22 @@ body.light {
   gap: 10px;
 }
 
+.legend-divider {
+  color: var(--dim);
+}
+
 .legend-line {
   width: 32px;
   height: 2px;
   border-radius: 1px;
 }
 
-.legend-line--guard { background: var(--accent); }
-.legend-line--late  { background: var(--issue-non-manifold, #cf4b4b); }
+.legend-line--pass { background: var(--pipeline-pass); }
+.legend-line--fail {
+  height: 0;
+  border-top: 2px dashed var(--pipeline-fail);
+  border-radius: 0;
+}
 
 /* ════════════════════════════════════════════════════════
    ISSUES MARQUEE (L-5) — 8개 이슈 infinite rail
@@ -1332,35 +1406,54 @@ body.light {
 }
 
 @media (max-width: 1024px) {
+  .pipeline-diagram {
+    padding: 20px 0 32px;
+  }
+
   .pipeline-track {
     grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-rows: auto;
+    row-gap: 18px;
+    column-gap: 0;
   }
-  .pipeline-loops {
-    display: none;
+
+  .pipeline-stage--modeling,
+  .pipeline-guard,
+  .pipeline-pass-lane,
+  .pipeline-fail-target {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: stretch;
+    align-self: stretch;
   }
-  .pipeline-stage:not([data-stage="1"])::before,
-  .pipeline-guard::before {
-    left: 50%;
-    top: -12px;
-    width: 1px;
-    height: 12px;
-    transform: translateX(-50%);
+
+  .pipeline-stage--modeling,
+  .pipeline-guard {
+    min-width: 0;
+  }
+
+  .pipeline-pass-lane {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .pipeline-fail-target {
+    min-width: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pipeline-diagram.in-view .loop-path,
+  .pipeline-diagram.in-view .pipeline-connectors,
   .pipeline-diagram.in-view .pipeline-stage,
-  .pipeline-diagram.in-view .pipeline-guard {
+  .pipeline-diagram.in-view .pipeline-guard,
+  .pipeline-diagram.in-view .pipeline-fail-target {
     transition: none !important;
     transition-delay: 0s !important;
   }
-  .pipeline-diagram .loop-path {
-    stroke-dashoffset: 0 !important;
-  }
+  .pipeline-diagram .pipeline-connectors,
   .pipeline-diagram .pipeline-stage,
-  .pipeline-diagram .pipeline-guard {
+  .pipeline-diagram .pipeline-guard,
+  .pipeline-diagram .pipeline-fail-target {
     opacity: 1;
     transform: none;
   }
