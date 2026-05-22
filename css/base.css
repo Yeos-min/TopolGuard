@@ -1,132 +1,223 @@
-/* ════════════════════════════════════════════════════════
-   TopolGuard — BASE & SHARED
-   ════════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=VT323&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html, body {
+html {
   margin: 0;
   padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
+  background: var(--canvas);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  letter-spacing: var(--tracking-body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  transition: background 0.3s var(--ease), color 0.3s var(--ease);
-}
-
-a { color: inherit; text-decoration: none; }
-button { font-family: inherit; cursor: pointer; }
-
-/* ── 공통 상단 바 ── */
-/* ── 공통 상단 바 (모든 페이지) ── */
-.tg-topnav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--topnav-h);
-  background: var(--bg);
-  border-bottom: 1px solid var(--border2);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-family: var(--mono);
-  font-size: 16px;
-  letter-spacing: 0.05em;
-  color: var(--dim);
-  z-index: 100;
-  transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
-}
-
-.tg-topnav .brand {
-  color: var(--text);
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: 1px;
-  margin-right: 28px;
-  text-transform: uppercase;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: var(--mono);
-}
-.tg-topnav .brand span { color: var(--accent); }
-.tg-topnav .brand:hover { opacity: 0.85; }
-
-.tg-topnav .links {
-  display: flex;
-  gap: 22px;
-}
-.tg-topnav .links a {
-  color: var(--dim);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  transition: color 0.15s var(--ease);
-  padding: 6px 0;
-  border-bottom: 1px solid transparent;
-}
-.tg-topnav .links a:hover { color: var(--text); }
-.tg-topnav .links a.active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
-
-.tg-topnav .center {
-  display: flex;
-  align-items: center;
-  justify-content: center;   /* ← 추가 */
-  flex: 1;
-  margin-left: 0;             /* ← 32px → 0 */
-}
-
-.tg-topnav .sys {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--dim);
-  font-size: 16px;
-  letter-spacing: 0.5px;
-}
-.tg-topnav .sys .dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 8px var(--ok);
-  animation: tg-pulse 2s infinite;
-}
-@keyframes tg-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.tg-topnav .theme-btn {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--dim);
-  width: 26px; height: 26px;
-  border-radius: 3px;
-  font-size: 16px;
-  margin-left: 12px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s var(--ease);
-  cursor: pointer;
-}
-.tg-topnav .theme-btn:hover {
-  color: var(--text);
-  border-color: var(--accent);
 }
 
 body.has-topnav { padding-top: var(--topnav-h); }
-
-/* 인스펙터에서는 has-topnav 대신 app-topbar가 자체적으로 위치 — padding 불필요 */
+body.has-topnav[data-page="landing"] { padding-top: 0; }
 body[data-page="app"] { padding-top: 0; }
 
-/* Inspector 페이지 한국어 최적화 */
-body[data-page="app"] { letter-spacing: -0.01em; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+.tg-topnav,
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--topnav-h);
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: 0 var(--space-lg);
+  background: color-mix(in srgb, var(--canvas) 92%, transparent);
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink-subtle);
+  backdrop-filter: blur(16px);
+}
+
+.tg-topnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+}
+
+body[data-page="app"] .tg-topnav {
+  position: static;
+  flex-shrink: 0;
+}
+
+.tg-topnav .brand,
+.top-nav .nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  padding: 0;
+}
+
+.tg-topnav .brand .brand-mark,
+.top-nav .brand-mark,
+.brand-mark {
+  color: var(--accent);
+}
+
+.tg-topnav .brand .brand-text,
+.top-nav .brand-text {
+  color: var(--ink);
+}
+
+.brand-mark {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.tg-topnav .links,
+.top-nav .nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.tg-topnav .links a,
+.top-nav .nav-links a {
+  color: var(--ink-subtle);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  padding: 6px 0;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+.tg-topnav .links a:hover,
+.top-nav .nav-links a:hover,
+.tg-topnav .links a.active,
+.top-nav .nav-links a.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.tg-topnav .sys,
+.top-nav .nav-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.tg-topnav .sys {
+  color: var(--ink-tertiary);
+  font-size: var(--text-caption);
+}
+
+.tg-topnav .sys .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--success);
+}
+
+.tg-topnav .icon-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  color: var(--ink-subtle);
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.tg-topnav .icon-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+  color: var(--ink);
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-text);
+  font-size: var(--text-button);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease), color 0.15s var(--ease), transform 0.15s var(--ease);
+}
+
+.btn-primary {
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-primary:active {
+  background: var(--accent-focus);
+  transform: translateY(1px);
+}
+
+.btn-secondary {
+  border: 1px solid var(--hairline);
+  background: var(--surface-1);
+  color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+
+.btn-lg {
+  min-height: 42px;
+  padding: 10px 18px;
+  font-size: var(--text-body-sm);
+}

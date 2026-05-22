@@ -1,89 +1,137 @@
-/* ════════════════════════════════════════════════════════
-   TopolGuard — DESIGN TOKENS
-   3페이지(Landing / Manual / App) 전체 공통 변수
-   ════════════════════════════════════════════════════════ */
+/* --------------------------------------------------------
+   TopolGuard - DESIGN TOKENS v2 (Linear-aligned)
+   Shared variables for Landing / Manual / App
+   -------------------------------------------------------- */
 
 :root {
-  /* Dark mode (default) */
-  --topnav-h: 64px;
+  /* Surface ladder */
+  --canvas:        #08080A;
+  --surface-1:     #0F1011;
+  --surface-2:     #141516;
+  --surface-3:     #18191A;
+  --surface-4:     #191A1B;
 
-  --bg:      #0d0d11;
-  --bg-app:  #1a1a1f;  /* 뷰포트 3D 배경 — js/app.js scene.background 참조 (PART UI-2) */
-  --panel:   #22222a;
-  --panel2:  #171720;
-  --header:  #2a2a35;
-  --border:  #141418;
-  --border2: #32323f;
+  /* Hairlines */
+  --hairline:           #23252A;
+  --hairline-strong:    #34343A;
+  --hairline-tertiary:  #3E3E44;
 
-  --text:    #e0e0ec;
-  --dim:     #7a7a90;
-  --faint:   #4a4a5c;
+  /* Text */
+  --ink:           #F7F8F8;
+  --ink-muted:     #D0D6E0;
+  --ink-subtle:    #8A8F98;
+  --ink-tertiary:  #62666D;
 
-  --accent:  #10b981;
-  --accent2: #3eb389;
-  --error:   #cf4b4b;
-  --warn:    #d9a336;
-  --ok:      #62a353;
-  --blue:    #4a9fd4;
-  /* PART R-3: Issue severity colors (인계 문서 v2 정책) */
-  --severity-critical: #cf4b4b;
-  --severity-error:    #e87d3e;
-  --severity-warning:  #d9a336;
-  --severity-info:     #4a9fd4;
-  /* PART R-3-A+B: Issue color tokens (severity family + per-issue tone) */
-  --issue-non-manifold: #cf4b4b;
-  --issue-degenerate:   #e85b7a;
-  --issue-boundary:     #e87d3e;
-  --issue-flipped:      #d65a2e;
-  --issue-ngon:         #d9a336;
-  --issue-skinny:       #c89020;
-  --issue-duplicate:    #a78bfa;
-  --issue-isolated:     #c4b5fd;
+  /* Landing text hierarchy */
+  --text-primary:   #FAFAFA;
+  --text-secondary: #A8ADB5;
+  --text-muted:     #737780;
 
-  /* 랜딩 와이어프레임 톤 */
-  --wire:    #3eb389;
-  --wire-dim:#1f5a48;
+  /* Single chromatic accent */
+  --accent:        #10B981;
+  --accent-hover:  #34D399;
+  --accent-focus:  #0EA674;
+  --on-accent:     #FFFFFF;
+
+  /* Semantic */
+  --success:       #27A644;
+  --overlay:       rgba(0, 0, 0, 0.6);
+
+  /* Issue colors: product UI only */
+  --severity-critical:  #CF4B4B;
+  --severity-error:     #E87D3E;
+  --severity-warning:   #D9A336;
+  --severity-info:      #4A9FD4;
+
+  --issue-non-manifold: #CF4B4B;
+  --issue-degenerate:   #E85B7A;
+  --issue-boundary:     #E87D3E;
+  --issue-flipped:      #D65A2E;
+  --issue-ngon:         #D9A336;
+  --issue-skinny:       #C89020;
+  --issue-duplicate:    #A78BFA;
+  --issue-isolated:     #C4B5FD;
+
+  /* App viewport */
+  --bg-app:        #1A1A1F;
+
+  /* Landing wire tones */
+  --wire:          #3EB389;
+  --wire-dim:      #1F5A48;
 
   /* Typography */
-  --mono: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
-  --sans: 'Pretendard Variable', 'Pretendard', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --display: 'VT323', 'JetBrains Mono', monospace;
+  --font-display:  'Pretendard Variable', 'Pretendard', 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-text:     'Pretendard Variable', 'Pretendard', 'SF Pro Text', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-display-xl:  80px;
+  --text-display-lg:  56px;
+  --text-display-md:  40px;
+  --text-headline:    28px;
+  --text-card-title:  22px;
+  --text-subhead:     20px;
+  --text-body-lg:     18px;
+  --text-body:        16px;
+  --text-body-sm:     14px;
+  --text-caption:     12px;
+  --text-button:      14px;
+  --text-eyebrow:     13px;
+  --text-mono:        13px;
+
+  --tracking-display-xl:  -3.0px;
+  --tracking-display-lg:  -1.8px;
+  --tracking-display-md:  -1.0px;
+  --tracking-headline:    -0.6px;
+  --tracking-card-title:  -0.4px;
+  --tracking-subhead:     -0.2px;
+  --tracking-body-lg:     -0.1px;
+  --tracking-body:        -0.05px;
+  --tracking-eyebrow:     0.4px;
+
+  /* Rounded */
+  --radius-xs:    4px;
+  --radius-sm:    6px;
+  --radius-md:    8px;
+  --radius-lg:    12px;
+  --radius-xl:    16px;
+  --radius-xxl:   24px;
+  --radius-pill:  9999px;
+  --radius-full:  9999px;
+
+  /* Spacing */
+  --space-xxs:     4px;
+  --space-xs:      8px;
+  --space-sm:      12px;
+  --space-md:      16px;
+  --space-lg:      24px;
+  --space-xl:      32px;
+  --space-xxl:     48px;
+  --space-section: 96px;
+
+  /* Layout */
+  --container-max: 1280px;
+  --topnav-h:      56px;
 
   /* Motion */
-  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease:     cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-:root[data-theme="light"],
-body.light {
-  --bg:      #f0f0f4;
-  --bg-app:  #f0f0f4;  /* 뷰포트 3D 배경 라이트 모드 (PART UI-2) */
-  --panel:   #ffffff;
-  --panel2:  #f5f5fa;
-  --header:  #e8e8f0;
-  --border:  #d0d0dd;
-  --border2: #b8b8cc;
-  --text:    #1a1a2e;
-  --dim:     #606080;
-  --faint:   #9090a8;
-  --accent:  #10b981;
-  --accent2: #3eb389;
-  --error:   #c03030;
-  --warn:    #b07000;
-  --ok:      #3a7a30;
-  --blue:    #2a7ab0;
-  --severity-critical: #c03030;
-  --severity-error:    #b85e28;
-  --severity-warning:  #b07000;
-  --severity-info:     #2a7ab0;
-  --issue-non-manifold: #b03838;
-  --issue-degenerate:   #c84668;
-  --issue-boundary:     #b85e28;
-  --issue-flipped:      #a84418;
-  --issue-ngon:         #b07000;
-  --issue-skinny:       #9a6e00;
-  --issue-duplicate:    #7c3aed;
-  --issue-isolated:     #9061f9;
-  --wire:    #3eb389;
-  --wire-dim:#1f5a48;
+  /* Legacy aliases */
+  --bg:        var(--canvas);
+  --panel:     var(--surface-1);
+  --panel2:    var(--surface-2);
+  --header:    var(--surface-3);
+  --border:    var(--canvas);
+  --border2:   var(--hairline);
+  --text:      var(--ink);
+  --dim:       var(--ink-subtle);
+  --faint:     var(--ink-tertiary);
+  --accent2:   var(--accent-hover);
+  --error:     var(--severity-critical);
+  --warn:      var(--severity-warning);
+  --ok:        var(--success);
+  --blue:      var(--severity-info);
+  --mono:      var(--font-mono);
+  --sans:      var(--font-text);
+  --display:   var(--font-display);
 }

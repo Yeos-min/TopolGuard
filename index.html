@@ -3,425 +3,249 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TopolGuard — 3D Mesh Topology Inspector</title>
-  <meta name="description" content="Audit your .obj meshes for non-manifold edges, skinny triangles, n-gons, flipped normals. Runs entirely in your browser.">
-  <script>
-    (function() {
-      var t = localStorage.getItem('tg_theme');
-      if (t) document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
+  <title>TopolGuard - 3D Mesh Topology Inspector</title>
+  <meta name="description" content="Inspect OBJ mesh topology in your browser. TopolGuard checks non-manifold edges, boundary holes, flipped normals, and risky geometry without uploads.">
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/landing.css">
 </head>
 <body class="has-topnav" data-page="landing">
-
-  <nav class="tg-topnav">
-    <button class="brand" onclick="location.href='index.html'">TOPOL<span>GUARD</span></button>
-    <div class="links">
-      <a href="index.html" class="active">HOME</a>
-      <a href="manual.html">MANUAL</a>
-      <a href="app.html">INSPECTOR</a>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">
+      <span class="brand-mark">▲</span>
+      <span class="brand-text">TopolGuard</span>
+    </a>
+    <div class="nav-links">
+      <a href="manual.html">Manual</a>
+      <a href="app.html">Inspector</a>
     </div>
-    <div class="sys">
-      <span class="dot"></span>
-      SYS.ONLINE // OP.READY
-      <button class="theme-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
+    <div class="nav-actions">
+      <a href="app.html" class="btn-primary">검사 시작</a>
     </div>
   </nav>
 
-  <main class="landing">
+  <canvas id="hero-wave-canvas" aria-hidden="true"></canvas>
 
-    <!-- ═══ HERO ═══ -->
+  <main class="landing-page">
     <section class="hero">
-      <canvas id="landing-canvas"></canvas>
-      <div class="landing-grid" data-parallax="0.15"></div>
-
-      <aside class="landing-frames" aria-hidden="true" data-parallax="0.4">
-        <div class="frame"></div>
-        <div class="frame tall"></div>
-        <div class="frame stair"></div>
-        <div class="frame"></div>
-      </aside>
-
-      <div class="hero-body">
-      <div class="hero-content" data-parallax="0.08">
-        <div class="landing-eyebrow">FOR ARTISTS, NOT JUST ENGINEERS</div>
-
-        <h1 class="landing-headline">
-          <span class="line">KNOW</span>
-          <span class="line">YOUR</span>
-          <span class="line">MESH<span class="dot">.</span></span>
-        </h1>
-
-        <p class="landing-sub">
-          .obj 파일의 토폴로지를 검사합니다. Non-manifold 엣지, skinny triangle,
-          n-gon, 뒤집힌 normal — 수정이 필요한 지점을 정확히 짚어냅니다.
-          모든 분석은 브라우저 안에서 실행되며, 파일은 외부로 전송되지 않습니다.
-        </p>
-
-        <div class="landing-cta">
-          <a href="app.html" class="primary">
-            Launch Inspector <span class="arrow">→</span>
-          </a>
-          <a href="manual.html" class="ghost">
-            Read the Manual <span class="arrow">→</span>
-          </a>
-        </div>
-      </div>
-
-      <div class="hero-cards-overlay" aria-label="AI Origin and Human Touched scan comparison">
-        <a href="app.html?sample=humanoid_ai" class="hero-card-link" aria-label="Open Inspector with AI Origin sample">
-        <div class="terminal-card hero-card defective">
-          <span class="hero-card-corner hero-card-corner--tl" aria-hidden="true"></span>
-          <span class="hero-card-corner hero-card-corner--tr" aria-hidden="true"></span>
-          <span class="hero-card-corner hero-card-corner--bl" aria-hidden="true"></span>
-          <span class="hero-card-corner hero-card-corner--br" aria-hidden="true"></span>
-          <div class="compare-img-placeholder hero-card-screenshot">
-            <canvas class="hero-card-canvas" data-hero-canvas="ai" aria-label="AI ORIGIN - Tripo AI raw mesh 3D preview">
-              Inspector preview will appear here.
-            </canvas>
-          </div>
-          <div class="terminal-header">
-            <span class="terminal-dot error"></span>
-            <span>SCAN RESULT &mdash; AI ORIGIN</span>
-          </div>
-          <div class="terminal-body">
-            <div class="hero-card-body-row">
-              <div class="hero-card-score-area">
-                <span class="hero-score-num hero-score-b">79</span>
-                <span class="hero-score-grade hero-score-b">B</span>
-              </div>
-              <div class="hero-card-issues-area">
-                <ul class="hero-card-issues">
-                  <li><span class="t-check fail">&#10005;</span><span class="t-label">Non-Manifold</span><span class="t-val err">176</span></li>
-                  <li><span class="t-check fail">&#10005;</span><span class="t-label">Boundary Edge</span><span class="t-val err">135</span></li>
-                  <li><span class="t-check fail">&#10005;</span><span class="t-label">Skinny Tri</span><span class="t-val err">180</span></li>
-                  <li class="more">&middot;&middot;&middot;</li>
-                </ul>
-              </div>
-            </div>
+      <div class="hero-grid">
+        <div class="hero-text">
+          <p class="eyebrow">Mesh topology inspector</p>
+          <h1 class="hero-headline">Know your mesh.</h1>
+          <p class="hero-subhead">
+            OBJ 파일 하나로 시작하세요. 다음 공정에서 문제가 되는 토폴로지를
+            브라우저 안에서 바로 검사합니다. 파일이 브라우저 밖으로 나가지 않습니다.
+          </p>
+          <div class="hero-cta">
+            <a href="app.html" class="btn-primary btn-lg">검사 시작</a>
+            <a href="manual.html" class="btn-secondary btn-lg">매뉴얼</a>
           </div>
         </div>
-        </a>
 
-        <a href="app.html?sample=humanoid_human" class="hero-card-link" aria-label="Open Inspector with Human Touched sample">
-        <div class="terminal-card hero-card clean">
-          <span class="hero-card-corner hero-card-corner--tl" aria-hidden="true"></span>
-          <span class="hero-card-corner hero-card-corner--tr" aria-hidden="true"></span>
-          <span class="hero-card-corner hero-card-corner--bl" aria-hidden="true"></span>
-          <span class="hero-card-corner hero-card-corner--br" aria-hidden="true"></span>
-          <div class="compare-img-placeholder hero-card-screenshot">
-            <canvas class="hero-card-canvas" data-hero-canvas="human" aria-label="HUMAN TOUCHED - human retopology mesh 3D preview">
-              Inspector preview will appear here.
-            </canvas>
-          </div>
-          <div class="terminal-header">
-            <span class="terminal-dot ok"></span>
-            <span>SCAN RESULT &mdash; HUMAN TOUCHED</span>
-          </div>
-          <div class="terminal-body">
-            <div class="hero-card-body-row">
-              <div class="hero-card-score-area">
-                <span class="hero-score-num hero-score-a">100</span>
-                <span class="hero-score-grade hero-score-a">A</span>
+        <div class="hero-visual">
+          <div class="screenshot-shell">
+            <div class="hero-preview-card">
+              <canvas id="hero-preview-scene" aria-label="Animated topology issue preview"></canvas>
+              <div class="hero-preview-overlay" aria-hidden="true">
+                <svg id="hero-preview-leaders" preserveAspectRatio="none"></svg>
               </div>
-              <div class="hero-card-issues-area">
-                <ul class="hero-card-issues">
-                  <li><span class="t-check pass">&#10003;</span><span class="t-label">Non-Manifold</span><span class="t-val ok">0</span></li>
-                  <li><span class="t-check pass">&#10003;</span><span class="t-label">Boundary Edge</span><span class="t-val ok">0</span></li>
-                  <li><span class="t-check pass">&#10003;</span><span class="t-label">Skinny Tri</span><span class="t-val ok">0</span></li>
-                  <li class="more">&middot;&middot;&middot;</li>
-                </ul>
+              <div class="hero-preview-label hero-preview-label-tl">
+                <div class="hero-preview-code">/ NM</div>
+                <div class="hero-preview-name">NON-MANIFOLD</div>
               </div>
-            </div>
-          </div>
-        </div>
-        </a>
-      </div>
-
-      </div>
-
-      <div class="landing-status">
-        <span>VERSION<b>2.1.0</b></span>
-        <span>ENGINE<b>THREE.JS r128</b></span>
-        <span>FORMAT<b>WAVEFRONT .OBJ</b></span>
-      </div>
-
-      <div class="scroll-hint" aria-hidden="true">
-        <span class="scroll-line"></span>
-        <span class="scroll-label">SCROLL</span>
-      </div>
-    </section>
-
-    <!-- ═══ [01] WHY ═══ -->
-    <section class="sect" id="why">
-      <div class="sect-inner">
-        <div class="sect-head">
-          <span class="sect-num">[01]</span>
-          <h2 class="sect-title">WHY TOPOLOGY MATTERS</h2>
-        </div>
-        <p class="sect-desc">
-          토폴로지 결함은 파이프라인의 어느 단계에서든 문제가 됩니다.
-          스컬프팅, 리깅, 최종 렌더링까지 — 한 번 생긴 결함은 이후 모든 작업에 영향을 미칩니다.
-          TopolGuard는 결함이 다른 툴에 드러나기 전에 먼저 찾아내어 수정 지점을 명확히 보여줍니다.
-        </p>
-        <div class="card-grid card-grid-3">
-          <div class="section-card">
-            <div class="card-num">01</div>
-            <h3 class="card-title">DEFORMATION</h3>
-            <p class="card-desc">잘못된 토폴로지는 리깅 과정에서 뒤틀립니다. 숨어있는 non-manifold 엣지는 캐릭터 애니메이션에서 예측 불가능한 변형 문제를 일으킵니다.</p>
-          </div>
-          <div class="section-card">
-            <div class="card-num">02</div>
-            <h3 class="card-title">PIPELINE</h3>
-            <p class="card-desc">Non-manifold 지오메트리는 불리언 연산, UV 언래핑, 3D 프린팅 슬라이서를 깨뜨립니다. 엣지 하나의 결함이 이후의 모든 툴로 연쇄됩니다.</p>
-          </div>
-          <div class="section-card">
-            <div class="card-num">03</div>
-            <h3 class="card-title">RENDER</h3>
-            <p class="card-desc">실시간 엔진에서 뒤집힌 normal과 degenerate 페이스는 셰이딩 문제, 보이지 않는 지오메트리, 렌더 사이클 낭비를 일으킵니다.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- ═══ [02] PIPELINE ═══ -->
-    <section class="sect sect-alt" id="pipeline">
-      <div class="sect-inner">
-        <div class="sect-head">
-          <span class="sect-num">[02]</span>
-          <h2 class="sect-title">PIPELINE</h2>
-        </div>
-        <p class="sect-desc">
-          토폴로지 결함은 한 번 뒤 단계로 넘어가면 되돌아와서 고쳐야 합니다.
-          UV · 리깅 · 애니메이션 · 렌더 — 어느 단계에서 문제가 드러나든
-          해결은 언제나 모델링 단계로의 회귀입니다.
-          TopolGuard는 그 루프가 시작되기 전에 결함을 잡아냅니다.
-        </p>
-
-        <!-- 파이프라인 다이어그램 -->
-        <div class="pipeline-diagram" role="img" aria-label="MODELING 단계 후 TopolGuard 게이트가 토폴로지를 검증한다. 통과 시 UV·리깅·애니메이션·렌더로 진행. 실패 시 모델링으로 즉시 복귀한다.">
-          <div class="pipeline-track">
-            <div class="pipeline-stage pipeline-stage--modeling" data-stage="1">
-              <span class="stage-num">01</span>
-              <span class="stage-label">MODELING</span>
-              <span class="stage-desc">메시 생성</span>
-            </div>
-
-            <div class="pipeline-guard" data-stage="guard">
-              <span class="guard-bracket">[ GATE ]</span>
-              <span class="guard-label">TopolGuard</span>
-              <span class="guard-desc">토폴로지 검사</span>
-            </div>
-
-            <div class="pipeline-pass-lane">
-              <div class="pipeline-stage" data-stage="2">
-                <span class="stage-num">02</span>
-                <span class="stage-label">UV</span>
-                <span class="stage-desc">언래핑</span>
+              <div class="hero-preview-label hero-preview-label-tr">
+                <div class="hero-preview-code">/ BD</div>
+                <div class="hero-preview-name">BOUNDARY EDGE</div>
               </div>
-              <div class="pipeline-stage" data-stage="3">
-                <span class="stage-num">03</span>
-                <span class="stage-label">RIGGING</span>
-                <span class="stage-desc">본 설정</span>
+              <div class="hero-preview-label hero-preview-label-bl">
+                <div class="hero-preview-code">/ FN</div>
+                <div class="hero-preview-name">FLIPPED NORMAL</div>
               </div>
-              <div class="pipeline-stage" data-stage="4">
-                <span class="stage-num">04</span>
-                <span class="stage-label">ANIMATION</span>
-                <span class="stage-desc">움직임</span>
+              <div class="hero-preview-label hero-preview-label-br">
+                <div class="hero-preview-code">/ SK</div>
+                <div class="hero-preview-name">SKINNY TRIANGLE</div>
               </div>
-              <div class="pipeline-stage" data-stage="5">
-                <span class="stage-num">05</span>
-                <span class="stage-label">RENDER</span>
-                <span class="stage-desc">최종 출력</span>
-              </div>
-            </div>
-
-            <div class="pipeline-fail-target">
-              <span class="fail-label">RETURN TO MODELING</span>
-              <span class="fail-desc">결함 수정 후 재검사</span>
-            </div>
-          </div>
-
-          <svg class="pipeline-connectors" aria-hidden="true">
-            <defs>
-              <marker id="pipeline-arrow-neutral" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="pipeline-arrow pipeline-arrow--neutral" />
-              </marker>
-              <marker id="pipeline-arrow-pass" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="pipeline-arrow pipeline-arrow--pass" />
-              </marker>
-              <marker id="pipeline-arrow-fail" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0,0 L 10,5 L 0,10 z" class="pipeline-arrow pipeline-arrow--fail" />
-              </marker>
-            </defs>
-            <path class="connector-path connector-path--neutral" />
-            <path class="connector-path connector-path--pass" />
-            <path class="connector-path connector-path--fail" />
-            <path class="connector-path connector-path--chain" data-chain="1" />
-            <path class="connector-path connector-path--chain" data-chain="2" />
-            <path class="connector-path connector-path--chain" data-chain="3" />
-            <path class="connector-path connector-path--loop" />
-            <text class="connector-label connector-label--pass">PASS ✓</text>
-            <text class="connector-label connector-label--fail">FAIL ✕</text>
-          </svg>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ [03] WHAT WE CHECK ═══ -->
-    <section class="sect" id="checks">
-      <div class="sect-inner">
-        <div class="sect-head">
-          <span class="sect-num">[03]</span>
-          <h2 class="sect-title">WHAT WE CHECK</h2>
-        </div>
-        <p class="sect-desc">
-          TopolGuard는 Wavefront .obj 메시에서 여덟 가지 토폴로지 결함을 검사합니다.
-          심각도 순으로 표시되며, 각 항목은 매뉴얼에서 자세한 설명을 볼 수 있습니다.
-        </p>
-
-        <!-- Infinite marquee: 원본 8 + 복제 8 = 16 카드 -->
-        <div class="issues-marquee-fade">
-          <div class="issues-marquee" data-marquee>
-            <div class="marquee-track">
-            <a href="manual.html#non-manifold" class="issue-card" data-severity="critical" aria-label="Non-manifold edges 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-non-manifold);">✕</span>
-              <h3 class="issue-title">NON-MANIFOLD</h3>
-              <p class="issue-desc">3개 이상의 페이스가 한 엣지를 공유하는 상태. 불리언, UV 언래핑, 슬라이서가 모호해집니다.</p>
-            </a>
-
-            <a href="manual.html#degenerate" class="issue-card" data-severity="critical" aria-label="Degenerate faces 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-degenerate);">○</span>
-              <h3 class="issue-title">DEGENERATE</h3>
-              <p class="issue-desc">면적이 0에 수렴하는 페이스. 법선이 정의되지 않아 렌더러가 검은 픽셀이나 NaN을 만듭니다.</p>
-            </a>
-
-            <a href="manual.html#boundary" class="issue-card" data-severity="error" aria-label="Boundary edges 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-boundary);">◠</span>
-              <h3 class="issue-title">BOUNDARY EDGE</h3>
-              <p class="issue-desc">한 개의 페이스만 공유하는 엣지. 메시가 뚫려있다는 뜻. 3D 프린팅과 시뮬레이션에서 문제가 발생합니다.</p>
-            </a>
-
-            <a href="manual.html#flipped" class="issue-card" data-severity="error" aria-label="Flipped normals 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-flipped);">⇄</span>
-              <h3 class="issue-title">FLIPPED NORMAL</h3>
-              <p class="issue-desc">법선이 이웃과 반대 방향을 가리키는 페이스. 실시간 엔진에서 사라지거나 어둡게 보입니다.</p>
-            </a>
-
-            <a href="manual.html#skinny" class="issue-card" data-severity="warning" aria-label="Skinny triangles 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-skinny);">△</span>
-              <h3 class="issue-title">SKINNY TRIANGLE</h3>
-              <p class="issue-desc">한 각이 극단적으로 좁은 삼각형. 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
-            </a>
-
-            <a href="manual.html#ngon" class="issue-card" data-severity="warning" aria-label="N-gons 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-ngon);">⬡</span>
-              <h3 class="issue-title">N-GON</h3>
-              <p class="issue-desc">5변 이상의 페이스. DCC에선 허용되지만 엔진 내부에서 임의로 삼각화되어 결과를 예측할 수 없습니다.</p>
-            </a>
-
-            <a href="manual.html#isolated" class="issue-card" data-severity="info" aria-label="Isolated vertices 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-isolated);">·</span>
-              <h3 class="issue-title">ISOLATED VERTEX</h3>
-              <p class="issue-desc">어떤 페이스에도 속하지 않는 떠다니는 버텍스. 파일 용량만 차지하며 정리가 필요한 항목입니다.</p>
-            </a>
-
-            <a href="manual.html#duplicate" class="issue-card" data-severity="info" aria-label="Duplicate vertices 자세히 보기">
-              <span class="issue-glyph" style="color:var(--issue-duplicate);">◉</span>
-              <h3 class="issue-title">DUPLICATE VERTEX</h3>
-              <p class="issue-desc">동일 좌표에 여러 버텍스가 겹친 상태. UV/노멀 분리 등 의도적인 경우도 있어 정보성 경고로만 표시합니다.</p>
-            </a>
-
-            <a href="manual.html#non-manifold" class="issue-card" data-severity="critical" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-non-manifold);">✕</span>
-              <h3 class="issue-title">NON-MANIFOLD</h3>
-              <p class="issue-desc">3개 이상의 페이스가 한 엣지를 공유하는 상태. 불리언, UV 언래핑, 슬라이서가 모호해집니다.</p>
-            </a>
-
-            <a href="manual.html#degenerate" class="issue-card" data-severity="critical" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-degenerate);">○</span>
-              <h3 class="issue-title">DEGENERATE</h3>
-              <p class="issue-desc">면적이 0에 수렴하는 페이스. 법선이 정의되지 않아 렌더러가 검은 픽셀이나 NaN을 만듭니다.</p>
-            </a>
-
-            <a href="manual.html#boundary" class="issue-card" data-severity="error" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-boundary);">◠</span>
-              <h3 class="issue-title">BOUNDARY EDGE</h3>
-              <p class="issue-desc">한 개의 페이스만 공유하는 엣지. 메시가 뚫려있다는 뜻. 3D 프린팅과 시뮬레이션에서 문제가 발생합니다.</p>
-            </a>
-
-            <a href="manual.html#flipped" class="issue-card" data-severity="error" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-flipped);">⇄</span>
-              <h3 class="issue-title">FLIPPED NORMAL</h3>
-              <p class="issue-desc">법선이 이웃과 반대 방향을 가리키는 페이스. 실시간 엔진에서 사라지거나 어둡게 보입니다.</p>
-            </a>
-
-            <a href="manual.html#skinny" class="issue-card" data-severity="warning" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-skinny);">△</span>
-              <h3 class="issue-title">SKINNY TRIANGLE</h3>
-              <p class="issue-desc">한 각이 극단적으로 좁은 삼각형. 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
-            </a>
-
-            <a href="manual.html#ngon" class="issue-card" data-severity="warning" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-ngon);">⬡</span>
-              <h3 class="issue-title">N-GON</h3>
-              <p class="issue-desc">5변 이상의 페이스. DCC에선 허용되지만 엔진 내부에서 임의로 삼각화되어 결과를 예측할 수 없습니다.</p>
-            </a>
-
-            <a href="manual.html#isolated" class="issue-card" data-severity="info" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-isolated);">·</span>
-              <h3 class="issue-title">ISOLATED VERTEX</h3>
-              <p class="issue-desc">어떤 페이스에도 속하지 않는 떠다니는 버텍스. 파일 용량만 차지하며 정리가 필요한 항목입니다.</p>
-            </a>
-
-            <a href="manual.html#duplicate" class="issue-card" data-severity="info" aria-hidden="true" tabindex="-1">
-              <span class="issue-glyph" style="color:var(--issue-duplicate);">◉</span>
-              <h3 class="issue-title">DUPLICATE VERTEX</h3>
-              <p class="issue-desc">동일 좌표에 여러 버텍스가 겹친 상태. UV/노멀 분리 등 의도적인 경우도 있어 정보성 경고로만 표시합니다.</p>
-            </a>
             </div>
           </div>
         </div>
       </div>
     </section>
-    <section class="sect sect-cta" id="scan">
-      <div class="sect-inner">
-        <h2 class="cta-headline">INITIATE<br>SCAN<span class="dot">.</span></h2>
-        <p class="cta-desc">
-          .obj 파일을 Inspector에 드롭하면 분석이 시작됩니다.
-          모든 처리는 브라우저 안에서 완료되며, 업로드도 트래킹도 없습니다.
-        </p>
-        <a href="app.html" class="cta-btn">
-          Launch Inspector <span class="arrow">→</span>
-        </a>
-        <div class="cta-features">
-          <span>100% LOCAL</span>
-          <span>ZERO UPLOADS</span>
-          <span>INSTANT RESULTS</span>
-        </div>
+
+    <section class="features">
+      <div class="section-header">
+        <p class="eyebrow">What we check</p>
+        <h2 class="section-headline">여덟 가지 토폴로지 문제.</h2>
+        <p class="section-subhead">메시가 다음 단계 도구로 넘어가기 전에 잡아내는 항목들.</p>
+      </div>
+
+      <div class="feature-grid feature-grid-4">
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-non-manifold">✕</div>
+          <h3 class="feature-title">Non-manifold edges</h3>
+          <p class="feature-body">하나의 엣지를 3개 이상 면이 공유하는 상태. 매니폴드 가정이 깨집니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-boundary">◠</div>
+          <h3 class="feature-title">Boundary holes</h3>
+          <p class="feature-body">한 개의 면만 공유하는 열린 엣지. 출력, 시뮬레이션, 슬라이싱에서 위험합니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-skinny">△</div>
+          <h3 class="feature-title">Skinny triangles</h3>
+          <p class="feature-body">극단적으로 얇은 삼각형은 셰이딩 아티팩트와 수치 불안정을 유발합니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-ngon">⬡</div>
+          <h3 class="feature-title">N-gons</h3>
+          <p class="feature-body">5각형 이상의 면은 엔진 내부에서 임의로 삼각화될 수 있습니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-degenerate">○</div>
+          <h3 class="feature-title">Degenerate faces</h3>
+          <p class="feature-body">면적이 거의 0인 면은 렌더러와 분석 파이프라인을 불안정하게 만듭니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-flipped">⇄</div>
+          <h3 class="feature-title">Flipped normals</h3>
+          <p class="feature-body">뒤집힌 법선은 실시간 엔진에서 사라지거나 어둡게 보일 수 있습니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-duplicate">◉</div>
+          <h3 class="feature-title">Duplicate vertices</h3>
+          <p class="feature-body">같은 좌표의 중복 정점은 UV, 노멀, 면 연결 진단을 흐리게 합니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon feature-icon-glyph issue-isolated">·</div>
+          <h3 class="feature-title">Isolated vertices</h3>
+          <p class="feature-body">어떤 면에도 속하지 않는 정점은 파일 용량만 차지하는 정리 대상입니다.</p>
+        </article>
       </div>
     </section>
 
-    <!-- ═══ FOOTER ═══ -->
-    <footer class="landing-footer">
-      <div class="footer-inner">
-        <span class="footer-brand">TOPOL<span>GUARD</span></span>
-        <div class="footer-links">
-          <a href="manual.html">MANUAL</a>
-          <a href="app.html">INSPECTOR</a>
+    <section class="pipeline-section">
+      <div class="pipeline-card" role="img" aria-label="MODELING 단계 후 TopolGuard 게이트가 토폴로지를 검증한다. 통과 시 UV, 리깅, 애니메이션, 렌더로 진행하고 실패 시 모델링으로 복귀한다.">
+        <div class="section-header pipeline-card-header">
+          <p class="eyebrow">Pipeline gate</p>
+          <h2 class="section-headline">공정 전 품질 게이트<span class="headline-dot">.</span></h2>
+          <p class="section-subhead">TopolGuard는 단계가 아니라 품질 게이트입니다.</p>
         </div>
-        <span class="footer-copy">MIT LICENSE · 2025</span>
-      </div>
-    </footer>
 
+        <svg class="pipeline-svg" viewBox="0 0 1120 230" aria-hidden="true">
+          <defs>
+            <marker id="arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--accent)"></path>
+            </marker>
+            <marker id="arrow-muted" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-subtle)"></path>
+            </marker>
+          </defs>
+
+          <line class="pipe-section-rule" x1="100" y1="26" x2="210" y2="26"></line>
+          <text x="298" y="26" class="pipe-section-label">UPSTREAM</text>
+          <line class="pipe-section-rule" x1="386" y1="26" x2="485" y2="26"></line>
+
+          <line class="pipe-section-rule" x1="570" y1="26" x2="728" y2="26"></line>
+          <text x="830" y="26" class="pipe-section-label">DOWNSTREAM</text>
+          <line class="pipe-section-rule" x1="932" y1="26" x2="1090" y2="26"></line>
+
+          <rect class="pipe-box" x="100" y="74" width="160" height="56" rx="12"></rect>
+          <g class="pipe-icon" transform="translate(132 102) scale(0.72)">
+            <path d="M0 -16 L16 -8 L16 10 L0 18 L-16 10 L-16 -8 Z"></path>
+            <path d="M0 0 L0 18 M0 0 L16 -8 M0 0 L-16 -8"></path>
+          </g>
+          <text x="196" y="103" class="pipe-stage-label">MODELING</text>
+
+          <rect class="pipe-box pipe-gate" x="315" y="50" width="170" height="104" rx="16"></rect>
+          <g class="pipe-shield" transform="translate(400 84) scale(0.58)">
+            <path d="M0 -24 L22 -14 L22 6 C22 28 9 41 0 46 C-9 41 -22 28 -22 6 L-22 -14 Z"></path>
+            <path d="M-9 9 L-2 16 L13 -2"></path>
+          </g>
+          <text x="400" y="132" class="pipe-gate-name">TopolGuard</text>
+
+          <rect class="pipe-box" x="570" y="74" width="140" height="56" rx="12"></rect>
+          <g class="pipe-icon" transform="translate(602 102) scale(0.7)">
+            <rect x="-13" y="-13" width="10" height="10"></rect>
+            <rect x="3" y="-13" width="10" height="10"></rect>
+            <rect x="-13" y="3" width="10" height="10"></rect>
+            <rect x="3" y="3" width="10" height="10"></rect>
+          </g>
+          <text x="662" y="103" class="pipe-stage-label">UV</text>
+
+          <rect class="pipe-box" x="750" y="74" width="150" height="56" rx="12"></rect>
+          <g class="pipe-icon" transform="translate(782 102) scale(0.7)">
+            <path d="M-16 14 L-5 3 L6 -4 L17 -15"></path>
+            <circle cx="-16" cy="14" r="4"></circle>
+            <circle cx="-5" cy="3" r="4"></circle>
+            <circle cx="6" cy="-4" r="4"></circle>
+            <circle cx="17" cy="-15" r="4"></circle>
+          </g>
+          <text x="842" y="103" class="pipe-stage-label">RIGGING</text>
+
+          <rect class="pipe-box" x="940" y="74" width="150" height="56" rx="12"></rect>
+          <g class="pipe-icon pipe-icon-fill" transform="translate(972 102) scale(0.52)">
+            <path d="M0 -20 A20 20 0 0 1 17 -10 L4 -3 Z"></path>
+            <path d="M17 -10 A20 20 0 0 1 17 10 L4 3 Z"></path>
+            <path d="M17 10 A20 20 0 0 1 0 20 L-3 4 Z"></path>
+            <path d="M0 20 A20 20 0 0 1 -17 10 L-4 3 Z"></path>
+            <path d="M-17 10 A20 20 0 0 1 -17 -10 L-4 -3 Z"></path>
+            <path d="M-17 -10 A20 20 0 0 1 0 -20 L3 -4 Z"></path>
+          </g>
+          <text x="1032" y="103" class="pipe-stage-label">RENDER</text>
+
+          <line class="pipe-line muted" x1="260" y1="102" x2="315" y2="102" marker-end="url(#arrow-muted)"></line>
+          <line class="pipe-line accent" x1="485" y1="102" x2="570" y2="102" marker-end="url(#arrow-accent)"></line>
+          <line class="pipe-line muted" x1="710" y1="102" x2="750" y2="102" marker-end="url(#arrow-muted)"></line>
+          <line class="pipe-line muted" x1="900" y1="102" x2="940" y2="102" marker-end="url(#arrow-muted)"></line>
+          <path class="pipe-line return" d="M400 154 V176 C400 194 384 202 354 202 H180 C150 202 132 188 132 166 V130" marker-end="url(#arrow-muted)"></path>
+
+          <text x="528" y="78" class="pipe-label pass">PASS</text>
+          <text x="268" y="191" class="pipe-label return-label">HOLD / RETURN</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="feature-grid">
+        <article class="feature-card feature-card-wide">
+          <div class="feature-icon">01</div>
+          <h3 class="feature-title">Read the manual</h3>
+          <p class="feature-body">결함별 원인과 처리 기준을 짧은 문서로 확인할 수 있습니다.</p>
+          <a class="feature-link" href="manual.html">매뉴얼 열기</a>
+        </article>
+        <article class="feature-card feature-card-wide">
+          <div class="feature-icon">02</div>
+          <h3 class="feature-title">100% local processing</h3>
+          <p class="feature-body">모든 분석은 브라우저 안에서 실행됩니다. 모델 파일은 외부 서버로 업로드되지 않습니다.</p>
+        </article>
+        <article class="feature-card feature-card-wide">
+          <div class="feature-icon">03</div>
+          <h3 class="feature-title">No install, browser-only</h3>
+          <p class="feature-body">설치 없이 OBJ 파일을 올려 바로 검사합니다. 결과는 즉시 뷰포트와 카드로 표시됩니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="cta-wrap">
+      <div class="cta-banner">
+        <h2 class="cta-headline">Initiate scan.</h2>
+        <p class="cta-subhead">인스펙터에 모델을 올리면 결과가 즉시 나옵니다.</p>
+        <a href="app.html" class="btn-primary btn-lg">검사 시작 →</a>
+        <p class="cta-tagline">100% local · Zero uploads · Instant results</p>
+      </div>
+    </section>
   </main>
 
-  <!-- 스크립트 (순서 중요) -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand"><span class="brand-mark">▲</span><span class="brand-text">TopolGuard</span></div>
+      <div class="footer-meta"><span>v2.1.0</span><span>·</span><span>MIT License</span><span>·</span><span>2026</span></div>
+    </div>
+  </footer>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/theme.js"></script>
+  <script src="js/hero-preview.js"></script>
+  <script type="module" src="js/hero-wave.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/landing.js"></script>
 </body>
