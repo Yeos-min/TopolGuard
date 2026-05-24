@@ -5,13 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manual — TopolGuard</title>
   <meta name="description" content="TopolGuard manual: what we check, how the Modeling Score works, and how to read the Inspector.">
-  <script>
-    (function() {
-      var t = localStorage.getItem('tg_theme');
-      if (t) document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
-
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/manual.css">
@@ -19,16 +12,13 @@
 <body class="has-topnav" data-page="manual">
 
   <nav class="tg-topnav">
-    <button class="brand" onclick="location.href='index.html'">TOPOL<span>GUARD</span></button>
+    <a href="index.html" class="brand"><span class="brand-mark">▲</span><span class="brand-text">TopolGuard</span></a>
     <div class="links">
-      <a href="index.html">HOME</a>
-      <a href="manual.html" class="active">MANUAL</a>
-      <a href="app.html">INSPECTOR</a>
+      <a href="manual.html" class="active">Manual</a>
+      <a href="app.html">Inspector</a>
     </div>
     <div class="sys">
-      <span class="dot"></span>
-      SYS.ONLINE // OP.READY
-      <button class="theme-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
+      <a href="app.html" class="btn-primary">Launch Inspector</a>
     </div>
   </nav>
 
@@ -334,7 +324,6 @@
 
   </div>
 
-  <script src="js/theme.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/manual.js"></script>
 </body>

@@ -5,13 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inspector — TopolGuard</title>
   <meta name="description" content="Upload a .obj file and audit its topology — non-manifold edges, skinny triangles, n-gons, flipped normals. Runs entirely in your browser.">
-  <script>
-    (function() {
-      var t = localStorage.getItem('tg_theme');
-      if (t) document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
-
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/app.css">
@@ -22,11 +15,10 @@
 
 <!-- UNIFIED TOPNAV (Inspector variant) -->
 <nav class="tg-topnav">
-  <button class="brand" onclick="location.href='index.html'">TOPOL<span>GUARD</span></button>
+  <a href="index.html" class="brand"><span class="brand-mark">▲</span><span class="brand-text">TopolGuard</span></a>
   <div class="links">
-    <a href="index.html">HOME</a>
-    <a href="manual.html">MANUAL</a>
-    <a href="app.html" class="active">INSPECTOR</a>
+    <a href="manual.html">Manual</a>
+    <a href="app.html" class="active">Inspector</a>
   </div>
 
   <div class="inspector-ctrl">
@@ -46,48 +38,65 @@
         </div>
       </div>
     </div>
-    <button id="anim-icon-btn" class="icon-btn" onclick="toggleAnimSetting()" title="ANIMATION">▶</button>
-    <button id="theme-toggle" class="icon-btn" onclick="toggleTheme()" title="DARK MODE">◐</button>
+    <button id="anim-icon-btn" class="icon-btn" onclick="toggleAnimSetting()" title="로딩 애니메이션 켜짐 — 누르면 끔" aria-pressed="true">⏸</button>
   </div>
 </nav>
 
 <div id="app-body">
 
-<!-- SIDE PANEL — HISTORY + SAMPLES -->
-<div id="side-panel" class="side-panel collapsed">
-  <div class="side-panel-tab" id="side-panel-tab">
-    <span class="tab-label tab-label-text">HISTORY</span>
-    <span class="tab-label tab-label-icon">☰</span>
-  </div>
+<div id="sidebar" class="results-sidebar">
+  <div id="sidebar-body">
 
-  <div class="side-panel-body">
-    <div class="side-panel-section history-section">
-      <div class="section-header">
-        <span class="section-title">HISTORY</span>
+    <!-- MODELING SCORE -->
+    <div id="health-card" class="health-card-hero">
+      <div class="health-label">MESH SCORE</div>
+      <div class="health-score-row">
+        <div id="health-score-val" style="color:var(--dim);">—</div>
+        <div class="health-score-meta">
+          <div id="health-grade" style="color:var(--dim);">N/A</div>
+        </div>
       </div>
-      <div class="section-content">
-        <ul id="history-list">
-          <li id="history-empty" style="font-size:11px; color:var(--dim); padding:4px 10px 6px; font-family:var(--mono); list-style:none;">아직 로드된 파일이 없어요</li>
-        </ul>
+      <div id="health-desc">파일을 업로드하면 품질 점수를 계산해요</div>
+      <div id="health-bar-wrap"><div id="health-bar-fill" style="width:0%;background:var(--dim);"></div></div>
+    </div>
+
+    <!-- MESH INFO -->
+    <div class="stat-grid stat-grid-stack">
+      <div class="stat-card-mesh-row">
+        <div class="stat-cell"><div class="stat-label">VERTICES</div><div class="stat-value" id="v-count">—</div></div>
+        <div class="stat-cell"><div class="stat-label">FACES</div><div class="stat-value" id="f-count">—</div></div>
+      </div>
+    </div>
+    <!-- DOM compatibility placeholders -->
+    <div style="display:none;">
+      <span id="e-count"></span>
+      <span id="euler"></span>
+      <span id="bbox"></span>
+    </div>
+
+    <!-- TOPOLOGY ISSUES -->
+    <div id="issue-list">
+      <div id="issue-cards-container">
+        <div class="issue-empty-state">
+          <div class="issue-empty-glyph">⬡</div>
+          <div>.obj 파일을 올려주세요</div>
+        </div>
       </div>
     </div>
 
-    <div class="side-panel-section samples-section">
-      <div class="section-header">
-        <span class="section-title">SAMPLES</span>
-      </div>
-      <div class="section-content">
-        <button class="sample-btn" id="sample-ai-btn" data-file="Humanoid_AI.obj">AI ORIGIN</button>
-        <button class="sample-btn" id="sample-human-btn" data-file="Humanoid_Human_Modified.obj">HUMAN TOUCHED</button>
-      </div>
+    <!-- OVERLAY COLORS -->
+    <div class="section-title">OVERLAY COLORS</div>
+    <div id="overlay-colors-panel" style="margin-bottom:6px;">
+      <button onclick="resetColors()" class="reset-colors-btn">↺ RESET</button>
+    </div>
+
+  </div><!-- /sidebar-body -->
+  <div id="sidebar-footer">
+    <div id="progress-wrap">
+      <div id="progress-bar"><div id="progress-fill"></div></div>
+      <div id="progress-label">분석 중이에요...</div>
     </div>
   </div>
-
-  <div class="side-panel-resize-handle"></div>
-</div>
-
-<div id="history-preview" class="history-preview hidden">
-  <img id="history-preview-img" src="" alt="preview">
 </div>
 
 <div id="viewport">
@@ -115,32 +124,12 @@
   <!-- SKIP ANIMATION 버튼 -->
   <button id="skip-btn" onclick="skipAnimation()">⏭ SKIP</button>
 
-  <!-- QUICK START 오버레이 (파일 없을 때) -->
+  <!-- LOAD-FIRST DROPZONE -->
   <div id="quick-start" class="visible">
-    <div class="qs-title">QUICK START — AI 모델 비교하기</div>
-    <div class="qs-grid qs-grid-2">
-      <button class="qs-btn qs-ai" onclick="loadSample('samples/Humanoid_AI.obj','Humanoid AI Origin','⚠')">
-        <span class="qs-btn-icon">⚠</span>
-        <span class="qs-btn-name">AI ORIGIN</span>
-        <span class="qs-btn-desc">
-          <span>Tripo AI · Humanoid 순정 출력</span><br>
-          <span class="qs-btn-meta">4,853 verts · 9,445 faces · 72 B</span>
-        </span>
-      </button>
-      <button class="qs-btn qs-human" onclick="loadSample('samples/Humanoid_Human_Modified.obj','Humanoid Human Touched','✓')">
-        <span class="qs-btn-icon">✓</span>
-        <span class="qs-btn-name">HUMAN TOUCHED</span>
-        <span class="qs-btn-desc">
-          <span>Human retopology · Humanoid revised</span><br>
-          <span class="qs-btn-meta">4,455 verts · 8,438 faces · 94 A</span>
-        </span>
-      </button>
-    </div>
-    <div class="qs-or">— OR —</div>
-    <div class="qs-upload-hint">
-      <label for="file-upload"><span>UPLOAD FILE</span></label>
-      <span>또는 여기에 드래그하세요</span>
-    </div>
+    <label class="viewport-dropzone" for="file-upload">
+      <span class="dropzone-title">OBJ 파일을 여기로 드래그하거나 클릭하세요</span>
+      <span class="dropzone-subtitle">또는 우측 SAMPLES에서 하나를 선택하세요</span>
+    </label>
   </div>
 
   <!-- DROP HOVER 오버레이 -->
@@ -152,63 +141,52 @@
   <div id="hud">
     <div>스크롤 — 확대</div><div>드래그 — 회전</div><div>우클릭 — 이동</div>
   </div>
+  <label id="upload-btn" for="file-upload">▲ UPLOAD .OBJ</label>
+  <input type="file" id="file-upload" accept=".obj" style="display:none;">
 </div>
 
-<div id="sidebar">
-  <div id="sidebar-body">
-
-    <!-- MODELING SCORE -->
-    <div id="health-card" class="health-card-hero">
-      <div class="health-label">MESH SCORE</div>
-      <div class="health-score-row">
-        <div id="health-score-val" style="color:var(--dim);">—</div>
-        <div class="health-score-meta">
-          <div id="health-grade" style="color:var(--dim);">N/A</div>
-        </div>
+<!-- RIGHT GALLERY — HISTORY + SAMPLES -->
+<div id="side-panel" class="side-panel gallery-sidebar expanded">
+  <div class="side-panel-body">
+    <div class="side-panel-section history-section">
+      <div class="section-header">
+        <span class="section-title">HISTORY</span>
       </div>
-      <div id="health-desc">파일을 업로드하면 품질 점수를 계산해요</div>
-      <div id="health-bar-wrap"><div id="health-bar-fill" style="width:0%;background:var(--dim);"></div></div>
-    </div>
-
-    <!-- MESH INFO -->
-    <div class="stat-grid stat-grid-stack">
-      <div class="stat-card-mesh-row">
-        <div class="stat-cell"><div class="stat-label">VERTICES</div><div class="stat-value" id="v-count">—</div></div>
-        <div class="stat-cell"><div class="stat-label">FACES</div><div class="stat-value" id="f-count">—</div></div>
-      </div>
-    </div>
-    <!-- DOM 호환용 hidden placeholders (JS가 참조할 수 있음, 표시는 안 함) -->
-    <div style="display:none;">
-      <span id="e-count"></span>
-      <span id="euler"></span>
-      <span id="bbox"></span>
-    </div>
-
-    <!-- TOPOLOGY ISSUES -->
-    <div id="issue-list">
-      <div id="issue-cards-container">
-        <div style="font-size:12px; color:var(--dim); text-align:center; padding:20px 0;">
-          <div style="font-size:28px; opacity:0.15; margin-bottom:8px;">⬡</div>
-          <div style="font-family:var(--mono); font-size:11px;">.obj 파일을 올려주세요</div>
-        </div>
+      <div class="section-content">
+        <ul id="history-list">
+          <li id="history-empty" aria-hidden="true"></li>
+        </ul>
       </div>
     </div>
 
-    <!-- COLOR THEME -->
-    <div class="section-title">COLOR THEME</div>
-    <div id="color-theme-panel" style="margin-bottom:6px;">
-      <button onclick="resetColors()" style="width:100%; padding:6px 0; background:var(--panel2); border:1px solid var(--border2); border-radius:2px; color:var(--dim); font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:color 0.15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--dim)'">↺ RESET</button>
+    <div class="side-panel-section samples-section">
+      <div class="section-header">
+        <span class="section-title">SAMPLES</span>
+      </div>
+      <div class="section-content">
+        <button class="sample-btn sample-entry" id="sample-ai-btn" data-file="Humanoid_AI.obj">
+          <span class="sample-thumb">
+            <img src="assets/samples/ai-origin.png" alt="" loading="lazy" onerror="this.style.display='none'">
+            <span class="sample-thumb-fallback">AI</span>
+          </span>
+          <span class="sample-name">AI ORIGIN</span>
+          <span class="sample-meta">4,853 verts · 9,445 faces</span>
+        </button>
+        <button class="sample-btn sample-entry" id="sample-human-btn" data-file="Humanoid_Human_Modified.obj">
+          <span class="sample-thumb">
+            <img src="assets/samples/human-touched.png" alt="" loading="lazy" onerror="this.style.display='none'">
+            <span class="sample-thumb-fallback">HU</span>
+          </span>
+          <span class="sample-name">HUMAN TOUCHED</span>
+          <span class="sample-meta">4,455 verts · 8,438 faces</span>
+        </button>
+      </div>
     </div>
-
-  </div><!-- /sidebar-body -->
-  <div id="sidebar-footer">
-    <div id="progress-wrap">
-      <div id="progress-bar"><div id="progress-fill"></div></div>
-      <div id="progress-label">분석 중이에요...</div>
-    </div>
-    <label id="upload-btn" for="file-upload">▲ UPLOAD .OBJ</label>
-    <input type="file" id="file-upload" accept=".obj" style="display:none;">
   </div>
+</div>
+
+<div id="history-preview" class="history-preview hidden">
+  <img id="history-preview-img" src="" alt="preview">
 </div>
 
 </div>

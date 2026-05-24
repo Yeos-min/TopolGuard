@@ -4,16 +4,18 @@ import {
   camera,
   renderer,
   controls,
+  overlayGroup,
   initViewport,
   setCurrentMeshes,
   clearSceneState,
+  cancelParticleWave,
+  runParticleWaveUntil,
   getOverlayByIssueKey,
   getFirstIssuePosition,
   applyOverlayColor,
   focusOnIssue,
   applyAnalysisVisuals,
   frameModel,
-  applyThemeToViewport,
   resetColors
 } from './viewport.js';
 
@@ -34,21 +36,42 @@ import {
   updateMeshInfo
 } from './ui.js';
 
-let animEnabled = localStorage.getItem('tg_anim') !== 'false';
+const PARTICLE_PREF_KEY = 'topolguard.particle-wave';
+
+function readParticlePreference() {
+  try {
+    const value = localStorage.getItem(PARTICLE_PREF_KEY);
+    if (value === null) return true;
+    return value !== 'off';
+  } catch (error) {
+    return true;
+  }
+}
+
+function writeParticlePreference(enabled) {
+  try {
+    localStorage.setItem(PARTICLE_PREF_KEY, enabled ? 'on' : 'off');
+  } catch (error) {
+    // Private browsing or disabled storage: keep the in-memory state.
+  }
+}
+
+let animEnabled = readParticlePreference();
 let animRunning = false;
 let animSkipped = false;
 let animTimeouts = [];
 let pendingFinalizeCallback = null;
 
 let historyEntries = [];
-const MAX_HISTORY = 15;
+const MAX_HISTORY = 20;
 let currentLoadedFile = null;
 let pendingLoad = null;
 
 let rawObjText = '';
 let analysisWorker = null;
 let modelGroup = null;
-let isLight = localStorage.getItem('tg_theme') === 'light';
+let loadSequence = 0;
+let lastAnalysisData = null;
 
 const SAMPLE_PATHS = {
   ai: 'samples/Humanoid_AI.obj',
@@ -85,12 +108,12 @@ function animDelay(fn, ms) {
 
 function toggleAnimSetting() {
   animEnabled = !animEnabled;
-  localStorage.setItem('tg_anim', animEnabled);
+  writeParticlePreference(animEnabled);
   applyAnimToggleUI(animEnabled);
   showToast(
     'info',
-    animEnabled ? '애니메이션 ON' : '애니메이션 OFF',
-    animEnabled ? '다음 검사부터 연출이 재생돼요.' : '결과가 즉시 표시돼요.',
+    animEnabled ? '파티클 웨이브 ON' : '파티클 웨이브 OFF',
+    animEnabled ? '다음 새 파일 로드부터 파티클 로딩이 재생돼요.' : '다음 새 파일 로드는 즉시 결과를 표시해요.',
     2000
   );
 }
@@ -137,7 +160,18 @@ function captureHistoryThumbnail() {
     camera.updateProjectionMatrix();
 
     renderer.render(scene, camera);
-    const thumbnailDataURL = renderer.domElement.toDataURL('image/png');
+    const sourceCanvas = renderer.domElement;
+    const side = Math.min(sourceCanvas.width, sourceCanvas.height);
+    const sx = Math.max(0, (sourceCanvas.width - side) / 2);
+    const sy = Math.max(0, (sourceCanvas.height - side) / 2);
+    const thumbCanvas = document.createElement('canvas');
+    thumbCanvas.width = 220;
+    thumbCanvas.height = 220;
+    const ctx = thumbCanvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(sourceCanvas, sx, sy, side, side, 0, 0, thumbCanvas.width, thumbCanvas.height);
+    }
+    const thumbnailDataURL = ctx ? thumbCanvas.toDataURL('image/png') : sourceCanvas.toDataURL('image/png');
 
     camera.position.copy(savedPos);
     controls.target.copy(savedTarget);
@@ -170,7 +204,8 @@ function addToHistory(info, analysisData) {
     loadedAt: Date.now(),
     isSample: info.isSample,
     samplePath: info.samplePath || null,
-    objText: info.isSample ? null : info.objText
+    objText: info.isSample ? null : info.objText,
+    analysis: info.analysis || null
   });
 
   if (historyEntries.length > MAX_HISTORY) {
@@ -187,15 +222,36 @@ function reloadFromHistory(index) {
   if (!entry) return;
 
   if (entry.isSample && entry.samplePath) {
-    loadSample(entry.samplePath, entry.name, entry.name.indexOf('Humanoid_AI') >= 0 ? '⚠' : '✓');
+    pendingLoad = {
+      isSample: true,
+      samplePath: entry.samplePath,
+      name: entry.name,
+      analysis: entry.analysis || null
+    };
+
+    fetch(entry.samplePath)
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.text();
+      })
+      .then(function(text) {
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        loadModel(url, text, { skipParticle: true, cachedAnalysis: entry.analysis || null });
+      })
+      .catch(function(error) {
+        console.error(error);
+        pendingLoad = null;
+        showToast('error', '히스토리를 복원하지 못했어요', entry.name, 4000);
+      });
     return;
   }
 
   if (entry.objText) {
-    pendingLoad = { isSample: false, name: entry.name, objText: entry.objText };
+    pendingLoad = { isSample: false, name: entry.name, objText: entry.objText, analysis: entry.analysis || null };
     const blob = new Blob([entry.objText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    loadModel(url, entry.objText);
+    loadModel(url, entry.objText, { skipParticle: true, cachedAnalysis: entry.analysis || null });
   }
 }
 
@@ -317,9 +373,10 @@ function validateAndLoad(file) {
 function applyAnalysisResult(analysisData, allGeometries) {
   if (!analysisData) return;
 
+  lastAnalysisData = analysisData;
   updateMeshInfo(analysisData);
   const stats = applyAnalysisVisuals(analysisData, allGeometries, modelGroup) || {};
-  const healthResult = computeHealthScore(analysisData.faceCount || 0, stats);
+  const healthResult = computeHealthScore(analysisData.faceCount ?? 0, stats);
   updateHealthUI(healthResult, { animEnabled: animEnabled, animSkipped: animSkipped });
   renderIssueCards(stats, {
     getOverlay: getOverlayByIssueKey,
@@ -372,13 +429,52 @@ function disposeModelGroup(group) {
   scene.remove(group);
 }
 
-function loadModel(url, text) {
-  rawObjText = text || '';
+function setAppLoadingState(isLoading) {
+  document.body.classList.toggle('is-loading', isLoading);
+}
+
+function setAppHasModel(hasModel) {
+  document.body.classList.toggle('has-model', hasModel);
+  if (hasModel) document.body.classList.remove('has-load-error');
+}
+
+function setResultsPanelReady(isReady) {
+  if (isReady) document.body.classList.add('results-panel-ready');
+}
+
+function setAppErrorState(hasError) {
+  document.body.classList.toggle('has-load-error', hasError);
+}
+
+function showInitialDropzone() {
+  const quickStart = document.getElementById('quick-start');
+  if (!quickStart) return;
+  quickStart.classList.add('visible');
+  quickStart.classList.remove('hidden');
+}
+
+function hideInitialDropzone() {
+  const quickStart = document.getElementById('quick-start');
+  if (!quickStart) return;
+  quickStart.classList.remove('visible');
+  quickStart.classList.add('hidden');
+}
+
+function loadModel(url, text, options) {
+  options = options || {};
+  const loadId = ++loadSequence;
+  rawObjText = text ?? '';
+  lastAnalysisData = null;
   terminateAnalysisWorker();
+  cancelParticleWave();
 
   const uploadButton = document.getElementById('upload-btn');
   if (uploadButton) uploadButton.style.pointerEvents = 'none';
   setProgress(10, '파일을 불러오고 있어요...');
+  setAppHasModel(false);
+  setAppLoadingState(true);
+  setAppErrorState(false);
+  overlayGroup.visible = false;
 
   if (modelGroup) {
     disposeModelGroup(modelGroup);
@@ -386,34 +482,10 @@ function loadModel(url, text) {
   }
 
   clearSceneState();
-
-  const quickStart = document.getElementById('quick-start');
-  if (quickStart) {
-    quickStart.classList.remove('visible');
-    quickStart.classList.add('hidden');
-  }
+  hideInitialDropzone();
 
   animSkipped = false;
   animTimeouts = [];
-
-  if (animEnabled) {
-    const scanLine = document.getElementById('scan-line');
-    const skipButton = document.getElementById('skip-btn');
-    if (scanLine) {
-      scanLine.classList.add('active');
-      scanLine.style.top = '0%';
-      const scanStart = performance.now();
-
-      function moveScan(now) {
-        const t = Math.min((now - scanStart) / 1500, 1);
-        scanLine.style.top = (t * 100) + '%';
-        if (t < 1 && !animSkipped) requestAnimationFrame(moveScan);
-      }
-
-      requestAnimationFrame(moveScan);
-    }
-    if (skipButton) skipButton.classList.add('visible');
-  }
 
   const healthValue = document.getElementById('health-score-val');
   const healthGrade = document.getElementById('health-grade');
@@ -427,24 +499,41 @@ function loadModel(url, text) {
   function finalizeLoad(cleanedUrl) {
     setProgress(100, '검사가 끝났어요');
     if (uploadButton) uploadButton.style.pointerEvents = '';
+    overlayGroup.visible = true;
+    setResultsPanelReady(true);
+    setAppHasModel(true);
+    setAppLoadingState(false);
 
     if (pendingLoad) {
+      pendingLoad.analysis = lastAnalysisData;
       const vertsText = (document.getElementById('v-count') || { textContent: '0' }).textContent.replace(/\s*\(.*\)/, '');
       const healthNum = getLastHealthScore() !== null ? getLastHealthScore() : '-';
       addToHistory(pendingLoad, { verts: vertsText, health: healthNum });
       pendingLoad = null;
     }
 
-    animDelay(function() {
-      const scanLine = document.getElementById('scan-line');
-      const skipButton = document.getElementById('skip-btn');
-      if (scanLine) scanLine.classList.remove('active');
-      if (skipButton) skipButton.classList.remove('visible');
-      animRunning = false;
-    }, animEnabled && !animSkipped ? 1200 : 0);
+    animRunning = false;
 
     URL.revokeObjectURL(url);
     URL.revokeObjectURL(cleanedUrl);
+  }
+
+  function failLoad(cleanedUrl, message) {
+    if (uploadButton) uploadButton.style.pointerEvents = '';
+    setAppLoadingState(false);
+    setAppHasModel(false);
+    setAppErrorState(true);
+    overlayGroup.visible = false;
+    showInitialDropzone();
+    cancelParticleWave();
+    if (modelGroup) {
+      disposeModelGroup(modelGroup);
+      modelGroup = null;
+      clearSceneState();
+    }
+    renderIssueMessage('error', '✕', message);
+    URL.revokeObjectURL(url);
+    if (cleanedUrl) URL.revokeObjectURL(cleanedUrl);
   }
 
   const hasLineElements = /^l\s/m.test(rawObjText);
@@ -459,6 +548,12 @@ function loadModel(url, text) {
   loader.load(
     cleanedUrl,
     function(object) {
+      if (loadId !== loadSequence) {
+        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(cleanedUrl);
+        return;
+      }
+
       setProgress(50, '검사 중이에요...');
       modelGroup = new THREE.Group();
       let firstGeometry = null;
@@ -512,27 +607,45 @@ function loadModel(url, text) {
       scene.add(modelGroup);
       setCurrentMeshes(meshPairs);
       frameModel(modelGroup);
+      modelGroup.visible = false;
 
       setProgress(80, '위상을 분석하고 있어요...');
-      setTimeout(function() {
-        if (!firstGeometry) {
-          finalizeLoad(cleanedUrl);
-          return;
-        }
 
-        analyzeModelInWorker(
-          rawObjText,
-          allGeometries,
-          function() {
-            finalizeLoad(cleanedUrl);
-          },
-          function(error) {
-            console.error('분석 오류:', error);
-            renderIssueMessage('error', '✕', '분석 중 오류가 발생했어요');
-            finalizeLoad(cleanedUrl);
-          }
-        );
-      }, 50);
+      if (!firstGeometry) {
+        failLoad(cleanedUrl, '면(face)이 없는 파일이에요');
+        return;
+      }
+
+      animRunning = true;
+      const analysisPromise = options.cachedAnalysis
+        ? Promise.resolve(options.cachedAnalysis).then(function(analysisData) {
+          applyAnalysisResult(analysisData, allGeometries);
+          return analysisData;
+        })
+        : new Promise(function(resolve, reject) {
+          analyzeModelInWorker(rawObjText, allGeometries, resolve, reject);
+        });
+
+      const shouldRunParticle = animEnabled && !options.skipParticle;
+      const displayPromise = shouldRunParticle
+        ? runParticleWaveUntil(modelGroup, analysisPromise, {
+          minDuration: 2500,
+          finalDuration: 500,
+          fadeDuration: 300
+        })
+        : analysisPromise;
+
+      displayPromise.then(function() {
+        if (loadId !== loadSequence) return;
+        modelGroup.visible = true;
+        finalizeLoad(cleanedUrl);
+      }).catch(function(error) {
+        if (loadId !== loadSequence) return;
+        console.error('분석 오류:', error);
+        modelGroup.visible = true;
+        renderIssueMessage('error', '✕', '분석 중 오류가 발생했어요');
+        finalizeLoad(cleanedUrl);
+      });
     },
     function(xhr) {
       if (xhr.total) {
@@ -540,30 +653,16 @@ function loadModel(url, text) {
       }
     },
     function(error) {
+      if (loadId !== loadSequence) {
+        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(cleanedUrl);
+        return;
+      }
       console.error(error);
       terminateAnalysisWorker();
-      renderIssueMessage('error', '✕', '파일 로드 실패');
-      if (uploadButton) uploadButton.style.pointerEvents = '';
-      URL.revokeObjectURL(url);
-      URL.revokeObjectURL(cleanedUrl);
+      failLoad(cleanedUrl, '파일 로드 실패');
     }
   );
-}
-
-function applyTheme() {
-  document.body.classList.toggle('light', isLight);
-  document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
-
-  const button = document.getElementById('theme-toggle');
-  if (button) button.textContent = isLight ? '○' : '◐';
-
-  applyThemeToViewport(isLight);
-}
-
-function toggleTheme() {
-  isLight = !isLight;
-  localStorage.setItem('tg_theme', isLight ? 'light' : 'dark');
-  applyTheme();
 }
 
 function initFileInteractions() {
@@ -613,25 +712,8 @@ function initKeyboardShortcuts() {
   });
 }
 
-function initThemeObserver() {
-  const syncSceneBg = function() {
-    applyThemeToViewport(isLight);
-  };
-
-  const themeObserver = new MutationObserver(syncSceneBg);
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme']
-  });
-  themeObserver.observe(document.body, {
-    attributes: true,
-    attributeFilter: ['class']
-  });
-}
-
 window.toggleAnimSetting = toggleAnimSetting;
 window.skipAnimation = skipAnimation;
-window.toggleTheme = toggleTheme;
 window.loadSample = loadSample;
 window.resetColors = function() {
   resetColors(showToast);
@@ -646,9 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initSampleButtons();
   initFileInteractions();
   initKeyboardShortcuts();
-  initThemeObserver();
   renderHistory(historyEntries, reloadFromHistory);
   renderSampleButtons(currentLoadedFile, SAMPLE_PATHS);
   autoLoadSampleFromURL();
-  applyTheme();
 });

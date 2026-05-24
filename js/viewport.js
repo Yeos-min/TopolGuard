@@ -245,8 +245,280 @@ function clearOverlays() {
 }
 
 function clearSceneState() {
+  cancelParticleWave();
   clearOverlays();
   currentMeshes = [];
+}
+
+let activeParticleWave = null;
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function disposeParticleWave(wave) {
+  if (!wave) return;
+  wave.cancelled = true;
+  if (wave.points) {
+    scene.remove(wave.points);
+    if (wave.points.geometry) wave.points.geometry.dispose();
+    if (wave.points.material) wave.points.material.dispose();
+  }
+}
+
+function sampleSurfaceTargets(targetObject, count) {
+  const triangles = [];
+  const fallbackVertices = [];
+  const a = new THREE.Vector3();
+  const b = new THREE.Vector3();
+  const c = new THREE.Vector3();
+  const ab = new THREE.Vector3();
+  const ac = new THREE.Vector3();
+  let totalArea = 0;
+
+  targetObject.updateMatrixWorld(true);
+  targetObject.traverse(function(child) {
+    if (!child.isMesh || !child.geometry || !child.geometry.attributes || !child.geometry.attributes.position) return;
+
+    const geometry = child.geometry;
+    const position = geometry.attributes.position;
+    const index = geometry.index;
+    child.updateMatrixWorld(true);
+
+    for (let vertex = 0; vertex < position.count; vertex += 1) {
+      fallbackVertices.push(new THREE.Vector3(
+        position.getX(vertex),
+        position.getY(vertex),
+        position.getZ(vertex)
+      ).applyMatrix4(child.matrixWorld));
+    }
+
+    const triCount = index ? Math.floor(index.count / 3) : Math.floor(position.count / 3);
+    for (let tri = 0; tri < triCount; tri += 1) {
+      const i0 = index ? index.getX(tri * 3) : tri * 3;
+      const i1 = index ? index.getX(tri * 3 + 1) : tri * 3 + 1;
+      const i2 = index ? index.getX(tri * 3 + 2) : tri * 3 + 2;
+
+      a.set(position.getX(i0), position.getY(i0), position.getZ(i0)).applyMatrix4(child.matrixWorld);
+      b.set(position.getX(i1), position.getY(i1), position.getZ(i1)).applyMatrix4(child.matrixWorld);
+      c.set(position.getX(i2), position.getY(i2), position.getZ(i2)).applyMatrix4(child.matrixWorld);
+
+      ab.subVectors(b, a);
+      ac.subVectors(c, a);
+      const area = ab.cross(ac).length() * 0.5;
+      if (area <= 1e-12) continue;
+
+      totalArea += area;
+      triangles.push({
+        a: a.clone(),
+        b: b.clone(),
+        c: c.clone(),
+        cumulative: totalArea
+      });
+    }
+  });
+
+  const targets = new Float32Array(count * 3);
+
+  if (!triangles.length) {
+    const fallback = fallbackVertices.length ? fallbackVertices : [new THREE.Vector3(0, 0, 0)];
+    for (let i = 0; i < count; i += 1) {
+      const point = fallback[i % fallback.length];
+      targets[i * 3] = point.x;
+      targets[i * 3 + 1] = point.y;
+      targets[i * 3 + 2] = point.z;
+    }
+    return targets;
+  }
+
+  const point = new THREE.Vector3();
+  for (let i = 0; i < count; i += 1) {
+    const pick = Math.random() * totalArea;
+    let lo = 0;
+    let hi = triangles.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (triangles[mid].cumulative < pick) lo = mid + 1;
+      else hi = mid;
+    }
+
+    const tri = triangles[lo];
+    let r1 = Math.random();
+    let r2 = Math.random();
+    if (r1 + r2 > 1) {
+      r1 = 1 - r1;
+      r2 = 1 - r2;
+    }
+
+    point.copy(tri.a)
+      .addScaledVector(new THREE.Vector3().subVectors(tri.b, tri.a), r1)
+      .addScaledVector(new THREE.Vector3().subVectors(tri.c, tri.a), r2);
+
+    targets[i * 3] = point.x;
+    targets[i * 3 + 1] = point.y;
+    targets[i * 3 + 2] = point.z;
+  }
+
+  return targets;
+}
+
+function createParticleWave(targetObject) {
+  const count = 2000;
+  const targets = sampleSurfaceTargets(targetObject, count);
+  const starts = new Float32Array(count * 3);
+  const current = new Float32Array(count * 3);
+  const box = new THREE.Box3().setFromObject(targetObject);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z, 1);
+  const clusterSpan = Math.max(2, maxDim * 0.6);
+
+  for (let i = 0; i < count; i += 1) {
+    const ox = (Math.random() - 0.5) * clusterSpan;
+    const oy = (Math.random() - 0.5) * clusterSpan;
+    const oz = (Math.random() - 0.5) * clusterSpan;
+    starts[i * 3] = center.x + ox;
+    starts[i * 3 + 1] = center.y + oy;
+    starts[i * 3 + 2] = center.z + oz;
+    current[i * 3] = starts[i * 3];
+    current[i * 3 + 1] = starts[i * 3 + 1];
+    current[i * 3 + 2] = starts[i * 3 + 2];
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(current, 3));
+
+  const material = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 2,
+    sizeAttenuation: false,
+    transparent: true,
+    opacity: 0.88,
+    depthTest: false,
+    blending: THREE.AdditiveBlending
+  });
+
+  const points = new THREE.Points(geometry, material);
+  points.frustumCulled = false;
+  scene.add(points);
+
+  return {
+    points: points,
+    starts: starts,
+    targets: targets,
+    current: current,
+    cancelled: false,
+    progress: 0,
+    update: function(progress) {
+      this.progress = progress;
+      for (let i = 0; i < count * 3; i += 1) {
+        current[i] = starts[i] + (targets[i] - starts[i]) * progress;
+      }
+      geometry.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+function cancelParticleWave() {
+  disposeParticleWave(activeParticleWave);
+  activeParticleWave = null;
+  viewport.classList.remove('particle-wave-active');
+}
+
+function runParticleWaveUntil(targetObject, readinessPromise, options) {
+  cancelParticleWave();
+
+  const minDuration = options && options.minDuration != null ? options.minDuration : 2500;
+  const finalDuration = options && options.finalDuration != null ? options.finalDuration : 500;
+  const fadeDuration = options && options.fadeDuration != null ? options.fadeDuration : 300;
+  const preDuration = Math.max(0, minDuration - finalDuration);
+  const holdProgress = 0.86;
+  const wave = createParticleWave(targetObject);
+  activeParticleWave = wave;
+  viewport.classList.add('particle-wave-active');
+
+  let ready = false;
+  let settledValue = null;
+  let settledError = null;
+  let convergeStart = null;
+
+  readinessPromise.then(function(value) {
+    ready = true;
+    settledValue = value;
+  }).catch(function(error) {
+    ready = true;
+    settledError = error;
+  });
+
+  return new Promise(function(resolve, reject) {
+    const start = performance.now();
+
+    function finishWithError(error) {
+      disposeParticleWave(wave);
+      if (activeParticleWave === wave) activeParticleWave = null;
+      viewport.classList.remove('particle-wave-active');
+      reject(error);
+    }
+
+    function fadeOutAndResolve() {
+      const fadeStart = performance.now();
+
+      function fadeTick(now) {
+        if (wave.cancelled) return;
+        const t = Math.min((now - fadeStart) / fadeDuration, 1);
+        wave.points.material.opacity = 0.88 * (1 - easeOutCubic(t));
+        if (t < 1) {
+          requestAnimationFrame(fadeTick);
+          return;
+        }
+
+        disposeParticleWave(wave);
+        if (activeParticleWave === wave) activeParticleWave = null;
+        viewport.classList.remove('particle-wave-active');
+        resolve(settledValue);
+      }
+
+      requestAnimationFrame(fadeTick);
+    }
+
+    function tick(now) {
+      if (wave.cancelled) return;
+      if (settledError) {
+        finishWithError(settledError);
+        return;
+      }
+
+      const elapsed = now - start;
+      if (elapsed < preDuration) {
+        const t = preDuration === 0 ? 1 : elapsed / preDuration;
+        wave.update(easeInOutCubic(t) * holdProgress);
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      if (!ready) {
+        wave.update(holdProgress);
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      if (convergeStart == null) convergeStart = now;
+      const t = Math.min((now - convergeStart) / finalDuration, 1);
+      wave.update(holdProgress + (1 - holdProgress) * easeOutCubic(t));
+      if (t < 1) {
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      fadeOutAndResolve();
+    }
+
+    requestAnimationFrame(tick);
+  });
 }
 
 function getOverlayByIssueKey(issueKey) {
@@ -604,18 +876,6 @@ function frameModel(modelGroup) {
   return { box: box, center: center, size: size, maxDim: maxDim };
 }
 
-function applyThemeToViewport(isLight) {
-  scene.background = new THREE.Color(readViewportBgColor());
-
-  if (grid) {
-    grid.material.color.set(isLight ? 0xc0c0cc : 0x2e2e3a);
-    if (Array.isArray(grid.material)) {
-      grid.material[0].color.set(isLight ? 0xa0a0b0 : 0x2e2e3a);
-      grid.material[1].color.set(isLight ? 0xc8c8d8 : 0x252530);
-    }
-  }
-}
-
 let viewportInitialized = false;
 
 function initViewport() {
@@ -697,6 +957,8 @@ export {
   randomizeColors,
   clearOverlays,
   clearSceneState,
+  cancelParticleWave,
+  runParticleWaveUntil,
   getOverlayByIssueKey,
   getFirstIssuePosition,
   focusOnIssue,
@@ -706,6 +968,5 @@ export {
   renderNgonOverlayData,
   applyAnalysisVisuals,
   buildVertexDensityMap,
-  frameModel,
-  applyThemeToViewport
+  frameModel
 };
