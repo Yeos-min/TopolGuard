@@ -262,3 +262,91 @@
   .manual-side { display: none; }
   .manual-main { padding: 32px 20px 80px; }
 }
+
+/* --------------------------------------------------------
+   Linear v2 polish layer
+   -------------------------------------------------------- */
+
+body[data-page="manual"] {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-text);
+}
+
+.manual {
+  background: var(--canvas);
+}
+
+.manual-side,
+.manual-toc {
+  background: var(--canvas);
+  border-color: var(--hairline);
+}
+
+.manual-main {
+  color: var(--ink);
+}
+
+.manual-main h1,
+.manual-main h2,
+.manual-main h3,
+.manual-main h4 {
+  font-family: var(--font-text);
+  color: var(--ink);
+  letter-spacing: var(--tracking-headline);
+}
+
+.manual-main p,
+.manual-main li {
+  color: var(--ink-muted);
+  font-family: var(--font-text);
+}
+
+.manual-main code {
+  background: var(--surface-1);
+  border-color: var(--hairline);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+}
+
+.manual-side .tree-title,
+.manual-side .tree-group > .label,
+.manual-toc .label,
+.manual-breadcrumb {
+  font-family: var(--font-mono);
+  color: var(--ink-tertiary);
+}
+
+.manual-side .tree-group ul,
+.manual-main h2,
+.manual-toc li a {
+  border-color: var(--hairline);
+}
+
+.manual-side .tree-group li a,
+.manual-toc li a {
+  color: var(--ink-subtle);
+}
+
+.manual-side .tree-group li a:hover,
+.manual-toc li a:hover,
+.manual-side .tree-group li a.active,
+.manual-toc li a.active {
+  color: var(--ink);
+}
+
+.metric-card,
+.callout {
+  background: var(--surface-1);
+  border-color: var(--hairline);
+  border-radius: var(--radius-md);
+}
+
+.metric-card .glyph {
+  font-family: var(--font-mono);
+}
+
+.metric-card .body h4 {
+  font-family: var(--font-text);
+  letter-spacing: var(--tracking-card-title);
+}

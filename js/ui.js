@@ -1,3 +1,5 @@
+import { issueDescriptions } from './issue-descriptions.js';
+
 const TOAST_ICONS = {
   error: '!',
   warn: '!',
@@ -8,43 +10,35 @@ const TOAST_ICONS = {
 const ISSUE_META = {
   'non-manifold': {
     glyph: '✕',
-    label: 'NON-MANIFOLD',
-    desc: '세 면 이상이 한 모서리를 공유하고 있어요. 불리언·UV·3D 프린팅이 막힐 수 있어요.'
+    label: 'NON-MANIFOLD'
   },
   boundary: {
     glyph: '○',
-    label: 'BOUNDARY EDGE',
-    desc: '메쉬에 열린 경계가 있어요. 3D 프린팅이나 시뮬레이션이 어려울 수 있어요.'
+    label: 'BOUNDARY EDGE'
   },
   skinny: {
     glyph: '△',
-    label: 'SKINNY TRIANGLE',
-    desc: '극단적으로 얇고 긴 삼각형이 있어요. 셰이딩이나 시뮬레이션이 불안정해질 수 있어요.'
+    label: 'SKINNY TRIANGLE'
   },
   ngon: {
     glyph: '⬡',
-    label: 'N-GON',
-    desc: '5각형 이상의 면이 있어요. 엔진마다 다르게 쪼개져서 결과가 예측 불가예요.'
+    label: 'N-GON'
   },
   degenerate: {
     glyph: '◠',
-    label: 'DEGENERATE',
-    desc: '면적이 거의 0인 면이 있어요. 법선이 정의되지 않아서 렌더링에서 튀어요.'
+    label: 'DEGENERATE'
   },
   flipped: {
     glyph: '⇄',
-    label: 'FLIPPED NORMAL',
-    desc: '이웃 면과 반대 방향을 향하는 면이 있어요. 렌더러에서 사라지거나 검게 보일 수 있어요.'
+    label: 'FLIPPED NORMAL'
   },
   isolated: {
     glyph: '·',
-    label: 'ISOLATED VERTEX',
-    desc: '어떤 면에도 속하지 않는 떠 있는 점이 있어요. 정리하는 게 좋아요.'
+    label: 'ISOLATED VERTEX'
   },
   duplicate: {
     glyph: '◉',
-    label: 'DUPLICATE VERTEX',
-    desc: '위치가 거의 같은 점 여러 개가 있어요. 모으거나 합치는 게 좋아요.'
+    label: 'DUPLICATE VERTEX'
   }
 };
 
@@ -66,11 +60,30 @@ const SEVERITY_RANK = {
   info: 3
 };
 
+const ISSUE_ORDER = [
+  'non-manifold',
+  'degenerate',
+  'boundary',
+  'flipped',
+  'skinny',
+  'ngon',
+  'isolated',
+  'duplicate'
+];
+
 let lastHealthScore = null;
 
 function applyAnimToggleUI(animEnabled) {
   const animButton = document.getElementById('anim-icon-btn');
-  if (animButton) animButton.classList.toggle('active', animEnabled);
+  if (!animButton) return;
+
+  animButton.classList.toggle('active', animEnabled);
+  animButton.textContent = animEnabled ? '⏸' : '▶';
+  animButton.setAttribute('aria-pressed', animEnabled ? 'true' : 'false');
+  animButton.setAttribute(
+    'title',
+    animEnabled ? '로딩 애니메이션 켜짐 — 누르면 끔' : '로딩 애니메이션 꺼짐 — 누르면 켬'
+  );
 }
 
 function countUpTo(element, targetValue, duration, suffix) {
@@ -137,69 +150,13 @@ function setProgress(percent, label) {
 
 function initSidePanel() {
   const panel = document.getElementById('side-panel');
-  const tab = document.getElementById('side-panel-tab');
-  if (!panel || !tab) return;
-
-  const storageKey = 'topolguard-sidepanel-state';
-  const savedState = localStorage.getItem(storageKey);
-  if (savedState === 'expanded') {
-    panel.classList.remove('collapsed');
-    panel.classList.add('expanded');
-  }
-
-  tab.addEventListener('click', function() {
-    const isExpanded = panel.classList.contains('expanded');
-    panel.classList.toggle('expanded');
-    panel.classList.toggle('collapsed');
-    localStorage.setItem(storageKey, isExpanded ? 'collapsed' : 'expanded');
-  });
+  if (!panel) return;
+  panel.classList.remove('collapsed');
+  panel.classList.add('expanded');
 }
 
 function initSidePanelResize() {
-  const panel = document.getElementById('side-panel');
-  if (!panel) return;
-
-  const handle = panel.querySelector('.side-panel-resize-handle');
-  const body = panel.querySelector('.side-panel-body');
-  if (!handle || !body) return;
-
-  const minWidth = 220;
-  const maxWidth = 500;
-  const widthKey = 'topolguard-sidepanel-width';
-  const savedWidth = localStorage.getItem(widthKey);
-  if (savedWidth) body.style.setProperty('--side-panel-width', savedWidth);
-
-  handle.addEventListener('mousedown', function(event) {
-    event.preventDefault();
-    const startX = event.clientX;
-    const startWidth = body.offsetWidth || minWidth;
-
-    function onMouseMove(moveEvent) {
-      let newWidth = startWidth + (moveEvent.clientX - startX);
-      newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-      body.style.setProperty('--side-panel-width', newWidth + 'px');
-
-      const samplesContent = panel.querySelector('.samples-section .section-content');
-      if (samplesContent) {
-        samplesContent.style.flexDirection = newWidth >= 320 ? 'row' : 'column';
-      }
-    }
-
-    function onMouseUp() {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      localStorage.setItem(widthKey, body.style.getPropertyValue('--side-panel-width'));
-    }
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  });
-
-  const samplesContent = panel.querySelector('.samples-section .section-content');
-  if (samplesContent) {
-    const initialWidth = body.offsetWidth || minWidth;
-    samplesContent.style.flexDirection = initialWidth >= 320 ? 'row' : 'column';
-  }
+  // Sidebars are fixed in the gaze-guide layout; resize is intentionally disabled.
 }
 
 function initHistoryPreview() {
@@ -225,7 +182,7 @@ function initHistoryPreview() {
       topPos = window.innerHeight - 240;
     }
 
-    preview.style.left = (panelRect.right + 8) + 'px';
+    preview.style.left = Math.max(8, panelRect.left - 244) + 'px';
     preview.style.top = topPos + 'px';
     preview.classList.remove('hidden');
   });
@@ -250,7 +207,7 @@ function renderHistory(historyEntries, onReload) {
   if (!container) return;
 
   if (!historyEntries || historyEntries.length === 0) {
-    if (emptyElement) emptyElement.style.display = '';
+    if (emptyElement) emptyElement.style.display = 'none';
     container.querySelectorAll('.history-entry, .history-item').forEach(function(entry) {
       entry.remove();
     });
@@ -270,7 +227,11 @@ function renderHistory(historyEntries, onReload) {
       '<div class="history-thumb">' +
         (entry.thumbnail ? '<img src="' + entry.thumbnail + '" alt="thumbnail">' : '') +
       '</div>' +
-      '<span class="history-name">' + escapeHtml(entry.name) + '</span>';
+      '<span class="history-name">' + escapeHtml(entry.name) + '</span>' +
+      '<span class="history-meta">' +
+        '<span>' + escapeHtml(entry.verts ?? '-') + 'v</span>' +
+        '<span>s' + escapeHtml(entry.health ?? '-') + '</span>' +
+      '</span>';
     container.appendChild(element);
   });
 }
@@ -298,15 +259,27 @@ function renderIssueMessage(type, icon, text) {
 }
 
 function getCountForIssue(issueKey, stats) {
-  if (issueKey === 'non-manifold') return stats.nonManifoldCount || 0;
-  if (issueKey === 'boundary') return stats.boundaryCount || 0;
-  if (issueKey === 'skinny') return stats.skinnyCount || 0;
-  if (issueKey === 'ngon') return stats.ngonCount || 0;
-  if (issueKey === 'degenerate') return stats.degenCount || 0;
-  if (issueKey === 'flipped') return stats.flippedCount || 0;
-  if (issueKey === 'isolated') return stats.isolatedCount || 0;
-  if (issueKey === 'duplicate') return stats.dupVertCount || 0;
+  if (issueKey === 'non-manifold') return stats.nonManifoldCount ?? 0;
+  if (issueKey === 'boundary') return stats.boundaryCount ?? 0;
+  if (issueKey === 'skinny') return stats.skinnyCount ?? 0;
+  if (issueKey === 'ngon') return stats.ngonCount ?? 0;
+  if (issueKey === 'degenerate') return stats.degenCount ?? 0;
+  if (issueKey === 'flipped') return stats.flippedCount ?? 0;
+  if (issueKey === 'isolated') return stats.isolatedCount ?? 0;
+  if (issueKey === 'duplicate') return stats.dupVertCount ?? 0;
   return 0;
+}
+
+function createCompactIssueRow(issueKey, meta) {
+  const severity = ISSUE_SEVERITY[issueKey] || 'info';
+  const row = document.createElement('div');
+  row.className = 'issue-card issue-card-compact issue-card-empty severity-' + severity;
+  row.setAttribute('data-issue', issueKey);
+  row.innerHTML =
+    '<span class="issue-glyph">' + meta.glyph + '</span>' +
+    '<span class="issue-label">' + meta.label + '</span>' +
+    '<span class="issue-count">0</span>';
+  return row;
 }
 
 function createIssueCard(issueKey, meta, count, actions) {
@@ -316,41 +289,47 @@ function createIssueCard(issueKey, meta, count, actions) {
   const color = overlay ? overlay.color : '#888888';
   const canFocus = !!actions.getFirstIssuePosition(issueKey);
   const severity = ISSUE_SEVERITY[issueKey] || 'info';
+  const description = issueDescriptions[issueKey] ?? '';
 
   const card = document.createElement('div');
-  card.className = 'issue-card collapsed severity-' + severity + (count === 0 ? ' issue-card-empty' : '');
+  card.className = 'issue-card issue-card-large severity-' + severity;
   card.setAttribute('data-issue', issueKey);
-  card.setAttribute('data-expanded', 'false');
   card.innerHTML =
-    '<div class="issue-card-header">' +
-      '<span class="issue-glyph">' + meta.glyph + '</span>' +
-      '<span class="issue-label">' + meta.label + '</span>' +
+    '<div class="issue-card-visual">' +
+      '<span class="issue-glyph" aria-hidden="true">' + meta.glyph + '</span>' +
       '<span class="issue-count">' + count.toLocaleString() + '</span>' +
-      '<span class="issue-chevron">></span>' +
     '</div>' +
-    '<div class="issue-card-body">' +
-      '<p class="issue-desc">' + meta.desc + '</p>' +
-      '<div class="issue-control">' +
-        '<span class="control-label">SHOW LAYERS</span>' +
-        '<button class="mini-toggle" data-on="' + (isOn ? 'true' : 'false') + '"></button>' +
+    '<div class="issue-card-detail">' +
+      '<div class="issue-card-title-row">' +
+        '<div class="issue-card-title">' + meta.label + '</div>' +
+        '<button class="issue-info-btn" type="button" aria-expanded="false" aria-label="설명 열기">ⓘ</button>' +
       '</div>' +
-      '<div class="issue-control">' +
-        '<span class="control-label">OVERLAY COLOR</span>' +
-        '<div class="color-swatch-wrap">' +
-          '<div class="color-swatch" id="swatch-' + overlayKey + '" style="background:' + color + '"></div>' +
-          '<input type="color" class="color-input-hidden" id="colorpick-' + overlayKey + '" value="' + color + '">' +
+      '<div class="card-content-stack">' +
+        '<div class="card-controls">' +
+          '<div class="issue-control">' +
+            '<span class="control-label">Show layer</span>' +
+            '<button class="mini-toggle" data-on="' + (isOn ? 'true' : 'false') + '"></button>' +
+          '</div>' +
+          '<div class="issue-control">' +
+            '<span class="control-label">Overlay</span>' +
+            '<div class="color-swatch-wrap">' +
+              '<div class="color-swatch" id="swatch-' + overlayKey + '" style="background:' + color + '"></div>' +
+              '<input type="color" class="color-input-hidden" id="colorpick-' + overlayKey + '" value="' + color + '">' +
+            '</div>' +
+          '</div>' +
+          '<button class="focus-btn"' + (canFocus ? '' : ' disabled') + '>GO TO ISSUE</button>' +
         '</div>' +
+        '<div class="card-description">' + escapeHtml(description) + '</div>' +
       '</div>' +
-      '<button class="focus-btn"' + (canFocus ? '' : ' disabled') + '>GO TO ISSUE</button>' +
     '</div>';
 
-  const header = card.querySelector('.issue-card-header');
-  header.addEventListener('click', function() {
-    if (count === 0) return;
-    const isExpanded = card.getAttribute('data-expanded') === 'true';
-    card.classList.toggle('expanded');
-    card.classList.toggle('collapsed', !card.classList.contains('expanded'));
-    card.setAttribute('data-expanded', isExpanded ? 'false' : 'true');
+  const infoButton = card.querySelector('.issue-info-btn');
+  infoButton.addEventListener('click', function(event) {
+    event.stopPropagation();
+    const isOpen = card.classList.toggle('description-open');
+    infoButton.textContent = isOpen ? '✕' : 'ⓘ';
+    infoButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    infoButton.setAttribute('aria-label', isOpen ? '설명 닫기' : '설명 열기');
   });
 
   const toggleButton = card.querySelector('.mini-toggle');
@@ -393,29 +372,38 @@ function renderIssueCards(stats, actions) {
   container.innerHTML = '';
 
   const allIssues = [];
-  let totalCount = 0;
-  Object.keys(ISSUE_META).forEach(function(key) {
+  ISSUE_ORDER.forEach(function(key) {
     const count = getCountForIssue(key, stats);
     allIssues.push({ key: key, count: count });
-    totalCount += count;
   });
 
-  if (totalCount === 0) {
-    container.innerHTML = '<div class="all-pass">✓ 모든 검사를 통과했어요</div>';
-    return;
-  }
+  const positiveIssues = allIssues.filter(function(issue) { return issue.count > 0; });
+  const zeroIssues = allIssues.filter(function(issue) { return issue.count === 0; });
 
-  allIssues.sort(function(a, b) {
+  positiveIssues.sort(function(a, b) {
     const sevA = SEVERITY_RANK[ISSUE_SEVERITY[a.key]] ?? 99;
     const sevB = SEVERITY_RANK[ISSUE_SEVERITY[b.key]] ?? 99;
     if (sevA !== sevB) return sevA - sevB;
-    return b.count - a.count;
+    const orderA = ISSUE_ORDER.indexOf(a.key);
+    const orderB = ISSUE_ORDER.indexOf(b.key);
+    return orderA - orderB;
   });
 
-  allIssues.forEach(function(issue) {
+  positiveIssues.forEach(function(issue) {
     const meta = ISSUE_META[issue.key];
     const card = createIssueCard(issue.key, meta, issue.count, actions);
     container.appendChild(card);
+  });
+
+  if (positiveIssues.length && zeroIssues.length) {
+    const separator = document.createElement('div');
+    separator.className = 'issue-zero-separator';
+    container.appendChild(separator);
+  }
+
+  zeroIssues.forEach(function(issue) {
+    const meta = ISSUE_META[issue.key];
+    container.appendChild(createCompactIssueRow(issue.key, meta));
   });
 }
 
@@ -505,8 +493,8 @@ function updateMeshInfo(analysisData) {
       bboxSize[1].toFixed(3) + ' / ' +
       bboxSize[2].toFixed(3);
   }
-  if (vCount) vCount.textContent = (analysisData.mergedVerts || 0).toLocaleString();
-  if (fCount) fCount.textContent = Math.round(analysisData.faceCount || 0).toLocaleString();
+  if (vCount) vCount.textContent = (analysisData.mergedVerts ?? 0).toLocaleString();
+  if (fCount) fCount.textContent = Math.round(analysisData.faceCount ?? 0).toLocaleString();
   if (eCount) eCount.textContent = analysisData.edgeCount != null ? analysisData.edgeCount.toLocaleString() : '-';
   if (euler) euler.textContent = analysisData.euler != null ? ((analysisData.euler >= 0 ? '+' : '') + analysisData.euler) : '-';
 }

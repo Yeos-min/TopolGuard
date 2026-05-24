@@ -18,7 +18,7 @@ game engines, 3D printing, simulation, or rigging.
   triangles, n-gons, degenerate faces, flipped normals, isolated vertices
 - **Four view modes** — Wire / Solid / Both / Density heatmap
 - **Error-layer overlays** — visualize each issue type directly on the mesh
-- **Custom color themes** — recolor overlays on the fly
+- **Custom overlay colors** — recolor issue layers on the fly
 - **Drag-and-drop** — drop `.obj` files into the viewport
 - **Runs 100% client-side** — no upload, no server, no tracking
 
@@ -45,13 +45,12 @@ topolguard/
 ├─ manual.html             # Documentation
 ├─ app.html                # Inspector (main tool)
 ├─ css/
-│  ├─ tokens.css           # Design tokens (dark/light variables)
+│  ├─ tokens.css           # Design tokens
 │  ├─ base.css             # Reset + shared top nav
 │  ├─ landing.css          # Landing page styles
 │  ├─ manual.css           # Manual page (Unreal-docs style)
 │  └─ app.css              # Inspector page styles
 ├─ js/
-│  ├─ theme.js             # Dark/light toggle (landing + manual)
 │  ├─ nav.js               # Shared top navigation injection
 │  ├─ landing.js           # Wireframe terrain background
 │  ├─ manual.js            # Scroll-spy for TOC
@@ -161,7 +160,7 @@ this repository.
 ### Fonts
 - **[JetBrains Mono](https://www.jetbrains.com/lp/mono/)** — monospace
 - **[IBM Plex Sans](https://www.ibm.com/plex/)** — sans-serif
-- **[VT323](https://fonts.google.com/specimen/VT323)** — pixel display (landing)
+- **[Pretendard Variable](https://github.com/orioncactus/pretendard)** — primary display and text family
 
 ### Author
 **Yeos** ([@Yeos-Min](https://github.com/Yeos-Min))
