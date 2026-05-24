@@ -115,9 +115,9 @@ function showToast(type, title, msg, duration) {
     '<span class="toast-corner-bl"></span>' +
     '<span class="toast-corner-br"></span>' +
     '<span class="toast-icon">' + (TOAST_ICONS[type] || 'i') + '</span>' +
-    '<div class="toast-body"><div class="toast-title">' + title + '</div>' +
-    (msg ? '<div class="toast-msg">' + msg + '</div>' : '') + '</div>' +
-    '<button class="toast-close" onclick="this.parentElement.remove()">x</button>';
+    '<div class="toast-body"><div class="toast-title">' + escapeHtml(title) + '</div>' +
+    (msg ? '<div class="toast-msg">' + escapeHtml(msg) + '</div>' : '') + '</div>' +
+    '<button class="toast-close" type="button" aria-label="알림 닫기" onclick="this.parentElement.remove()">×</button>';
 
   container.appendChild(element);
 
