@@ -260,15 +260,16 @@ body, .side-panel, #sidebar, #sidebar-body, #sidebar-footer,
     pointer-events: none;
     width: min(430px, calc(100vw - 32px));
   }
-  .toast {
+  body[data-page="app"] .toast {
     pointer-events: auto;
     position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     width: 100%;
     min-height: 56px;
-    padding: 11px 12px;
+    box-sizing: border-box;
+    padding: 12px 12px 12px 18px;
     font-family: var(--font-text);
     font-size: 13px;
     line-height: 1.35;
