@@ -405,7 +405,7 @@ body, .side-panel, #sidebar, #sidebar-body, #sidebar-footer,
   @keyframes countUp { from { opacity:0.3; } to { opacity:1; } }
 
 /* ════════════════════════════════════════════════════════
-   Quick Start — 2버튼 Good/Bad 비교 레이아웃
+   Legacy Quick Start sample button layout
    ════════════════════════════════════════════════════════ */
 
 .qs-grid.qs-grid-2 {
